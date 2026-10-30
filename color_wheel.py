@@ -859,8 +859,8 @@ def build_disc1_front(c):
     # tabs with what they add, pointer lines and the five windows
     for k, a in enumerate(D1_TAB_ANGLES):
         col = TAB_COLOURS[k]
-        # a tab close to the paper colour (white, or black on dark paper) gets a grey edge
-        edge = (.6, .6, .6) if abs(luma(col) - luma(PAPER)) < .3 else PAPER
+        # the white or black tab, when close to the paper colour, gets a grey edge
+        edge = (.6, .6, .6) if k >= 3 and abs(luma(col) - luma(PAPER)) < .3 else PAPER
         fill_poly(c, ring_wedge(CX, CY, (R - 6) * MM, R * MM, a - 14, a + 14, 10), col, edge, .6)
         ring_text(c, T("tabs")[k], CX, CY, (R - 3) * MM, a, 6.8, text_on(col),
                   max_w=math.radians(26) * (R - 3) * MM)
