@@ -7,6 +7,8 @@ construir em casa, tudo gerado em Python. As rodas podem ser impressas e recorta
 rodadas no ecrã (aplicação de computador ou página web). Todos os textos existem em inglês,
 português e espanhol.
 
+**Experimente as rodas online: https://mcampilho.github.io/color-theory/web/?lang=pt**
+
 ![As duas rodas de cores no ecrã](images/on_screen.jpg)
 
 ## Póster

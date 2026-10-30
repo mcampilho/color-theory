@@ -1,7 +1,9 @@
 # Color Theory — guia e pósteres de teoria da cor
 
 Pasta de documentos sobre teoria da cor, publicada em https://github.com/mcampilho/color-theory
-(público, licença MIT, ramo `master`). O `README.md` está em inglês e o `README.pt.md` em
+(público, licença MIT, ramo `master`), com GitHub Pages a servir o ramo: a página das rodas
+fica em https://mcampilho.github.io/color-theory/web/ (`?lang=pt` escolhe o idioma), por isso
+`web/discs/` tem de ser regenerado e enviado quando os discos mudam. O `README.md` está em inglês e o `README.pt.md` em
 português europeu: mudar os dois em conjunto. As imagens dos READMEs estão em `images/`; os
 PDFs atuais (`colour_theory_*.pdf`, `colour_wheels_*.pdf`) e `web/discs/` vão para o
 repositório, para se poderem usar sem Python. Contém:

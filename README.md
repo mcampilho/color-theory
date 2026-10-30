@@ -6,6 +6,8 @@ A colour theory guide, a ten-page vector poster and two build-your-own colour wh
 all generated with Python. The wheels can be printed and cut out, or turned on screen
 (desktop app or web page). Every text is available in English, Portuguese and Spanish.
 
+**Try the wheels online: https://mcampilho.github.io/color-theory/web/**
+
 ![The two colour wheels on screen](images/on_screen.jpg)
 
 ## Poster
