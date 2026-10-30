@@ -1,0 +1,5 @@
+# ReportLab writes PDFs that look like text; never touch their line endings
+*.pdf binary
+*.docx binary
+*.png binary
+*.jpg binary

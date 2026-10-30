@@ -1,0 +1,10 @@
+# Older outputs and personal notes kept in the project folder
+/colour_theory.pdf
+/claude_colour_theory.pdf
+/Color_Theory_Guide.pdf
+/color_wheel_instructions.md
+/*.url
+
+# Python
+__pycache__/
+*.pyc

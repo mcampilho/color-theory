@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Colour wheels</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- The discs (discs/<lang>/*.svg) and discs/data.js are written by
+       "python3 color_wheel.py --web"; this page and app.js turn them. -->
+  <header>
+    <h1 id="title">Colour wheels</h1>
+    <div class="tools">
+      <label for="lang" id="lang-label">Language</label>
+      <select id="lang"></select>
+      <button id="reset" type="button">Reset</button>
+    </div>
+  </header>
+
+  <main id="wheels" tabindex="0" aria-describedby="help">
+    <div class="disc" id="disc-0">
+      <img id="img-d1b" class="back" alt="" draggable="false">
+      <img id="img-d1f" class="front" alt="" draggable="false">
+      <svg class="overlay" viewBox="-96 -96 192 192" aria-hidden="true">
+        <circle id="ring-0" class="ring" r="95"></circle>
+        <circle class="pin" r="2.6"></circle>
+      </svg>
+    </div>
+    <div class="disc" id="disc-1">
+      <img id="img-d2b" class="back" alt="" draggable="false">
+      <img id="img-d2f" class="front" alt="" draggable="false">
+      <svg class="overlay" viewBox="-96 -96 192 192" aria-hidden="true">
+        <circle id="ring-1" class="ring" r="95"></circle>
+        <circle class="pin" r="2.6"></circle>
+      </svg>
+    </div>
+  </main>
+
+  <footer>
+    <p id="status" aria-live="polite"></p>
+    <ul id="help"></ul>
+  </footer>
+
+  <script src="discs/data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

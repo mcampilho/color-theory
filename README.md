@@ -1,0 +1,137 @@
+# Colour Theory
+
+*Português: [README.pt.md](README.pt.md)*
+
+A colour theory guide, a ten-page vector poster and two build-your-own colour wheels,
+all generated with Python. The wheels can be printed and cut out, or turned on screen
+(desktop app or web page). Every text is available in English, Portuguese and Spanish.
+
+![The two colour wheels on screen](images/on_screen.jpg)
+
+## Poster
+
+`color_theory_document.py` draws a ten-page, landscape US Letter poster with ReportLab.
+Every colour is computed: the RYB cube, HSB, the RGB cube, a simple CMY ink model, the
+values of the CSS colour keywords, the CIE 1931 colour-matching functions and CIELAB. No image
+is copied. Ready-made PDFs: [English](colour_theory_en.pdf), [Português](colour_theory_pt.pdf),
+[Español](colour_theory_es.pdf).
+
+| Page | Content |
+|------|---------|
+| 1 | RYB colour wheel, primary/secondary/tertiary colours, tint/tone/shade, colour meanings, colour schemes |
+| 2 | Colour models (CMYK, RGB, HSB, grayscale), hue/saturation disc, colour properties and harmonies |
+| 3 | Hue & lightness: a cross of hue × tint/shade swatches, tint, tone and shade wheels, and the RGB cube seen from its white corner (hexagon of hexagons) |
+| 4 | Colour mixing & codes: RYB, RGB and CMYK side by side, a CMYK hexagram with ink percentages, and the 216-colour web-safe palette |
+| 5 | Named colours: an overlapping-circles RYB wheel with colour names, and a wheel of CSS named colours with hex codes |
+| 6 | Colour & emotion: Plutchik's wheel of emotions, a spiral rosette of tints and shades, and translucent petals |
+| 7 | "The Color Wheel": six RYB circles through the centre with named overlaps and a named outer ring, and a spiral sphere on black |
+| 8 | The space of visible colours: the CIE 1931 chromaticity diagram (spectral and Planckian loci, sRGB triangle), the visible spectrum and the colour-matching functions |
+| 9 | Tints and shades: ten base colours in the middle of a scale from 90 % white (left) to 90 % black (right) |
+| 10 | Hue circles: Munsell's 20-hue circle (most saturated sRGB colour of each hue, via CIELAB), and RYB and RGB twelve-colour stars |
+
+| | |
+|---|---|
+| ![Page 1](images/poster_p1.png) | ![Page 3](images/poster_p3.png) |
+| ![Page 7](images/poster_p7.png) | ![Page 8](images/poster_p8.png) |
+| ![Page 9](images/poster_p9.png) | ![Page 10](images/poster_p10.png) |
+
+All text is in the `STRINGS` table.
+
+```bash
+pip install reportlab pillow
+python3 color_theory_document.py                 # all pages -> colour_theory_en.pdf
+python3 color_theory_document.py --lang pt       # Portuguese -> colour_theory_pt.pdf
+python3 color_theory_document.py --lang es -o es.pdf
+python3 color_theory_document.py --pages 3 4     # only some pages
+```
+
+Options:
+
+- `--lang {en,pt,es}`: text language (default `en`).
+- `-o, --out PATH`: output PDF (default `colour_theory_<lang>.pdf`).
+- `--pages N [N ...]`: pages to render (default: all ten).
+
+To add a language, copy the `en` block of `STRINGS`, translate the values and register
+it under a new key.
+
+## Build-your-own colour wheels
+
+`color_wheel.py` makes a printable A4 PDF (six pages) with two paper colour wheels to cut
+out and assemble at home. Each wheel has a back disc that turns and a front disc with
+windows, joined at the centre by a split pin. Ready-made PDFs:
+[English](colour_wheels_en.pdf), [Português](colour_wheels_pt.pdf),
+[Español](colour_wheels_es.pdf).
+
+![The four discs to cut out](images/wheels_pages.png)
+
+| Page | Content |
+|------|---------|
+| 1 | What you need, printing, cutting and assembly (with an exploded view) |
+| 2 | How to use both wheels, and a glossary of colour words |
+| 3 | Disc 1, back: the 12 RYB hues and five rings of mixtures (+ red, + yellow, + blue, + white, + black) |
+| 4 | Disc 1, front: five coloured tabs with their windows, a grey scale (value 1 to 10) and colour definitions |
+| 5 | Disc 2, back: the 12 hues with their names, and tint, tone and shade of each |
+| 6 | Disc 2, front: 12 name windows, 8 large windows and the harmony diagram (complementary, split complementary, triad, tetrads) |
+
+On disc 1 each window sits at a different distance from the centre, so the mixture of a
+hue with what a tab adds can be printed at that hue's angle on the back disc: it shows in
+the window when the hue stands just beyond the tab.
+
+```bash
+python3 color_wheel.py                 # -> colour_wheels_en.pdf
+python3 color_wheel.py --lang pt       # Portuguese
+python3 color_wheel.py --lang es -o es.pdf
+```
+
+Print pages 3 to 6 at actual size (100 %); each page has a 100 mm bar to check the scale.
+The script imports its colours and some drawing helpers from `color_theory_document.py`,
+so keep both files in the same folder.
+
+### On screen
+
+The same two wheels can be turned on a computer, with every part (back and front of
+each disc) movable:
+
+- drag a disc with the mouse (a back disc by its coloured rim or through a window);
+- the mouse wheel turns the disc under the pointer one colour at a time;
+- ← and → turn the selected disc one colour, ↑ and ↓ (or Tab) select another disc.
+
+**Desktop** (Tkinter and Pillow, nothing else to install):
+
+```bash
+python3 color_wheel.py --app            # English
+python3 color_wheel.py --app --lang pt  # starts in Portuguese; the language can be changed in the window
+```
+
+**Web**: open `web/index.html` in a browser. The language box at the top switches between
+English, Portuguese and Spanish. The page loads the discs from `web/discs/` (SVG) and the
+texts and disc geometry from `web/discs/data.js`, both written by:
+
+```bash
+python3 color_wheel.py --web            # -> web/discs/  (or: --web OTHER_FOLDER)
+```
+
+Run it again after changing the discs or the texts. The page itself (`index.html`,
+`style.css`, `app.js`) is plain HTML, CSS and JavaScript, with no build step.
+
+**Web page in a window of its own** (pywebview): the same page as above, in a desktop
+window without a browser. It writes `web/discs/` first if it is missing.
+
+```bash
+pip install pywebview
+python3 color_wheel.py --webview            # English
+python3 color_wheel.py --webview --lang pt  # starts in Portuguese
+```
+
+On Windows it uses the Edge WebView2 runtime, which comes with Windows 10 and 11.
+
+## Other files
+
+- `Claude - The Complete Guide to Color Theory.md`: the full reference guide, from the physics
+  of light to colour spaces (also as `.docx` and `.pdf`).
+- `color_theory_poster.py`: the earlier single-page poster, English only.
+- `images/`: the pictures in this README.
+
+## Licence
+
+[MIT](LICENSE)
