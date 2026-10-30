@@ -1,6 +1,7 @@
 // Colour wheels on the web: the same two wheels as color_wheel.py --app.
 // Every part (back and front of each disc) turns by dragging it, with the
-// mouse wheel, or with the arrow keys; the select box changes the language.
+// mouse wheel, or with the arrow keys; the select box changes the language
+// and a button switches between light and dark mode.
 // Angles: turns are clockwise in degrees; window angles in data.js are
 // counter-clockwise from 3 o'clock, as in color_wheel.py.
 "use strict";
@@ -36,18 +37,46 @@
     $("lang-label").textContent = S.app_lang;
     $("reset").textContent = S.app_reset;
     $("lang").value = l;
+    themeButton();
     const help = $("help");
     help.replaceChildren(...S.app_help.map((t) => {
       const li = document.createElement("li");
       li.textContent = t;
       return li;
     }));
-    D.parts.forEach((p, i) => {
-      imgs[i].src = "discs/" + l + "/" + p + ".svg";
-      imgs[i].alt = S.parts[i];
-    });
+    D.parts.forEach((p, i) => { imgs[i].alt = S.parts[i]; });
+    discSources();
     render();
   }
+
+  // light or dark: set on <html> by the script in index.html, changed by
+  // the button (remembered) or by the system while nothing was chosen
+  const theme = () => document.documentElement.dataset.theme;
+
+  function discSources() {
+    const suffix = theme() === "dark" ? "-dark" : "";
+    D.parts.forEach((p, i) => { imgs[i].src = "discs/" + lang + "/" + p + suffix + ".svg"; });
+  }
+
+  function themeButton() {
+    const S = D.langs[lang];
+    $("theme").textContent = theme() === "dark" ? "☀ " + S.app_light : "☾ " + S.app_dark;
+  }
+
+  function setTheme(t, remember = true) {
+    document.documentElement.dataset.theme = t;
+    if (remember) {
+      try { localStorage.setItem("wheels-theme", t); } catch (e) { /* private mode */ }
+    }
+    themeButton();
+    discSources();
+  }
+
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (ev) => {
+    let chosen = null;
+    try { chosen = localStorage.getItem("wheels-theme"); } catch (e) { /* private mode */ }
+    if (!chosen) setTheme(ev.matches ? "dark" : "light", false);
+  });
 
   function render() {
     imgs.forEach((img, i) => { img.style.transform = "rotate(" + turn[i] + "deg)"; });
@@ -145,7 +174,9 @@
   }
   select.addEventListener("change", () => setLang(select.value));
   $("reset").addEventListener("click", () => { turn.fill(0); render(); });
+  $("theme").addEventListener("click", () => setTheme(theme() === "dark" ? "light" : "dark"));
 
   window.setLang = setLang;          // for color_wheel.py --webview
+  window.setTheme = setTheme;
   setLang(startLang());
 })();

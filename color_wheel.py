@@ -28,6 +28,7 @@ that turns, with all the colours, and a front disc with windows.
     python3 color_wheel.py --app [--lang pt]  # the wheels in a window (Tkinter)
     python3 color_wheel.py --web              # SVG discs + data for web/index.html
     python3 color_wheel.py --webview          # that web page in its own window (pywebview)
+    --theme auto|light|dark                   # colours of --app and --webview
 
 On screen every part of both wheels turns: drag it with the mouse, use the
 mouse wheel, or the arrow keys (up/down choose the part).
@@ -48,7 +49,7 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD
 
 from color_theory_document import (HUE_RYB, STRINGS as DOC_STRINGS, arc_text, fill_poly, fit_size,
-                                   mix, pol, radial_text, ring_text, ring_wedge, ryb_to_rgb,
+                                   luma, mix, pol, radial_text, ring_text, ring_wedge, ryb_to_rgb,
                                    srgb_gamma, text_on, tracked)
 
 # ==========================================================================
@@ -171,6 +172,8 @@ STRINGS = {
         "app_title": "Colour wheels",
         "app_lang": "Language",
         "app_reset": "Reset",
+        "app_dark": "Dark mode",
+        "app_light": "Light mode",
         "app_wait": "Drawing the discs...",
         "app_selected": "Selected",
         "parts": ["Disc 1, back", "Disc 1, front", "Disc 2, back", "Disc 2, front"],
@@ -300,6 +303,8 @@ STRINGS = {
         "app_title": "Rodas de cores",
         "app_lang": "Idioma",
         "app_reset": "Repor",
+        "app_dark": "Modo escuro",
+        "app_light": "Modo claro",
         "app_wait": "A desenhar os discos...",
         "app_selected": "Selecionado",
         "parts": ["Disco 1, trás", "Disco 1, frente", "Disco 2, trás", "Disco 2, frente"],
@@ -431,6 +436,8 @@ STRINGS = {
         "app_title": "Ruedas de colores",
         "app_lang": "Idioma",
         "app_reset": "Restablecer",
+        "app_dark": "Modo oscuro",
+        "app_light": "Modo claro",
         "app_wait": "Dibujando los discos...",
         "app_selected": "Seleccionado",
         "parts": ["Disco 1, trasero", "Disco 1, delantero", "Disco 2, trasero",
@@ -463,9 +470,29 @@ def hue_names():
 # ==========================================================================
 W, H = A4                                   # 595 x 842 pt, portrait
 MM = 72 / 25.4
-INK = (0.18, 0.18, 0.18)
 WHITE, BLACK = (1, 1, 1), (0, 0, 0)
 REG, BOLD = "Helvetica", "Helvetica-Bold"
+
+# Theme colours of the discs: the paper, its text, outlines, thin rules and
+# the shapes of the harmony diagram (tetrad, tetrad, triad, split
+# complementary). The printed pages always use the light theme; the
+# on-screen wheels can also use the dark one (set_theme).
+THEMES = {
+    "light": {"PAPER": WHITE, "INK": (0.18, 0.18, 0.18), "LINE": BLACK, "RULE": (.6, .6, .6),
+              "DIAGRAM": [(.64, .64, .64), (.52, .52, .52), (.84, .84, .84), WHITE]},
+    "dark": {"PAPER": (.14, .14, .15), "INK": (.88, .88, .88), "LINE": (.82, .82, .82),
+             "RULE": (.40, .40, .40),
+             "DIAGRAM": [(.40, .40, .40), (.33, .33, .33), (.24, .24, .25), (.14, .14, .15)]},
+}
+PAPER, INK, LINE, RULE, DIAGRAM = (THEMES["light"][k] for k in
+                                   ("PAPER", "INK", "LINE", "RULE", "DIAGRAM"))
+
+
+def set_theme(name):
+    """Switch the theme colours above ("light" or "dark")."""
+    global PAPER, INK, LINE, RULE, DIAGRAM
+    t = THEMES[name]
+    PAPER, INK, LINE, RULE, DIAGRAM = t["PAPER"], t["INK"], t["LINE"], t["RULE"], t["DIAGRAM"]
 NPAGES = 6
 CX, CY = W / 2, 392                         # centre of the disc on its page
 
@@ -534,7 +561,7 @@ def window(c, r0, r1, a0, a1):
     hole itself comes from disc_base."""
     pts = ring_wedge(CX, CY, r0 * MM, r1 * MM, a0, a1, 16)
     if _VIRTUAL:
-        c.setStrokeColorRGB(*BLACK)
+        c.setStrokeColorRGB(*LINE)
         c.setLineWidth(.6)
         c.drawPath(path_of(c, pts), stroke=1, fill=0)
         return
@@ -589,7 +616,7 @@ def d2_windows():
 
 
 def disc_base(c, r, holes=()):
-    """On screen, the paper of a disc: a white circle with the windows cut
+    """On screen, the paper of a disc: a circle of the paper colour with the windows cut
     out (even-odd fill), so what lies below shows through. Printed pages
     need none."""
     if not _VIRTUAL:
@@ -602,12 +629,12 @@ def disc_base(c, r, holes=()):
         for q in pts[1:]:
             p.lineTo(*q)
         p.close()
-    c.setFillColorRGB(*WHITE)
+    c.setFillColorRGB(*PAPER)
     c.drawPath(p, stroke=0, fill=1, fillMode=FILL_EVEN_ODD)
 
 
 def disc_outline(c, r):
-    c.setStrokeColorRGB(*BLACK)
+    c.setStrokeColorRGB(*LINE)
     c.setLineWidth(.8)
     c.circle(CX, CY, r * MM, stroke=1, fill=0)
 
@@ -815,12 +842,12 @@ def build_disc1_back(c):
         a = hue_angle(i)
         col = hue_colour(i)
         fill_poly(c, ring_wedge(CX, CY, (D1_FRONT - 3) * MM, D1_BACK * MM, a - 15, a + 15, 10),
-                  col, WHITE, .8)
+                  col, PAPER, .8)
         rim_text(c, names[i], (D1_FRONT + D1_BACK) / 2 * MM, a, 7.4, text_on(col),
                  max_w=math.radians(28) * (D1_FRONT + D1_BACK) / 2 * MM)
         for k, (r0, r1) in enumerate(D1_BANDS):
             fill_poly(c, ring_wedge(CX, CY, r0 * MM, r1 * MM, a - 15, a + 15, 6),
-                      mixture(i, k), WHITE, .5)
+                      mixture(i, k), PAPER, .5)
     disc_outline(c, D1_BACK)
     pierce_mark(c)
 
@@ -832,8 +859,9 @@ def build_disc1_front(c):
     # tabs with what they add, pointer lines and the five windows
     for k, a in enumerate(D1_TAB_ANGLES):
         col = TAB_COLOURS[k]
-        fill_poly(c, ring_wedge(CX, CY, (R - 6) * MM, R * MM, a - 14, a + 14, 10), col,
-                  (.6, .6, .6) if k == 3 else WHITE, .6)
+        # a tab close to the paper colour (white, or black on dark paper) gets a grey edge
+        edge = (.6, .6, .6) if abs(luma(col) - luma(PAPER)) < .3 else PAPER
+        fill_poly(c, ring_wedge(CX, CY, (R - 6) * MM, R * MM, a - 14, a + 14, 10), col, edge, .6)
         ring_text(c, T("tabs")[k], CX, CY, (R - 3) * MM, a, 6.8, text_on(col),
                   max_w=math.radians(26) * (R - 3) * MM)
         r0, r1 = D1_BANDS[k]
@@ -846,7 +874,7 @@ def build_disc1_front(c):
         ux, uy = math.cos(math.radians(a)), math.sin(math.radians(a))
         fill_poly(c, [(x1, y1), (x1 + 5 * ux - 2.2 * uy, y1 + 5 * uy + 2.2 * ux),
                       (x1 + 5 * ux + 2.2 * uy, y1 + 5 * uy - 2.2 * ux)], INK, INK, .1)
-    c.setStrokeColorRGB(.6, .6, .6)
+    c.setStrokeColorRGB(*RULE)
     c.setLineWidth(.4)
     for b in (165, 135, 105, 75, 45, 15):
         c.line(*pol(CX, CY, 9 * MM, b), *pol(CX, CY, (R - 6) * MM, b))
@@ -912,12 +940,12 @@ def build_disc2_back(c):
         a = hue_angle(i)
         col = hue_colour(i)
         fill_poly(c, ring_wedge(CX, CY, D2_NAME_R[0] * MM, D2_NAME_R[1] * MM, a - 15, a + 15,
-                                10), col, WHITE, .8)
+                                10), col, PAPER, .8)
         rim_text(c, names[i], r_name * MM, a, 6.6, text_on(col),
                  max_w=math.radians(21) * r_name * MM)
         variants = (mix(col, WHITE, .55), mix(col, (.55, .55, .55), .5), mix(col, BLACK, .5))
         for (r0, r1), v in zip(D2_BANDS, variants):
-            fill_poly(c, ring_wedge(CX, CY, r0 * MM, r1 * MM, a - 15, a + 15, 6), v, WHITE, .5)
+            fill_poly(c, ring_wedge(CX, CY, r0 * MM, r1 * MM, a - 15, a + 15, 6), v, PAPER, .5)
     disc_outline(c, D2_BACK)
     pierce_mark(c)
 
@@ -965,12 +993,11 @@ def draw_harmony_diagram(c, r):
         return pol(CX, CY, rr, 90 - a)
 
     # opaque greys, drawn from back to front: the two tetrads darker (and
-    # unequal), the triad light, the split complementary white; then every
+    # unequal), the triad light, the split complementary the paper colour
+    # (on dark paper the order of the greys is reversed); then every
     # outline on top so no edge is hidden
-    shapes = [((0, 60, 180, 240), (.64, .64, .64)),
-              ((0, 120, 180, 300), (.52, .52, .52)),
-              ((0, 120, 240), (.84, .84, .84)),
-              ((0, 150, 210), WHITE)]
+    shapes = list(zip([(0, 60, 180, 240), (0, 120, 180, 300), (0, 120, 240), (0, 150, 210)],
+                      DIAGRAM))
     for angles, col in shapes:
         c.setFillColorRGB(*col)
         c.drawPath(path_of(c, [P(a) for a in angles]), stroke=0, fill=1)
@@ -979,7 +1006,7 @@ def draw_harmony_diagram(c, r):
     for angles, _ in shapes:
         c.drawPath(path_of(c, [P(a) for a in angles]), stroke=1, fill=0)
     # complementary line, top to bottom
-    c.setStrokeColorRGB(*BLACK)
+    c.setStrokeColorRGB(*LINE)
     c.setLineWidth(1.2)
     c.line(*P(0), *P(180))
     # an arrow from each corner to its window
@@ -991,7 +1018,7 @@ def draw_harmony_diagram(c, r):
         c.setLineWidth(.9)
         c.line(x0, y0, x1 - 4 * ux, y1 - 4 * uy)
         fill_poly(c, [(x1, y1), (x1 - 5 * ux - 2.4 * uy, y1 - 5 * uy + 2.4 * ux),
-                      (x1 - 5 * ux + 2.4 * uy, y1 - 5 * uy - 2.4 * ux)], BLACK, BLACK, .1)
+                      (x1 - 5 * ux + 2.4 * uy, y1 - 5 * uy - 2.4 * ux)], LINE, LINE, .1)
     c.saveState()
     c.translate(CX - 2.5, CY + r * .3)
     c.rotate(90)
@@ -1216,16 +1243,19 @@ class ShapeRecorder:
             self._text(text, x, y, font, size, colour or self._fill, space)
 
 
-def record_part(build, lang):
-    """The shapes of one disc (a build_disc* function) in language lang."""
+def record_part(build, lang, theme="light"):
+    """The shapes of one disc (a build_disc* function) in language lang and
+    theme "light" or "dark"."""
     global _LANG, _VIRTUAL
     old = _LANG, _VIRTUAL
     _LANG, _VIRTUAL = lang, True
+    set_theme(theme)
     try:
         rec = ShapeRecorder()
         build(rec)
     finally:
         _LANG, _VIRTUAL = old
+        set_theme("light")
     return rec.items
 
 
@@ -1357,14 +1387,41 @@ def hit_part(disc, r, ang, front_turn):
 # ==========================================================================
 # 7. DESKTOP APP  (Tkinter)
 # ==========================================================================
+# Window colours of each theme (the same as web/style.css).
+UI_COLOURS = {
+    "light": {"bg": "#f4f4f2", "fg": "#2e2e2e", "muted": "#5c5c5c", "field": "#ffffff",
+              "border": "#b9b9b4", "accent": "#1a73e8"},
+    "dark": {"bg": "#1e1e20", "fg": "#e6e6e6", "muted": "#a8a8a8", "field": "#2c2c2f",
+             "border": "#4a4a4e", "accent": "#8ab4f8"},
+}
+
+
+def system_theme():
+    """"dark" when the operating system uses dark mode (Windows, macOS), else "light"."""
+    try:
+        if os.name == "nt":
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows"
+                                 r"\CurrentVersion\Themes\Personalize")
+            return "light" if winreg.QueryValueEx(key, "AppsUseLightTheme")[0] else "dark"
+        if os.uname().sysname == "Darwin":
+            import subprocess
+            out = subprocess.run(["defaults", "read", "-g", "AppleInterfaceStyle"],
+                                 capture_output=True, text=True).stdout
+            return "dark" if "Dark" in out else "light"
+    except (OSError, AttributeError):
+        pass
+    return "light"
+
+
 class WheelApp:
     """Both wheels side by side. Each part (back and front of each disc)
     turns by dragging it, with the mouse wheel, or with the arrow keys."""
 
-    def __init__(self, root, lang):
+    def __init__(self, root, lang, theme="light"):
         import tkinter as tk
         from tkinter import ttk
-        self.tk, self.root = tk, root
+        self.tk, self.root, self.theme = tk, root, theme
         sw, sh = root.winfo_screenwidth(), root.winfo_screenheight()
         self.size = int(max(300, min((sw - 100) / 2, sh - 300, 640)))
         self.gap = 30
@@ -1373,8 +1430,8 @@ class WheelApp:
         self.moving = None                  # part being dragged or eased
         self.turned = [None] * 4            # last rotated image of each part
         self.pending, self.after_id = set(), None
-        from PIL import Image
-        self.ground = Image.new("RGBA", (self.size, self.size), (244, 244, 242, 255))
+        self.style = ttk.Style(root)
+        self.style.theme_use("clam")        # the built-in theme that takes custom colours
 
         bar = ttk.Frame(root, padding=(14, 10))
         bar.pack(fill="x")
@@ -1382,6 +1439,8 @@ class WheelApp:
         self.title.pack(side="left")
         self.reset_btn = ttk.Button(bar, command=self.reset)
         self.reset_btn.pack(side="right")
+        self.theme_btn = ttk.Button(bar, command=self.toggle_theme)
+        self.theme_btn.pack(side="right", padx=(0, 8))
         self.lang_box = ttk.Combobox(bar, state="readonly", width=11,
                                      values=[LANG_NAMES[k] for k in STRINGS])
         self.lang_box.pack(side="right", padx=(6, 14))
@@ -1390,7 +1449,7 @@ class WheelApp:
         self.lang_label.pack(side="right")
 
         w = 2 * self.size + self.gap
-        self.canvas = tk.Canvas(root, width=w + 28, height=self.size + 20, bg="#f4f4f2",
+        self.canvas = tk.Canvas(root, width=w + 28, height=self.size + 20,
                                 highlightthickness=0)
         self.canvas.pack(padx=0, pady=0)
         self.status = ttk.Label(root, padding=(14, 4))
@@ -1412,8 +1471,55 @@ class WheelApp:
         cv.bind("<Down>", lambda e: self.select(self.sel + 1))
         cv.bind("<Tab>", lambda e: self.select(self.sel + 1) or "break")
         cv.bind("<Shift-Tab>", lambda e: self.select(self.sel - 1) or "break")
+        self.apply_theme()
         self.set_lang(lang)
         cv.focus_set()
+
+    # theme
+    def apply_theme(self):
+        """Window colours, the canvas ground and the title bar of the theme."""
+        from PIL import Image
+        c, st = UI_COLOURS[self.theme], self.style
+        self.root.configure(bg=c["bg"])
+        self.canvas.configure(bg=c["bg"])
+        self.ground = Image.new("RGBA", (self.size, self.size), c["bg"])
+        st.configure(".", background=c["bg"], foreground=c["fg"], bordercolor=c["border"],
+                     lightcolor=c["field"], darkcolor=c["field"], troughcolor=c["bg"])
+        st.configure("TLabel", background=c["bg"], foreground=c["fg"])
+        st.configure("TButton", background=c["field"], foreground=c["fg"], padding=(10, 3))
+        st.map("TButton", background=[("active", c["border"])], bordercolor=[("focus",
+                                                                              c["accent"])])
+        st.configure("TCombobox", fieldbackground=c["field"], background=c["field"],
+                     foreground=c["fg"], arrowcolor=c["fg"])
+        st.map("TCombobox", fieldbackground=[("readonly", c["field"])],
+               foreground=[("readonly", c["fg"])], selectbackground=[("readonly", c["field"])],
+               selectforeground=[("readonly", c["fg"])])
+        # the list that drops down from the language box
+        for opt, val in (("background", c["field"]), ("foreground", c["fg"]),
+                         ("selectBackground", c["accent"]), ("selectForeground", c["bg"])):
+            self.root.option_add("*TCombobox*Listbox." + opt, val)
+        try:
+            pop = self.root.tk.call("ttk::combobox::PopdownWindow", self.lang_box)
+            self.root.tk.call(pop + ".f.l", "configure", "-background", c["field"],
+                              "-foreground", c["fg"])
+        except self.tk.TclError:
+            pass
+        self.help.configure(foreground=c["muted"])
+        if os.name == "nt":             # dark or light title bar (Windows 10 2004 and later)
+            try:
+                import ctypes
+                self.root.update_idletasks()
+                hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+                on = ctypes.c_int(1 if self.theme == "dark" else 0)
+                ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(on), 4)
+            except (AttributeError, OSError):
+                pass
+
+    def toggle_theme(self):
+        self.theme = "light" if self.theme == "dark" else "dark"
+        self.apply_theme()
+        self.set_lang(_LANG)
+        self.canvas.focus_set()
 
     # geometry of the canvas
     def centre(self, disc):
@@ -1448,17 +1554,20 @@ class WheelApp:
         self.lang_label.config(text=T("app_lang") + ":")
         self.reset_btn.config(text=T("app_reset"))
         self.help.config(text="\n".join("• " + t for t in T("app_help")))
-        if lang not in self.images:
+        self.theme_btn.config(text="☀  " + T("app_light") if self.theme == "dark"
+                              else "☾  " + T("app_dark"))
+        key = (lang, self.theme)
+        if key not in self.images:
             self.canvas.delete("all")
             self.canvas.create_text(*self.centre(0), text=T("app_wait"), anchor="w",
-                                    font=("Helvetica", 13))
+                                    font=("Helvetica", 13), fill=UI_COLOURS[self.theme]["fg"])
             self.root.config(cursor="watch")
             self.root.update()
-            self.images[lang] = [items_to_image(record_part(build, lang), self.size)
-                                 for _, build in PARTS]
+            self.images[key] = [items_to_image(record_part(build, lang, self.theme), self.size)
+                                for _, build in PARTS]
             self.root.config(cursor="")
-            self.canvas.delete("all")
-            self.photos = [None, None]
+        self.canvas.delete("all")
+        self.photos = [None, None]
         self.redraw()
 
     # drawing
@@ -1468,12 +1577,13 @@ class WheelApp:
         rest it is redone with the smoother bicubic one."""
         from PIL import Image
         fast = part == self.moving
-        lang, turn, was_fast, img = self.turned[part] or (None, None, None, None)
-        if (lang, turn) == (_LANG, self.turn[part]) and (fast or not was_fast):
+        key = (_LANG, self.theme)
+        was_key, turn, was_fast, img = self.turned[part] or (None, None, None, None)
+        if (was_key, turn) == (key, self.turn[part]) and (fast or not was_fast):
             return img
-        img = self.images[_LANG][part].rotate(
+        img = self.images[key][part].rotate(
             -self.turn[part], resample=Image.BILINEAR if fast else Image.BICUBIC)
-        self.turned[part] = (_LANG, self.turn[part], fast, img)
+        self.turned[part] = (key, self.turn[part], fast, img)
         return img
 
     def redraw(self, discs=(0, 1)):
@@ -1496,7 +1606,8 @@ class WheelApp:
             if self.sel // 2 == d:          # ring round the selected part
                 g = disc_geometry()[d]
                 r = (g["front_r"] if self.sel % 2 else g["back_r"]) * self.px_per_mm() + 2
-                cv.create_oval(cx - r, cy - r, cx + r, cy + r, outline="#1a73e8", width=3,
+                cv.create_oval(cx - r, cy - r, cx + r, cy + r,
+                               outline=UI_COLOURS[self.theme]["accent"], width=3,
                                dash=(8, 5), tags="deco%d" % d)
             p = 2.6 * self.px_per_mm()      # the split pin
             cv.create_oval(cx - p, cy - p, cx + p, cy + p, fill="#b8b2a4", outline="#6d675c",
@@ -1574,11 +1685,11 @@ class WheelApp:
         self.redraw()
 
 
-def run_app(lang):
+def run_app(lang, theme="auto"):
     import tkinter as tk
     root = tk.Tk()
     root.resizable(False, False)
-    WheelApp(root, lang)
+    WheelApp(root, lang, system_theme() if theme == "auto" else theme)
     root.mainloop()
 
 
@@ -1586,15 +1697,18 @@ def run_app(lang):
 # 8. WEB PAGE  (the SVG discs and the data for web/app.js)
 # ==========================================================================
 def export_web(folder):
-    """Write folder/discs/<lang>/<part>.svg for every language and
-    folder/discs/data.js with the texts and the disc geometry."""
+    """Write folder/discs/<lang>/<part>.svg and <part>-dark.svg for every
+    language and folder/discs/data.js with the texts and the disc geometry."""
     base = os.path.join(folder, "discs")
     for lang in STRINGS:
         os.makedirs(os.path.join(base, lang), exist_ok=True)
         for name, build in PARTS:
-            with open(os.path.join(base, lang, name + ".svg"), "w", encoding="utf-8") as f:
-                f.write(items_to_svg(record_part(build, lang)))
-    keys = ["app_title", "app_lang", "app_reset", "app_selected", "parts", "app_help"]
+            for theme, suffix in (("light", ""), ("dark", "-dark")):
+                path = os.path.join(base, lang, name + suffix + ".svg")
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(items_to_svg(record_part(build, lang, theme)))
+    keys = ["app_title", "app_lang", "app_reset", "app_selected", "parts", "app_help",
+            "app_dark", "app_light"]
     data = {"view_r": VIEW_MM, "step": STEP, "parts": [n for n, _ in PARTS],
             "lang_names": LANG_NAMES, "discs": disc_geometry(),
             "langs": {lang: {k: STRINGS[lang].get(k, STRINGS["en"][k]) for k in keys}
@@ -1605,18 +1719,21 @@ def export_web(folder):
     print("Saved", base)
 
 
-def run_webview(lang):
+def run_webview(lang, theme="auto"):
     """The web page in a window of its own (pip install pywebview): the same
     wheels as in the browser, without one. Writes web/discs first if they
     are missing."""
     import webview
     web = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
-    if not os.path.exists(os.path.join(web, "discs", "data.js")):
+    if not os.path.exists(os.path.join(web, "discs", "en", "d2f-dark.svg")):
         export_web(web)
+    theme = system_theme() if theme == "auto" else theme
     window = webview.create_window(STRINGS[lang]["app_title"], os.path.join(web, "index.html"),
-                                   width=1360, height=860, min_size=(420, 500))
+                                   width=1360, height=860, min_size=(420, 500),
+                                   background_color=UI_COLOURS[theme]["bg"])
     # the page reads ?lang= from its address; here it is told once loaded
-    window.events.loaded += lambda: window.evaluate_js("setLang(%s)" % json.dumps(lang))
+    window.events.loaded += lambda: window.evaluate_js(
+        "setLang(%s); setTheme(%s, false)" % (json.dumps(lang), json.dumps(theme)))
     webview.start()
 
 
@@ -1638,12 +1755,14 @@ def main():
                     help="write the discs and data for the web page (default folder: web)")
     ap.add_argument("--webview", action="store_true",
                     help="open the web page in a window of its own (needs pywebview)")
+    ap.add_argument("--theme", default="auto", choices=["auto", "light", "dark"],
+                    help="colours of --app and --webview (auto: as the operating system)")
     a = ap.parse_args()
     if a.app:
-        run_app(a.lang)
+        run_app(a.lang, a.theme)
         return
     if a.webview:
-        run_webview(a.lang)
+        run_webview(a.lang, a.theme)
         return
     if a.web:
         export_web(a.web)

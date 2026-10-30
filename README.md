@@ -98,16 +98,24 @@ each disc) movable:
 - the mouse wheel turns the disc under the pointer one colour at a time;
 - ← and → turn the selected disc one colour, ↑ and ↓ (or Tab) select another disc.
 
+Every on-screen version has a **dark mode**. It follows the operating system at first,
+and a button next to the language box switches between light and dark (the web page
+remembers the choice). The printed PDFs are always light.
+
+![The two colour wheels in dark mode](images/on_screen_dark.jpg)
+
 **Desktop** (Tkinter and Pillow, nothing else to install):
 
 ```bash
 python3 color_wheel.py --app            # English
 python3 color_wheel.py --app --lang pt  # starts in Portuguese; the language can be changed in the window
+python3 color_wheel.py --app --theme dark   # --theme auto (default), light or dark
 ```
 
 **Web**: open `web/index.html` in a browser. The language box at the top switches between
 English, Portuguese and Spanish. The page loads the discs from `web/discs/` (SVG) and the
-texts and disc geometry from `web/discs/data.js`, both written by:
+texts and disc geometry from `web/discs/data.js`, both written by (each disc in a light
+and a dark version; `?theme=dark` or `?lang=pt` in the address also work):
 
 ```bash
 python3 color_wheel.py --web            # -> web/discs/  (or: --web OTHER_FOLDER)
@@ -123,6 +131,7 @@ window without a browser. It writes `web/discs/` first if it is missing.
 pip install pywebview
 python3 color_wheel.py --webview            # English
 python3 color_wheel.py --webview --lang pt  # starts in Portuguese
+python3 color_wheel.py --webview --theme light
 ```
 
 On Windows it uses the Edge WebView2 runtime, which comes with Windows 10 and 11.

@@ -53,6 +53,13 @@ repositório, para se poderem usar sem Python. Contém:
   `--webview` abre a página web numa janela própria com o pywebview (`pip install pywebview`;
   é a única dependência opcional): `run_webview` escreve `web/discs` se faltar e chama
   `window.setLang` do `app.js` depois de a página carregar.
+  Modo escuro (só no ecrã; os PDFs ficam sempre claros): as cores de papel, texto, linhas e
+  diagrama dos discos vêm de `THEMES` via `set_theme`, e `record_part(build, lang, theme)`
+  desenha o tema escuro. Nos discos usar `PAPER`/`INK`/`LINE`/`RULE`/`DIAGRAM`, não `WHITE` ou
+  `BLACK`, quando a cor é do papel e não uma cor real (a tinta, a patilha + branco, a escala de
+  cinzentos). O `--web` escreve `<part>-dark.svg`; a página escolhe o tema no `<head>`
+  (`?theme=`, `localStorage`, sistema) e o `app.js` troca os SVG. Na janela Tkinter, as cores
+  estão em `UI_COLOURS` (iguais às do `style.css`); `--theme auto` usa `system_theme()`.
 - `color_theory_poster.py` — versão anterior, só a página 1, sem traduções (ReportLab).
 - PDFs gerados: `colour_theory_en.pdf`, `colour_theory_pt.pdf`, `colour_theory_es.pdf`
   (do `color_theory_document.py`), `colour_wheels_en.pdf`, `colour_wheels_pt.pdf`,
@@ -72,6 +79,7 @@ python3 color_wheel.py [--lang pt]                    # -> colour_wheels_<lang>.
 python3 color_wheel.py --app [--lang pt]              # rodas numa janela (Tkinter)
 python3 color_wheel.py --web                          # -> web/discs/ para web/index.html
 python3 color_wheel.py --webview [--lang pt]          # a página web numa janela (pywebview)
+python3 color_wheel.py --app --theme dark             # --theme auto|light|dark (--app, --webview)
 ```
 
 Para ver uma página como imagem:

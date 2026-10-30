@@ -193,7 +193,9 @@ window.WHEEL_DATA = {
     "Drag any disc with the mouse to turn it; the mouse wheel turns it one colour at a time.",
     "Keyboard: ← and → turn the selected disc one colour; ↑ and ↓ (or Tab) choose another disc.",
     "Grab a back disc by its coloured rim or through a window."
-   ]
+   ],
+   "app_dark": "Dark mode",
+   "app_light": "Light mode"
   },
   "pt": {
    "app_title": "Rodas de cores",
@@ -210,7 +212,9 @@ window.WHEEL_DATA = {
     "Arraste qualquer disco com o rato para o rodar; a roda do rato roda-o uma cor de cada vez.",
     "Teclado: ← e → rodam o disco selecionado uma cor; ↑ e ↓ (ou Tab) escolhem outro disco.",
     "Agarre um disco de trás pela borda colorida ou através de uma janela."
-   ]
+   ],
+   "app_dark": "Modo escuro",
+   "app_light": "Modo claro"
   },
   "es": {
    "app_title": "Ruedas de colores",
@@ -227,7 +231,9 @@ window.WHEEL_DATA = {
     "Arrastre cualquier disco con el ratón para girarlo; la rueda del ratón lo gira un color cada vez.",
     "Teclado: ← y → giran el disco seleccionado un color; ↑ y ↓ (o Tab) eligen otro disco.",
     "Agarre un disco trasero por su borde de color o a través de una ventana."
-   ]
+   ],
+   "app_dark": "Modo oscuro",
+   "app_light": "Modo claro"
   }
  }
 };

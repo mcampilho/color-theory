@@ -100,16 +100,24 @@ de cada disco) móveis:
 - a roda do rato roda o disco debaixo do ponteiro, uma cor de cada vez;
 - ← e → rodam o disco selecionado uma cor; ↑ e ↓ (ou Tab) escolhem outro disco.
 
+Todas as versões no ecrã têm **modo escuro**. Ao abrir, seguem o tema do sistema
+operativo, e um botão ao lado da caixa de idioma alterna entre claro e escuro (a página
+web lembra-se da escolha). Os PDFs para imprimir são sempre claros.
+
+![As duas rodas de cores em modo escuro](images/on_screen_dark.jpg)
+
 **Computador** (Tkinter e Pillow, nada mais para instalar):
 
 ```bash
 python3 color_wheel.py --app            # inglês
 python3 color_wheel.py --app --lang pt  # começa em português; o idioma pode ser mudado na janela
+python3 color_wheel.py --app --theme dark   # --theme auto (por omissão), light ou dark
 ```
 
 **Web**: abre-se o `web/index.html` num browser. A caixa de idioma no topo alterna entre
 inglês, português e espanhol. A página carrega os discos de `web/discs/` (SVG) e os textos e
-a geometria dos discos de `web/discs/data.js`, ambos escritos por:
+a geometria dos discos de `web/discs/data.js`, ambos escritos por (cada disco numa versão
+clara e numa escura; `?theme=dark` ou `?lang=pt` no endereço também funcionam):
 
 ```bash
 python3 color_wheel.py --web            # -> web/discs/  (ou: --web OUTRA_PASTA)
@@ -125,6 +133,7 @@ computador sem browser. Se a pasta `web/discs/` faltar, é escrita primeiro.
 pip install pywebview
 python3 color_wheel.py --webview            # inglês
 python3 color_wheel.py --webview --lang pt  # começa em português
+python3 color_wheel.py --webview --theme light
 ```
 
 No Windows usa o Edge WebView2, que já vem com o Windows 10 e 11.
