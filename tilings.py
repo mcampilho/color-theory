@@ -15,6 +15,9 @@ from the colour schemes of colour theory (RYB wheel of color_theory_document.py)
     python3 tilings.py hexagonal -c 7 --scheme rainbow -o hex.svg
     python3 tilings.py penrose_p3 --scheme complementary --hue blue -o p3.png
     python3 tilings.py herringbone -p ratio=3 -p angle=45 -o h.pdf
+    python3 tilings.py cairo --show             # preview window: change it there, then Save
+    python3 tilings.py cairo --vary scheme      # sheet: one tiling in every scheme
+    python3 tilings.py "hexagonal:c=7:scheme=rainbow" "cairo:hue=blue" --cols 2 -o sheet.pdf
 
 All geometry is computed. Periodic tilings are a motif of polygons repeated
 over a lattice (Periodic); gaps between placed polygons are found as the
@@ -1368,7 +1371,9 @@ def build_scene(spec):
     h = w * s["aspect"]
     box = (-w / 2, -h / 2, w / 2, h / 2)
     params = dict(tiling.params)
-    params.update(s["params"])
+    for k, v in s["params"].items():      # parameters of other tilings (in a sheet) are ignored
+        if k in tiling.params or (k in ("shear", "turn") and tiling.make.__name__ == "make"):
+            params[k] = v
     patch = tiling.make(box, **params)
     tiles = patch.tiles
     lw = w * .0032
@@ -1450,16 +1455,19 @@ def _hex(c):
     return "#%02x%02x%02x" % _rgb255(c)
 
 
-def write_svg(ops, box, path, width=1200):
+def svg_panel(ops, box, x, y, width, uid=0):
+    """SVG elements of ops in a nested <svg> at (x, y), width pixels wide, clipped to it
+    (Inkscape does not clip nested <svg> elements by itself)."""
     x0, y0, x1, y1 = box
     k = width / (x1 - x0)
     height = (y1 - y0) * k
     P = lambda p: "%.2f,%.2f" % ((p[0] - x0) * k, (y1 - p[1]) * k)   # noqa: E731
-    out = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
-           % (width, height, width, height),
-           '<defs><clipPath id="v"><rect width="%d" height="%d"/></clipPath></defs>' % (width, height),
+    out = ['<svg x="%.2f" y="%.2f" width="%.2f" height="%.2f" viewBox="0 0 %.2f %.2f">'
+           % (x, y, width, height, width, height),
+           '<defs><clipPath id="clip%d"><rect width="%.2f" height="%.2f"/></clipPath></defs>'
+           % (uid, width, height),
            '<rect width="100%" height="100%" fill="#ffffff"/>',
-           '<g clip-path="url(#v)" stroke-linejoin="round" stroke-linecap="round">']
+           '<g clip-path="url(#clip%d)" stroke-linejoin="round" stroke-linecap="round">' % uid]
     for op in ops:
         if op[0] == "poly":
             _, pts, fill, stroke, lw = op
@@ -1475,6 +1483,13 @@ def write_svg(ops, box, path, width=1200):
             out.append('<circle cx="%s" cy="%s" r="%.2f" fill="%s" stroke="%s" stroke-width="%.2f"/>'
                        % (x, y, r * k, _hex(fill), _hex(stroke), lw * k))
     out.append("</g></svg>")
+    return out
+
+
+def write_svg(ops, box, path, width=1200):
+    height = (box[3] - box[1]) * width / (box[2] - box[0])
+    out = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
+           % (width, height, width, height)] + svg_panel(ops, box, 0, 0, width) + ["</svg>"]
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(out))
 
@@ -1854,7 +1869,7 @@ def build_catalogue(path):
 
 
 # ==========================================================================
-# 9. MAIN
+# 9. SHEETS OF SEVERAL TILINGS, AND THE PREVIEW WINDOW
 # ==========================================================================
 def parse_value(v):
     try:
@@ -1863,10 +1878,333 @@ def parse_value(v):
         return v
 
 
+def parse_hue(v):
+    v = str(v).strip().lower()
+    return int(v) % 12 if v.lstrip("-").isdigit() else HUE_KEYS.index(v)
+
+
+def parse_colours(text, sep=","):
+    return [hexc(h.strip().lstrip("#")) for h in text.split(sep) if h.strip()]
+
+
+ITEM_KEYS = {"c": "colouring", "colouring": "colouring", "s": "scheme", "scheme": "scheme", "hue": "hue",
+             "size": "size", "aspect": "aspect", "seed": "seed", "girih": "girih", "overlay": "overlay",
+             "colours": "colours"}
+
+
+def parse_item(text, base):
+    """'cairo:c=orientation:scheme=triad:hue=blue:colours=#fff/#123:ratio=3' -> spec.
+
+    Options not in ITEM_KEYS are tiling parameters; colours are separated by /
+    and overlays by +."""
+    key, *opts = text.split(":")
+    if key not in TILINGS:
+        raise SystemExit("unknown tiling %r (see --list)" % key)
+    spec = dict(base, key=key, params=dict(base.get("params") or {}))
+    for o in opts:
+        k, v = o.split("=", 1)
+        name = ITEM_KEYS.get(k)
+        if name == "hue":
+            spec["hue"] = parse_hue(v)
+        elif name == "colours":
+            spec["colours"] = parse_colours(v, "/")
+        elif name == "overlay":
+            spec["overlay"] = v.split("+")
+        elif name in ("size", "aspect", "girih"):
+            spec[name] = float(v)
+        elif name == "seed":
+            spec["seed"] = int(v)
+        elif name:
+            spec[name] = v
+        else:
+            spec["params"][k] = parse_value(v)
+    return spec
+
+
+def colourings_of(key):
+    t = TILINGS[key]
+    if key == "wang":
+        return ["classic", "scheme"]
+    return list(t.colourings) + UNIVERSAL
+
+
+def variations(spec, what):
+    """The same tiling in every scheme, every base hue or every colouring."""
+    if what == "scheme":
+        return [dict(spec, scheme=s, colours=None) for s in SCHEMES]
+    if what == "hue":
+        return [dict(spec, hue=h, colours=None) for h in range(12)]
+    return [dict(spec, colouring=c) for c in colourings_of(spec["key"])]
+
+
+def label_of(spec):
+    s = spec_defaults(spec)
+    col = s["colouring"]
+    parts = [s["key"].replace("_", " ")]
+    parts.append(T("c_" + col) if ("c_" + col) in STRINGS["en"] else col)
+    if not s["colours"] and col != "classic":
+        parts.append(scheme_name(s))
+    return "  ·  ".join(parts)
+
+
+def sheet_layout(n, cols, width, aspect, labels):
+    """Cells (x, y top-left, in pixels / points), panel size and sheet height."""
+    cols = max(1, min(cols, n))
+    rows = (n + cols - 1) // cols
+    gap = max(8.0, width * .012)
+    lab = max(14.0, width * .022) if labels else 0.0
+    pw = (width - gap * (cols + 1)) / cols
+    ph = pw * aspect
+    cells = [(gap + (i % cols) * (pw + gap), gap + (i // cols) * (ph + lab + gap)) for i in range(n)]
+    return cells, pw, ph, lab, gap + rows * (ph + lab + gap)
+
+
+def _font(px):
+    from PIL import ImageFont
+    for name in ("arial.ttf", "LiberationSans-Regular.ttf", "DejaVuSans.ttf"):
+        try:
+            return ImageFont.truetype(name, int(px))
+        except OSError:
+            pass
+    return ImageFont.load_default()
+
+
+def render_sheet(specs, cols=3, width=1800, labels=True, ss=2):
+    from PIL import Image, ImageDraw
+    aspect = spec_defaults(specs[0])["aspect"]
+    cells, pw, ph, lab, H = sheet_layout(len(specs), cols, width, aspect, labels)
+    img = Image.new("RGB", (int(width), int(round(H))), (255, 255, 255))
+    d = ImageDraw.Draw(img)
+    for (x, y), spec in zip(cells, specs):
+        ops, box = build_scene(dict(spec, aspect=aspect))
+        img.paste(render_image(ops, box, int(round(pw)), ss), (int(round(x)), int(round(y))))
+        d.rectangle((x - 1, y - 1, x + pw, y + ph), outline=(150, 150, 150))
+        if labels:
+            text, px = label_of(spec), lab * .62
+            font = _font(px)
+            while px > 7 and font.getlength(text) > pw:
+                px *= .92
+                font = _font(px)
+            d.text((x, y + ph + lab * .2), text, fill=(60, 60, 60), font=font)
+    return img
+
+
+def label_size(text, lab, max_w):
+    """Font size of a caption: lab * 0.62, smaller if it would be wider than the panel."""
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    size = lab * .62
+    return min(size, size * max_w / max(1e-6, stringWidth(text, "Helvetica", size)))
+
+
+def write_sheet(specs, path, cols=3, width=1800, labels=True):
+    ext = path.lower().rsplit(".", 1)[-1]
+    if ext == "png" or ext not in ("svg", "pdf"):
+        render_sheet(specs, cols, width, labels).save(path)
+        return
+    aspect = spec_defaults(specs[0])["aspect"]
+    cells, pw, ph, lab, H = sheet_layout(len(specs), cols, width, aspect, labels)
+    if ext == "svg":
+        out = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
+               % (width, H, width, H), '<rect width="100%" height="100%" fill="#ffffff"/>']
+        for n, ((x, y), spec) in enumerate(zip(cells, specs)):
+            ops, box = build_scene(dict(spec, aspect=aspect))
+            out += svg_panel(ops, box, x, y, pw, n)
+            out.append('<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" fill="none" stroke="#969696"/>'
+                       % (x, y, pw, ph))
+            if labels:
+                text = label_of(spec)
+                out.append('<text x="%.2f" y="%.2f" font-family="Helvetica, Arial, sans-serif" '
+                           'font-size="%.1f" fill="#3c3c3c">%s</text>'
+                           % (x, y + ph + lab * .8, label_size(text, lab, pw), text.replace("&", "&amp;")))
+        out.append("</svg>")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(out))
+        return
+    from reportlab.pdfgen import canvas
+    c = canvas.Canvas(path, pagesize=(width, H))
+    for (x, y), spec in zip(cells, specs):
+        ops, box = build_scene(dict(spec, aspect=aspect))
+        draw_ops_pdf(c, ops, box, x, H - y - ph, pw, ph)
+        c.setStrokeColorRGB(.6, .6, .6)
+        c.setLineWidth(.6)
+        c.rect(x, H - y - ph, pw, ph, fill=0, stroke=1)
+        if labels:
+            text = label_of(spec)
+            c.setFillColorRGB(.24, .24, .24)
+            c.setFont("Helvetica", label_size(text, lab, pw))
+            c.drawString(x, H - y - ph - lab * .8, text)
+    c.showPage()
+    c.save()
+
+
+class PreviewApp:
+    """A window that shows one tiling, with boxes to change it, or a fixed sheet.
+
+    Changing a box redraws at once; Save writes PNG, SVG or PDF at a larger size."""
+
+    def __init__(self, root, spec=None, sheet=None, cols=3, labels=True):
+        import tkinter as tk
+        from tkinter import ttk
+        self.root, self.tk, self.ttk = root, tk, ttk
+        self.sheet, self.cols, self.labels = sheet, cols, labels
+        self.spec = dict(spec or {})
+        self.custom = self.spec.get("colours")
+        self.photo, self.pending = None, None
+        root.title(T("app_title"))
+        root.geometry("1100x780")
+        bar = ttk.Frame(root, padding=(10, 8))
+        bar.pack(side="top", fill="x")
+        self.vars = {}
+        if sheet is None:
+            s = spec_defaults(self.spec)
+            hue_names = [n.lower() for n in CTD_STRINGS.get(_LANG, CTD_STRINGS["en"])["hue_names"]]
+            self.hue_names = hue_names
+            self._combo(bar, "tiling", T("app_tiling"), list(TILINGS), s["key"], 24)
+            self._combo(bar, "colouring", T("colouring"), colourings_of(s["key"]), s["colouring"], 13)
+            self._combo(bar, "scheme", T("app_scheme"), SCHEMES, s["scheme"], 13)
+            self._combo(bar, "hue", T("app_hue"), hue_names, hue_names[s["hue"] % 12], 15)
+            ttk.Label(bar, text=T("app_size")).pack(side="left", padx=(8, 3))
+            self.vars["size"] = tk.StringVar(value="%g" % s["size"])
+            sp = ttk.Spinbox(bar, from_=2, to=80, increment=1, width=5, textvariable=self.vars["size"],
+                             command=self.redraw_soon)
+            sp.pack(side="left")
+            sp.bind("<Return>", lambda e: self.redraw_soon())
+            # tiling parameters as "name=value name=value" (ratio=3 angle=45, base=hexagonal theta=60)
+            row = ttk.Frame(root, padding=(10, 0, 10, 6))
+            row.pack(side="top", fill="x")
+            ttk.Label(row, text=T("app_params")).pack(side="left", padx=(8, 3))
+            self.vars["params"] = tk.StringVar(value=self._params_text(s["key"], s["params"]))
+            ent = ttk.Entry(row, textvariable=self.vars["params"], width=60)
+            ent.pack(side="left")
+            ent.bind("<Return>", lambda e: self.redraw_soon())
+            ttk.Label(row, text=T("app_params_hint"), foreground="#777777").pack(side="left", padx=8)
+        ttk.Button(bar, text=T("app_save"), command=self.save).pack(side="right")
+        self.status = ttk.Label(root, padding=(10, 4), foreground="#555555")
+        self.status.pack(side="bottom", fill="x")
+        self.canvas = tk.Canvas(root, background="#5c5c5c", highlightthickness=0)
+        self.canvas.pack(side="top", fill="both", expand=True)
+        self.canvas.bind("<Configure>", lambda e: self.redraw_soon())
+
+    def _combo(self, bar, name, label, values, value, width):
+        self.ttk.Label(bar, text=label).pack(side="left", padx=(8, 3))
+        var = self.tk.StringVar(value=value)
+        box = self.ttk.Combobox(bar, textvariable=var, values=values, state="readonly", width=width)
+        box.pack(side="left")
+        box.bind("<<ComboboxSelected>>", lambda e, n=name: self.changed(n))
+        self.vars[name] = var
+        setattr(self, name + "_box", box)
+
+    @staticmethod
+    def _params_text(key, given=None):
+        p = dict(TILINGS[key].params)
+        p.update({k: v for k, v in (given or {}).items() if k in p or k in ("shear", "turn")})
+        return " ".join("%s=%g" % (k, v) if isinstance(v, float) else "%s=%s" % (k, v) for k, v in p.items())
+
+    def changed(self, name):
+        if name == "tiling":             # a new tiling starts from its own defaults
+            key = self.vars["tiling"].get()
+            t = TILINGS[key]
+            self.spec = {"key": key}
+            self.colouring_box["values"] = colourings_of(key)
+            self.vars["colouring"].set(t.default)
+            self.vars["scheme"].set(t.scheme)
+            self.vars["hue"].set(self.hue_names[t.hue % 12])
+            self.vars["size"].set("%g" % t.size)
+            self.vars["params"].set(self._params_text(key))
+        if name == "scheme":             # own colours (--colours) last until a scheme is picked
+            self.custom = None
+        self.redraw_soon()
+
+    def current(self):
+        if self.sheet is not None:
+            return None
+        spec = dict(self.spec)
+        spec.update(key=self.vars["tiling"].get(), colouring=self.vars["colouring"].get(),
+                    scheme=self.vars["scheme"].get(), hue=self.hue_names.index(self.vars["hue"].get()))
+        try:
+            spec["size"] = max(1.0, float(self.vars["size"].get().replace(",", ".")))
+        except ValueError:
+            pass
+        spec["colours"] = self.custom
+        spec["params"] = dict(kv.split("=", 1) for kv in self.vars["params"].get().split() if "=" in kv)
+        spec["params"] = {k: parse_value(v) for k, v in spec["params"].items()}
+        return spec
+
+    def redraw_soon(self):
+        if self.pending:
+            self.root.after_cancel(self.pending)
+        self.pending = self.root.after(120, self.redraw)
+
+    def redraw(self):
+        from PIL import ImageTk
+        self.pending = None
+        cw, ch = self.canvas.winfo_width(), self.canvas.winfo_height()
+        if cw < 20 or ch < 20:
+            return
+        self.status.config(text=T("app_drawing"))
+        self.root.update_idletasks()
+        try:
+            if self.sheet is not None:
+                img = render_sheet(self.sheet, self.cols, cw, self.labels)
+                if img.height > ch:
+                    img = img.resize((int(img.width * ch / img.height), ch))
+            else:
+                spec = self.current()
+                spec["aspect"] = ch / cw
+                ops, box = build_scene(spec)
+                img = render_image(ops, box, cw, ss=2)
+                self.status.config(text=label_of(spec))
+        except (SystemExit, Exception) as e:     # a bad combination: say so and keep the window
+            self.status.config(text=T("app_error") % e)
+            return
+        if self.sheet is not None:
+            self.status.config(text="%d %s" % (len(self.sheet), T("app_panels")))
+        self.photo = ImageTk.PhotoImage(img)
+        self.canvas.delete("all")
+        self.canvas.create_image(cw // 2, ch // 2, image=self.photo)
+
+    def save(self):
+        from tkinter import filedialog
+        path = filedialog.asksaveasfilename(
+            parent=self.root, defaultextension=".png", initialfile=(self.vars["tiling"].get()
+                                                                    if self.sheet is None else "sheet"),
+            filetypes=[("PNG", "*.png"), ("SVG", "*.svg"), ("PDF", "*.pdf")])
+        if not path:
+            return
+        if self.sheet is not None:
+            write_sheet(self.sheet, path, self.cols, 2400, self.labels)
+        else:
+            spec = self.current()
+            spec["aspect"] = self.canvas.winfo_height() / max(1, self.canvas.winfo_width())
+            write_file(spec, path, 2000)
+        self.status.config(text=T("app_saved") % path)
+
+
+def run_preview(spec=None, sheet=None, cols=3, labels=True):
+    import tkinter as tk
+    root = tk.Tk()
+    PreviewApp(root, spec, sheet, cols, labels)
+    root.mainloop()
+
+
+# ==========================================================================
+# 10. MAIN
+# ==========================================================================
+
+
 def main():
     global _LANG
     ap = argparse.ArgumentParser(description="Tilings and mosaics with colour schemes.")
-    ap.add_argument("tiling", nargs="?", help="tiling to draw (see --list); without it, the PDF catalogue")
+    ap.add_argument("tilings", nargs="*", metavar="TILING",
+                    help="tiling(s) to draw (see --list), each optionally with its own options, e.g. "
+                         "cairo:c=orientation:scheme=triad:hue=blue; several make a sheet; "
+                         "none writes the PDF catalogue")
+    ap.add_argument("--vary", choices=["scheme", "hue", "colouring"],
+                    help="sheet of one tiling in every scheme, base hue or colouring")
+    ap.add_argument("--cols", type=int, default=3, help="columns of a sheet")
+    ap.add_argument("--no-labels", action="store_true", help="no captions under the panels of a sheet")
+    ap.add_argument("--show", action="store_true",
+                    help="open a preview window (change tiling and colours there, then Save)")
     ap.add_argument("--list", action="store_true", help="list tilings, colourings, schemes and parameters")
     ap.add_argument("-c", "--colouring", help="colouring (tiling's own, or: %s)" % ", ".join(UNIVERSAL))
     ap.add_argument("--scheme", choices=SCHEMES, help="colour scheme")
@@ -1879,7 +2217,8 @@ def main():
     ap.add_argument("--girih", type=float, metavar="ANGLE", help="draw Hankin / girih lines over the tiles")
     ap.add_argument("--size", type=float, help="width of the view in tile edges")
     ap.add_argument("--aspect", type=float, default=.75, help="height / width of the image")
-    ap.add_argument("--width", type=int, default=1200, help="image width in pixels (PNG, SVG)")
+    ap.add_argument("--width", type=int, help="image width in pixels (PNG, SVG; points for PDF); "
+                                              "default 1200, or 1800 for a sheet")
     ap.add_argument("--seed", type=int, default=1, help="seed of the random colouring")
     ap.add_argument("--lang", default="en", choices=sorted(STRINGS), help="language of the catalogue")
     ap.add_argument("-o", "--out", help="output file: .png, .svg or .pdf")
@@ -1895,23 +2234,34 @@ def main():
         print("hues:", ", ".join("%d %s" % kv for kv in enumerate(HUE_KEYS)))
         print("hankin bases:", ", ".join(TILINGS_BASE))
         return
-    if not a.tiling:
+    if not a.tilings:
+        if a.show:
+            run_preview({"key": "hexagonal"})
+            return
         out = a.out or "tilings_%s.pdf" % a.lang
         build_catalogue(out)
         print("wrote", out)
         return
-    if a.tiling not in TILINGS:
-        ap.error("unknown tiling %r (see --list)" % a.tiling)
-    hue = None
-    if a.hue is not None:
-        hue = int(a.hue) if a.hue.isdigit() else HUE_KEYS.index(a.hue.lower())
-    spec = {"key": a.tiling, "colouring": a.colouring, "scheme": a.scheme, "hue": hue,
+    base = {"colouring": a.colouring, "scheme": a.scheme,
+            "hue": parse_hue(a.hue) if a.hue is not None else None,
             "size": a.size, "aspect": a.aspect, "seed": a.seed, "overlay": a.overlay, "girih": a.girih,
             "params": dict((k, parse_value(v)) for k, v in (p.split("=", 1) for p in a.param)),
-            "colours": [hexc(h.strip().lstrip("#")) for h in a.colours.split(",")] if a.colours else None}
-    out = a.out or a.tiling + ".png"
-    write_file(spec, out, a.width)
+            "colours": parse_colours(a.colours) if a.colours else None}
+    specs = [parse_item(t, base) for t in a.tilings]
+    if a.vary:
+        specs = [v for s in specs for v in variations(s, a.vary)]
+    single = len(specs) == 1
+    if a.show and not a.out:
+        run_preview(specs[0] if single else None, None if single else specs, a.cols, not a.no_labels)
+        return
+    out = a.out or (specs[0]["key"] if single else "sheet") + ".png"
+    if single:
+        write_file(specs[0], out, a.width or 1200)
+    else:
+        write_sheet(specs, out, a.cols, a.width or 1800, not a.no_labels)
     print("wrote", out)
+    if a.show:
+        run_preview(specs[0] if single else None, None if single else specs, a.cols, not a.no_labels)
 
 
 # ==========================================================================
@@ -2094,6 +2444,10 @@ STRINGS = {
         "v_i_4612": "Rosettes from 4.6.12",
         "v_i_3464": "Stars from 3.4.6.4",
         "v_i_snub": "Stars from the snub square tiling",
+        "app_title": "Tilings and mosaics", "app_tiling": "Tiling", "app_scheme": "Scheme",
+        "app_hue": "Base hue", "app_size": "Width", "app_save": "Save…", "app_saved": "Saved: %s",
+        "app_drawing": "Drawing…", "app_error": "Cannot draw this combination: %s", "app_panels": "panels",
+        "app_params": "Parameters", "app_params_hint": "name=value, separated by spaces; Enter applies",
     },
     # ------------------------------------------------------------------ PT
     "pt": {
@@ -2274,6 +2628,11 @@ STRINGS = {
         "v_i_4612": "Rosáceas a partir de 4.6.12",
         "v_i_3464": "Estrelas a partir de 3.4.6.4",
         "v_i_snub": "Estrelas a partir da quadrada achatada",
+        "app_title": "Pavimentações e mosaicos", "app_tiling": "Pavimentação", "app_scheme": "Esquema",
+        "app_hue": "Matiz de base", "app_size": "Largura", "app_save": "Guardar…", "app_saved": "Guardado: %s",
+        "app_drawing": "A desenhar…", "app_error": "Não é possível desenhar esta combinação: %s",
+        "app_panels": "painéis",
+        "app_params": "Parâmetros", "app_params_hint": "nome=valor, separados por espaços; Enter aplica",
     },
     # ------------------------------------------------------------------ ES
     "es": {
@@ -2455,6 +2814,11 @@ STRINGS = {
         "v_i_4612": "Rosetones a partir de 4.6.12",
         "v_i_3464": "Estrellas a partir de 3.4.6.4",
         "v_i_snub": "Estrellas a partir del cuadrado achatado",
+        "app_title": "Teselados y mosaicos", "app_tiling": "Teselado", "app_scheme": "Esquema",
+        "app_hue": "Matiz base", "app_size": "Ancho", "app_save": "Guardar…", "app_saved": "Guardado: %s",
+        "app_drawing": "Dibujando…", "app_error": "No se puede dibujar esta combinación: %s",
+        "app_panels": "paneles",
+        "app_params": "Parámetros", "app_params_hint": "nombre=valor, separados por espacios; Intro aplica",
     },
 }
 

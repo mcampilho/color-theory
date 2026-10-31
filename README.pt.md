@@ -180,8 +180,36 @@ python3 tilings.py girih --girih 54                # linhas girih sobre as peça
 ```
 
 O formato de saída segue a extensão do ficheiro (`.png`, `.svg` ou `.pdf`). O `--size`
-diz quantas arestas cabem na largura da imagem, o `--aspect` dá as proporções e o
-`--width` os píxeis. Tudo é calculado:
+diz quantas arestas cabem na largura da imagem (um número maior mostra um bloco maior do
+mosaico), o `--aspect` dá as proporções e o `--width` os píxeis.
+
+**Janela de pré-visualização.** O `--show` abre uma janela (Tkinter, nada para instalar)
+com caixas para a pavimentação, a coloração, o esquema, o matiz de base, a largura e os
+parâmetros. Cada mudança redesenha logo, e o botão *Guardar…* escreve PNG, SVG ou PDF.
+Com `-o` o ficheiro também é escrito.
+
+```bash
+python3 tilings.py --show                          # começa pela pavimentação hexagonal
+python3 tilings.py cairo -c orientation --scheme triad --show --lang pt
+```
+
+**Folhas com vários mosaicos.** Indicam-se várias pavimentações, cada uma seguida das suas
+opções (`:nome=valor`; cores separadas por `/`, sobreposições por `+`; qualquer outro nome
+é um parâmetro da pavimentação), ou deixa-se o `--vary` fazer as variações de uma só.
+O `--cols` dá o número de colunas e o `--no-labels` tira as legendas; com `--show` a folha
+aparece na janela.
+
+```bash
+python3 tilings.py cairo --vary scheme --cols 4 -o cairo_esquemas.png   # todos os esquemas
+python3 tilings.py penrose_p3 --vary hue -o penrose_matizes.png         # todos os matizes
+python3 tilings.py hexagonal --vary colouring                           # todas as colorações
+python3 tilings.py "hexagonal:c=7:scheme=rainbow" "penrose_p2:c=orientation:hue=blue" \
+    "herringbone:ratio=3:angle=45:colours=#b5532f/#e2b77a" "hankin:base=hexagonal:theta=60:scheme=azulejo" \
+    --cols 2 --aspect 0.6 --width 2400 -o folha.pdf
+```
+
+As opções dadas antes das pavimentações (`--scheme`, `--hue`, `-c` …) valem para todos os
+painéis, exceto quando um painel tem as suas. Tudo é calculado:
 
 - as pavimentações periódicas são um motivo de polígonos repetido numa rede;
 - os buracos entre polígonos colocados são as faces do grafo plano das suas arestas;

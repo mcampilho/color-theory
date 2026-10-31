@@ -79,6 +79,14 @@ repositório, para se poderem usar sem Python. Contém:
   - `TILINGS` regista cada pavimentação com as suas colorações próprias (`TRI_COLOURINGS`,
     `HEX_COLOURINGS`, por célula da rede) e parâmetros. As colorações universais (`UNIVERSAL`)
     usam `shape_info` (forma, quiralidade, orientação) ou a adjacência por arestas.
+  - Folhas: vários argumentos `chave:opção=valor:...` (`parse_item`; as opções fora de
+    `ITEM_KEYS` são parâmetros) ou `--vary scheme|hue|colouring` (`variations`) →
+    `write_sheet` (PNG via `render_sheet`, SVG com `svg_panel` e um `clipPath` por painel,
+    porque o Inkscape não recorta `<svg>` encaixados; PDF com `draw_ops_pdf`). O
+    `build_scene` ignora parâmetros que a pavimentação não tem, para que `-p` sirva a todos os painéis.
+  - `--show` abre `PreviewApp` (Tkinter): caixas para pavimentação, coloração, esquema,
+    matiz, largura e parâmetros; redesenha ao mudar, e *Guardar…* chama `write_file` /
+    `write_sheet`. Os textos da janela são as chaves `app_*`.
   - Os textos estão na `STRINGS` no fim do ficheiro (en, pt, es).
   - Não usar ⁴ ⁶ nos textos (a Helvetica do PDF não os tem): escrever 3.3.3.3.6.
   - Ficou de fora, por falta de geometria fiável: a P1 de Penrose e os arcos de
@@ -106,6 +114,8 @@ python3 color_wheel.py --app --theme dark             # --theme auto|light|dark 
 python3 tilings.py [--lang pt]                        # -> tilings_<lang>.pdf (catálogo, 22 páginas)
 python3 tilings.py --list                             # pavimentações, colorações, esquemas
 python3 tilings.py hexagonal -c 7 --scheme rainbow -o hex.svg
+python3 tilings.py cairo --show                       # janela de pré-visualização
+python3 tilings.py cairo --vary scheme --cols 4 -o folha.png   # folha de variações
 ```
 
 Para ver uma página como imagem:

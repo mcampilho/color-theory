@@ -175,8 +175,34 @@ python3 tilings.py girih --girih 54                # girih lines over the tiles
 ```
 
 The output format follows the file name (`.png`, `.svg` or `.pdf`); `--size` sets how
-many tile edges fit across the picture, `--aspect` its proportions and `--width` the
-pixels. Everything is computed: periodic tilings are a motif of polygons on a lattice,
+many tile edges fit across the picture (a bigger number shows a bigger block of the
+tiling), `--aspect` its proportions and `--width` the pixels.
+
+**Preview window.** `--show` opens a window (Tkinter, nothing to install) with boxes for
+the tiling, colouring, scheme, base hue, width and parameters; every change redraws at
+once, and *Save…* writes PNG, SVG or PDF. With `-o` the file is written as well.
+
+```bash
+python3 tilings.py --show                          # starts with the hexagonal tiling
+python3 tilings.py cairo -c orientation --scheme triad --show --lang pt
+```
+
+**Sheets of several tilings.** Give several tilings, each followed by its own options
+(`:name=value`; colours separated by `/`, overlays by `+`; any other name is a tiling
+parameter), or let `--vary` make the variations of one tiling. `--cols` sets the columns,
+`--no-labels` drops the captions; `--show` shows the sheet in the window.
+
+```bash
+python3 tilings.py cairo --vary scheme --cols 4 -o cairo_schemes.png    # every scheme
+python3 tilings.py penrose_p3 --vary hue -o penrose_hues.png            # every base hue
+python3 tilings.py hexagonal --vary colouring                           # every colouring
+python3 tilings.py "hexagonal:c=7:scheme=rainbow" "penrose_p2:c=orientation:hue=blue" \
+    "herringbone:ratio=3:angle=45:colours=#b5532f/#e2b77a" "hankin:base=hexagonal:theta=60:scheme=azulejo" \
+    --cols 2 --aspect 0.6 --width 2400 -o sheet.pdf
+```
+
+Options given before the tilings (`--scheme`, `--hue`, `-c` …) apply to every panel
+unless a panel sets its own. Everything is computed: periodic tilings are a motif of polygons on a lattice,
 gaps between placed polygons are found as faces of the planar graph of their edges, the
 duals join the centres of the tiles around each vertex, Penrose tilings come from
 deflating golden triangles and the hat from the metatile substitution of Smith, Myers,
