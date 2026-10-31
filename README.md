@@ -136,6 +136,52 @@ python3 color_wheel.py --webview --theme light
 
 On Windows it uses the Edge WebView2 runtime, which comes with Windows 10 and 11.
 
+## Tilings and mosaics
+
+`tilings.py` draws the tilings of the Wikipedia articles listed in `tiles.md`, each with
+several colourings and with colours from the colour schemes above. Ready-made catalogues
+(A4, 22 pages): [English](tilings_en.pdf), [Português](tilings_pt.pdf), [Español](tilings_es.pdf).
+
+![Six tilings: hat, zellij, Penrose, stars and crosses, rhombille, seven-colour hexagons](images/tilings.png)
+
+- **Regular and uniform**: triangular, square and hexagonal tilings, and the eight
+  semiregular ones (3.6.3.6, 3.12.12, 4.8.8, 4.6.12, 3.4.6.4, 3.3.3.3.6, 3.3.3.4.4, 3.3.4.3.4).
+- **Duals and variations**: rhombille, tetrakis, kisrhombille, kisdeltile, Cairo,
+  prismatic and floret pentagonal; triangles of two sizes or turned (stars), alternating
+  squares, chamfered square tiling, 2-uniform hexagon dissections.
+- **Bricks and squares**: Pythagorean tiling, herringbone (any ratio, turned or slanted), basket weave.
+- **Pentagons**: type 1 (halved hexagons), Cairo, prismatic, floret.
+- **Aperiodic**: Penrose P3 (rhombs) and P2 (kites and darts), the "hat" monotile,
+  Robinson's tiles, and the 11 Wang tiles of Jeandel and Rao.
+- **Islamic art**: girih tiles and lines, zellij stars and crosses, and star patterns
+  made from any of the tilings with Hankin's polygons-in-contact method.
+
+Colourings: each tiling's own (the uniform colourings 121212, 111222 … of the triangular
+tiling, 2/3/4/7 colours of the hexagonal one), and colourings that work on any tiling:
+`single`, `kind`, `shape`, `chirality` (mirror images), `orientation`, `proper`
+(neighbours differ), `random` and `rings`. Schemes: `mono`, `analogous`, `complementary`,
+`split`, `triad`, `tetrad`, `square`, `rainbow` from any base hue of the RYB wheel, or the
+palettes `zellij`, `azulejo`, `girih`, `earth`, `grey`, or your own colours.
+
+```bash
+python3 tilings.py                       # catalogue -> tilings_en.pdf  (--lang pt, --lang es)
+python3 tilings.py --list                # tilings, their colourings and parameters
+python3 tilings.py hexagonal -c 7 --scheme rainbow -o hex.svg
+python3 tilings.py penrose_p2 -c orientation --scheme analogous --hue blue -o p2.png
+python3 tilings.py herringbone -p ratio=3 -p angle=45 --colours "#b5532f,#e2b77a" -o floor.pdf
+python3 tilings.py hankin -p base=truncated_trihexagonal -p theta=60 --scheme zellij -o stars.png
+python3 tilings.py trihexagonal --overlay dual     # also: circles, incircles, edges
+python3 tilings.py girih --girih 54                # girih lines over the tiles
+```
+
+The output format follows the file name (`.png`, `.svg` or `.pdf`); `--size` sets how
+many tile edges fit across the picture, `--aspect` its proportions and `--width` the
+pixels. Everything is computed: periodic tilings are a motif of polygons on a lattice,
+gaps between placed polygons are found as faces of the planar graph of their edges, the
+duals join the centres of the tiles around each vertex, Penrose tilings come from
+deflating golden triangles and the hat from the metatile substitution of Smith, Myers,
+Kaplan and Goodman-Strauss.
+
 ## Other files
 
 - `Claude - The Complete Guide to Color Theory.md`: the full reference guide, from the physics

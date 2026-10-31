@@ -60,6 +60,29 @@ repositório, para se poderem usar sem Python. Contém:
   cinzentos). O `--web` escreve `<part>-dark.svg`; a página escolhe o tema no `<head>`
   (`?theme=`, `localStorage`, sistema) e o `app.js` troca os SVG. Na janela Tkinter, as cores
   estão em `UI_COLOURS` (iguais às do `style.css`); `--theme auto` usa `system_theme()`.
+- `tilings.py` — pavimentações e mosaicos dos artigos da Wikipedia listados em `tiles.md`, com
+  várias colorações e as cores dos esquemas RYB (importa `ryb_to_rgb`, `hue_ryb`, `mix` e os
+  `hue_names` do `color_theory_document.py`). Sem argumentos escreve o catálogo A4
+  `tilings_<lang>.pdf` (`CATALOGUE`: uma família por artigo, 6 painéis por página); com o
+  nome de uma pavimentação escreve uma imagem `.png`/`.svg`/`.pdf`. Estrutura:
+  - `Periodic`: motivo de polígonos numa rede (a1, a2).
+  - `with_gaps`: acrescenta os buracos entre peças, encontrados por `faces`, as faces do grafo
+    plano (corta segmentos que se cruzam ou tocam). Não separa duas peças em falta que
+    partilhem uma aresta (por isso a `snub_square` corta os losangos à mão).
+  - `dual`: centros das peças à volta de cada vértice completo.
+  - `hankin`: linhas a `theta` graus a partir do meio das arestas, emparelhadas pela soma mais
+    curta, e as faces entre elas.
+  - Não periódicas: `penrose` (deflação de triângulos de Robinson; P2 junta as metades pela
+    aresta AB, P3 pela BC; as regras do P2 foram confirmadas por uma procura em que todas as
+    metades interiores ficam emparelhadas); `hat` (metapeças de Kaplan, reescritas do hatviz); `robinson`;
+    `wang` (procura com retrocesso das 11 peças de Jeandel–Rao, lidas do SVG da Wikipedia).
+  - `TILINGS` regista cada pavimentação com as suas colorações próprias (`TRI_COLOURINGS`,
+    `HEX_COLOURINGS`, por célula da rede) e parâmetros. As colorações universais (`UNIVERSAL`)
+    usam `shape_info` (forma, quiralidade, orientação) ou a adjacência por arestas.
+  - Os textos estão na `STRINGS` no fim do ficheiro (en, pt, es).
+  - Não usar ⁴ ⁶ nos textos (a Helvetica do PDF não os tem): escrever 3.3.3.3.6.
+  - Ficou de fora, por falta de geometria fiável: a P1 de Penrose e os arcos de
+    correspondência, o pentágono do tipo 15, as estrelas 3-9 e o Cairo equilátero/colinear.
 - `color_theory_poster.py` — versão anterior, só a página 1, sem traduções (ReportLab).
 - PDFs gerados: `colour_theory_en.pdf`, `colour_theory_pt.pdf`, `colour_theory_es.pdf`
   (do `color_theory_document.py`), `colour_wheels_en.pdf`, `colour_wheels_pt.pdf`,
@@ -80,6 +103,9 @@ python3 color_wheel.py --app [--lang pt]              # rodas numa janela (Tkint
 python3 color_wheel.py --web                          # -> web/discs/ para web/index.html
 python3 color_wheel.py --webview [--lang pt]          # a página web numa janela (pywebview)
 python3 color_wheel.py --app --theme dark             # --theme auto|light|dark (--app, --webview)
+python3 tilings.py [--lang pt]                        # -> tilings_<lang>.pdf (catálogo, 22 páginas)
+python3 tilings.py --list                             # pavimentações, colorações, esquemas
+python3 tilings.py hexagonal -c 7 --scheme rainbow -o hex.svg
 ```
 
 Para ver uma página como imagem:

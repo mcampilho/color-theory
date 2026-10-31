@@ -138,6 +138,57 @@ python3 color_wheel.py --webview --theme light
 
 No Windows usa o Edge WebView2, que já vem com o Windows 10 e 11.
 
+## Pavimentações e mosaicos
+
+O `tilings.py` desenha as pavimentações dos artigos da Wikipedia listados no `tiles.md`,
+cada uma com várias colorações e com as cores dos esquemas de cores acima. Catálogos
+prontos (A4, 22 páginas): [English](tilings_en.pdf), [Português](tilings_pt.pdf),
+[Español](tilings_es.pdf).
+
+![Seis pavimentações: chapéu, zellij, Penrose, estrelas e cruzes, losangos, hexágonos em sete cores](images/tilings.png)
+
+- **Regulares e uniformes**: as pavimentações triangular, quadrada e hexagonal, e as oito
+  semirregulares (3.6.3.6, 3.12.12, 4.8.8, 4.6.12, 3.4.6.4, 3.3.3.3.6, 3.3.3.4.4, 3.3.4.3.4).
+- **Duais e variações**: losangos (rhombille), tetrakis, kisrhombille, kisdeltile, Cairo,
+  pentagonal prismática e em flor; triângulos de dois tamanhos ou rodados (estrelas),
+  quadrados alternados, pavimentação chanfrada, hexágonos cortados (2-uniformes).
+- **Tijolos e quadrados**: pavimentação pitagórica, espinha de peixe (qualquer proporção,
+  rodada ou inclinada) e cestaria.
+- **Pentágonos**: tipo 1 (hexágonos cortados ao meio), Cairo, prismática, em flor.
+- **Aperiódicas**: Penrose P3 (losangos) e P2 (papagaios e dardos), o "chapéu" (uma só
+  peça), as peças de Robinson e as 11 peças de Wang de Jeandel e Rao.
+- **Arte islâmica**: peças e linhas girih, estrelas e cruzes do zellij, e padrões de
+  estrelas feitos a partir de qualquer pavimentação com o método de Hankin dos polígonos em contacto.
+
+Colorações: as próprias de cada pavimentação (as colorações uniformes 121212, 111222 … da
+triangular, 2/3/4/7 cores da hexagonal) e colorações que servem para qualquer uma:
+`single`, `kind` (tipo de peça), `shape` (forma), `chirality` (imagem ao espelho),
+`orientation`, `proper` (vizinhas diferentes), `random` e `rings` (anéis). Esquemas:
+`mono`, `analogous`, `complementary`, `split`, `triad`, `tetrad`, `square` e `rainbow`, a
+partir de qualquer matiz da roda RYB; as paletas `zellij`, `azulejo`, `girih`, `earth` e
+`grey`; ou cores à escolha.
+
+```bash
+python3 tilings.py                       # catálogo -> tilings_en.pdf  (--lang pt, --lang es)
+python3 tilings.py --list                # pavimentações, colorações e parâmetros
+python3 tilings.py hexagonal -c 7 --scheme rainbow -o hex.svg
+python3 tilings.py penrose_p2 -c orientation --scheme analogous --hue blue -o p2.png
+python3 tilings.py herringbone -p ratio=3 -p angle=45 --colours "#b5532f,#e2b77a" -o chao.pdf
+python3 tilings.py hankin -p base=truncated_trihexagonal -p theta=60 --scheme zellij -o estrelas.png
+python3 tilings.py trihexagonal --overlay dual     # também: circles, incircles, edges
+python3 tilings.py girih --girih 54                # linhas girih sobre as peças
+```
+
+O formato de saída segue a extensão do ficheiro (`.png`, `.svg` ou `.pdf`). O `--size`
+diz quantas arestas cabem na largura da imagem, o `--aspect` dá as proporções e o
+`--width` os píxeis. Tudo é calculado:
+
+- as pavimentações periódicas são um motivo de polígonos repetido numa rede;
+- os buracos entre polígonos colocados são as faces do grafo plano das suas arestas;
+- as duais ligam os centros das peças à volta de cada vértice;
+- as de Penrose vêm da deflação de triângulos de ouro;
+- o chapéu vem da substituição de metapeças de Smith, Myers, Kaplan e Goodman-Strauss.
+
 ## Outros ficheiros
 
 - `Claude - The Complete Guide to Color Theory.md`: o guia de referência completo, da física
