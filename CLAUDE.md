@@ -91,6 +91,20 @@ repositório, para se poderem usar sem Python. Contém:
   - Não usar ⁴ ⁶ nos textos (a Helvetica do PDF não os tem): escrever 3.3.3.3.6.
   - Ficou de fora, por falta de geometria fiável: a P1 de Penrose e os arcos de
     correspondência, o pentágono do tipo 15, as estrelas 3-9 e o Cairo equilátero/colinear.
+- `patterns.py` — mosaicos decorados sobre o motor do `tilings.py`: regista as suas
+  pavimentações em `tl.TILINGS`, junta a sua `STRINGS` à do `tilings.py`, troca o
+  `tl.PROGRAM` (catálogo, chaves mostradas na lista e na janela, nome do PDF) e chama
+  `tl.main()`. Por isso tudo o que o `tilings.py` faz (folhas, `--vary`, `--show`) funciona aqui.
+  - `decorate`: facetas e faixas sobre qualquer pavimentação (`base`).
+  - `voxel_patch`: renderizador isométrico de voxels. Desenha por ordem de x+y+z e salta as
+    faces tapadas. As arestas são tiras finas desenhadas logo a seguir à sua face, só onde o
+    objeto dobra ou acaba, e o objeto de um voxel é dado por (i, j).
+  - Outros padrões: `tripods` (cantos na rede (2,-1,-1), (-1,2,-1), a única que encontrei a
+    encaixar), `framework`, `quilt` (tabelas `QUILT_LAYOUTS`), `jigsaw`, `weave`, `beadwork`.
+  - Para isto o `tilings.py` ganhou:
+    - `Tile.shade` (luz aplicada depois da cor), `Tile.colour` (cor fixa, para juntas) e `Tile.stroke`;
+    - linhas com papel `line:<largura>[:<hex>]`, e `background` e `lw` por pavimentação;
+    - os esquemas `ramp` e `sweep` e a coloração `gradient`.
 - `color_theory_poster.py` — versão anterior, só a página 1, sem traduções (ReportLab).
 - PDFs gerados: `colour_theory_en.pdf`, `colour_theory_pt.pdf`, `colour_theory_es.pdf`
   (do `color_theory_document.py`), `colour_wheels_en.pdf`, `colour_wheels_pt.pdf`,
@@ -116,6 +130,8 @@ python3 tilings.py --list                             # pavimentações, colora�
 python3 tilings.py hexagonal -c 7 --scheme rainbow -o hex.svg
 python3 tilings.py cairo --show                       # janela de pré-visualização
 python3 tilings.py cairo --vary scheme --cols 4 -o folha.png   # folha de variações
+python3 patterns.py [--lang pt]                       # -> patterns_<lang>.pdf (mosaicos decorados)
+python3 patterns.py tripods --show                    # qualquer opção do tilings.py serve
 ```
 
 Para ver uma página como imagem:

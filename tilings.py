@@ -322,13 +322,15 @@ def shape_info(pts):
 # 3. TILES, PATCHES AND PERIODIC TILINGS
 # ==========================================================================
 class Tile:
-    __slots__ = ("pts", "kind", "cell", "colour")
+    __slots__ = ("pts", "kind", "cell", "colour", "shade", "stroke")
 
-    def __init__(self, pts, kind="", cell=None, colour=None):
+    def __init__(self, pts, kind="", cell=None, colour=None, shade=0.0, stroke=True):
         self.pts = pts
         self.kind = kind        # prototile name, used by the "kind" colouring
         self.cell = cell        # (i, j, k) lattice cell and motif index, or other data
-        self.colour = colour    # fixed colour (Wang tiles), or None
+        self.colour = colour    # fixed colour (gaps, backgrounds), or None
+        self.shade = shade      # -1 .. 1: towards black / white after colouring (3D light)
+        self.stroke = stroke    # False: no outline (pieces of a larger shape)
 
 
 class Patch:
@@ -1098,7 +1100,9 @@ def hexagonal_dissected(box, which="third"):
 # ==========================================================================
 class Tiling:
     def __init__(self, key, make, colourings=None, default="kind", size=8.0, params=None,
-                 scheme="triad", hue=4, stroke=True):
+                 scheme="triad", hue=4, stroke=True, background=None, lw=1.0):
+        self.background = background        # colour behind the tiles (seen through gaps), or white
+        self.lw = lw                        # outline width, as a multiple of the default
         self.key = key
         self.make = make                    # make(box, **params) -> Patch
         self.colourings = colourings or {}  # tiling-specific colourings: name -> tile -> key
@@ -1240,7 +1244,7 @@ register("wang", lambda box, seed=3: wang(box, seed=int(seed)), params={"seed": 
 # ==========================================================================
 # 6. COLOURINGS AND PALETTES
 # ==========================================================================
-UNIVERSAL = ["single", "kind", "shape", "chirality", "orientation", "proper", "random", "rings"]
+UNIVERSAL = ["single", "kind", "shape", "chirality", "orientation", "proper", "random", "rings", "gradient"]
 HUE_KEYS = ["yellow", "yellow-orange", "orange", "red-orange", "red", "red-violet", "violet",
             "blue-violet", "blue", "blue-green", "green", "yellow-green"]
 SCHEME_OFFSETS = {"analogous": [0, 1, -1, 2, -2, 3, -3], "complementary": [0, 6],
@@ -1261,8 +1265,8 @@ NAMED_PALETTES = {
     "earth": [hexc(h) for h in ("B5532F", "E2B77A", "6B4226", "F2E6CF", "8A8F4D", "3C2A21")],
     "grey": [(.92, .92, .92), (.62, .62, .62), (.32, .32, .32), (.78, .78, .78), (.47, .47, .47)],
 }
-SCHEMES = ["mono", "analogous", "complementary", "split", "triad", "tetrad", "square", "rainbow"] + \
-    list(NAMED_PALETTES)
+SCHEMES = ["mono", "analogous", "complementary", "split", "triad", "tetrad", "square", "rainbow",
+           "ramp", "sweep"] + list(NAMED_PALETTES)
 
 
 def ryb_hue(h):
@@ -1278,6 +1282,12 @@ def palette(scheme, hue, n, custom=None):
                 mix(c, WHITE, .3)]
     elif scheme == "rainbow":
         base = [ryb_hue(hue + 12.0 * k / max(n, 1)) for k in range(max(n, 1))]
+    elif scheme == "ramp":               # one hue from a deep shade to a pale tint, in n steps
+        c = ryb_hue(hue)
+        base = [mix(c, BLACK, .6 * (1 - 2 * f)) if f < .5 else mix(c, WHITE, .75 * (2 * f - 1))
+                for f in (k / max(n - 1, 1) for k in range(max(n, 1)))]
+    elif scheme == "sweep":              # half the wheel, from the base hue onwards, in n steps
+        base = [ryb_hue(hue + 6.0 * k / max(n - 1, 1)) for k in range(max(n, 1))]
     elif scheme in NAMED_PALETTES:
         base = NAMED_PALETTES[scheme]
     else:
@@ -1331,6 +1341,8 @@ def colour_keys(tiling, tiles, colouring, centre, size, seed=1):
         keys = [rng.randrange(6) for _ in tiles]
     elif colouring == "rings":
         keys = [int(dist(centroid(t.pts), centre) / (size / 14)) for t in tiles]
+    elif colouring == "gradient":        # diagonal bands across the picture
+        keys = [int(math.floor((c[0] - c[1] * .6) / (size / 12))) for c in (centroid(t.pts) for t in tiles)]
     else:
         raise SystemExit("unknown colouring %r for %s" % (colouring, tiling.key))
     if colouring in ("shape", "chirality", "orientation"):
@@ -1358,7 +1370,8 @@ def _kind_rank(tiling, kind):
 def spec_defaults(spec):
     t = TILINGS[spec["key"]]
     out = {"colouring": t.default, "scheme": t.scheme, "hue": t.hue, "colours": None,
-           "size": t.size, "params": {}, "overlay": [], "aspect": .75, "seed": 1, "girih": None}
+           "size": t.size, "params": {}, "overlay": [], "aspect": .75, "seed": 1, "girih": None,
+           "stroke": None, "lw": t.lw, "background": t.background}
     out.update({k: v for k, v in spec.items() if v is not None})
     return out
 
@@ -1376,8 +1389,12 @@ def build_scene(spec):
             params[k] = v
     patch = tiling.make(box, **params)
     tiles = patch.tiles
-    lw = w * .0032
+    lw = w * .0032 * float(s["lw"])
     ops = []
+    if s["background"]:
+        bg = s["background"] if isinstance(s["background"], tuple) else hexc(s["background"].lstrip("#"))
+        ops.append(("poly", [(box[0] - 1, box[1] - 1), (box[2] + 1, box[1] - 1), (box[2] + 1, box[3] + 1),
+                             (box[0] - 1, box[3] + 1)], bg, None, 0))
     if s["colouring"] == "classic" or s["key"] == "wang":
         cols_wang = {k: (WANG_COLOURS[k] if s["colouring"] == "classic" else c)
                      for k, c in zip("WRGB", palette(s["scheme"], s["hue"], 4, s["colours"]))}
@@ -1388,9 +1405,15 @@ def build_scene(spec):
     index = {k: n for n, k in enumerate(order)}
     edges_mode = "edges" in s["overlay"]
     stroke = STROKE if tiling.stroke else None
+    if s["stroke"]:                       # "none" or a colour such as "#000000"
+        stroke = None if s["stroke"] == "none" else hexc(s["stroke"].lstrip("#"))
     for t, k in zip(tiles, keys):
         fill = WHITE if edges_mode and s["colouring"] == "single" else pal[index[k]]
-        ops.append(("poly", t.pts, fill, None if edges_mode else stroke, lw))
+        if t.colour is not None:
+            fill = t.colour
+        elif t.shade:
+            fill = mix(fill, WHITE, t.shade) if t.shade > 0 else mix(fill, BLACK, -t.shade)
+        ops.append(("poly", t.pts, fill, None if edges_mode or not t.stroke else stroke, lw))
     for _, pts, letter in patch.extras:        # Wang tiles: one triangle per edge colour
         ops.append(("poly", pts, cols_wang[letter], STROKE, lw * .6))
     if s["key"] == "wang":
@@ -1411,6 +1434,10 @@ def build_scene(spec):
         if role.startswith("mark"):
             col, width = ((.10, .10, .10), lw * 3.2) if role == "mark_a" else ((.86, .36, .12), lw * 1.3)
             ops.append(("line", pts, col, width, closed))
+        elif role.startswith("line:"):    # "line:<width in outlines>[:<hex colour>]", colour default = outline
+            part = role.split(":")
+            col = hexc(part[2]) if len(part) > 2 else (stroke or STROKE)
+            ops.append(("line", pts, col, lw * float(part[1]), closed))
     if edges_mode:
         dirs = sorted({int(round(math.degrees(math.atan2(q[1] - p[1], q[0] - p[0])) % 180)) % 180
                        for t in tiles for p, q in zip(t.pts, t.pts[1:] + t.pts[:1])})
@@ -1716,6 +1743,14 @@ CATALOGUE = [
 ]
 
 
+# What this program shows: patterns.py swaps in its own catalogue and tilings
+PROGRAM = {"catalogue": CATALOGUE, "keys": None, "out": "tilings", "start": "hexagonal"}
+
+
+def program_keys():
+    return PROGRAM["keys"] or list(TILINGS)
+
+
 def write_file(spec, path, width=1200):
     ops, box = build_scene(spec)
     ext = path.lower().rsplit(".", 1)[-1]
@@ -1735,7 +1770,7 @@ def write_file(spec, path, width=1200):
 
 def scheme_name(s):
     name = T("s_" + s["scheme"])
-    if s["scheme"] in SCHEME_OFFSETS or s["scheme"] in ("mono", "rainbow"):
+    if s["scheme"] in SCHEME_OFFSETS or s["scheme"] in ("mono", "rainbow", "ramp", "sweep"):
         name += " (%s)" % CTD_STRINGS.get(_LANG, CTD_STRINGS["en"])["hue_names"][s["hue"] % 12].lower()
     return name
 
@@ -1781,7 +1816,7 @@ def build_catalogue(path):
     # pages of each family, counted first for the contents
     per_page = 6
     starts, n = {}, 2
-    for fam, _, vs in CATALOGUE:
+    for fam, _, vs in PROGRAM["catalogue"]:
         starts[fam] = n
         n += (len(vs) + per_page - 1) // per_page
 
@@ -1817,12 +1852,13 @@ def build_catalogue(path):
     c.setFillColorRGB(.12, .12, .12)
     c.drawString(M, y, T("contents"))
     y -= 18
-    for fam, art, vs in CATALOGUE:
+    for fam, art, vs in PROGRAM["catalogue"]:
         c.setFont("Helvetica", 9.5)
         c.setFillColorRGB(.2, .2, .2)
         c.drawString(M + 8, y, T("f_" + fam))
         c.setFillColorRGB(.55, .55, .55)
-        c.drawString(M + 230, y, "Wikipedia: " + art)
+        if art:
+            c.drawString(M + 230, y, "Wikipedia: " + art)
         c.setFillColorRGB(.2, .2, .2)
         c.drawRightString(W - M, y, str(starts[fam]))
         y -= 13.5
@@ -1831,7 +1867,7 @@ def build_catalogue(path):
     # ---- family pages: header, then a 2 x 3 grid of panels
     pw, gap = (W - 2 * M - 18) / 2, 18
     ph = 168
-    for fam, art, vs in CATALOGUE:
+    for fam, art, vs in PROGRAM["catalogue"]:
         for first in range(0, len(vs), per_page):
             c.setFillColorRGB(.12, .12, .12)
             c.setFont("Helvetica-Bold", 20)
@@ -1839,7 +1875,8 @@ def build_catalogue(path):
             c.drawString(M, H - 66, title)
             c.setFont("Helvetica", 8.5)
             c.setFillColorRGB(.5, .5, .5)
-            c.drawString(M, H - 82, "Wikipedia: " + art + "  —  en.wikipedia.org/wiki/" + art.replace(" ", "_"))
+            if art:
+                c.drawString(M, H - 82, "Wikipedia: " + art + "  —  en.wikipedia.org/wiki/" + art.replace(" ", "_"))
             paragraph(c, T("f_%s_d" % fam), M, H - 102, W - 2 * M)
             top = H - 160
             for n_, v in enumerate(vs[first:first + per_page]):
@@ -2059,7 +2096,7 @@ class PreviewApp:
             s = spec_defaults(self.spec)
             hue_names = [n.lower() for n in CTD_STRINGS.get(_LANG, CTD_STRINGS["en"])["hue_names"]]
             self.hue_names = hue_names
-            self._combo(bar, "tiling", T("app_tiling"), list(TILINGS), s["key"], 24)
+            self._combo(bar, "tiling", T("app_tiling"), program_keys(), s["key"], 24)
             self._combo(bar, "colouring", T("colouring"), colourings_of(s["key"]), s["colouring"], 13)
             self._combo(bar, "scheme", T("app_scheme"), SCHEMES, s["scheme"], 13)
             self._combo(bar, "hue", T("app_hue"), hue_names, hue_names[s["hue"] % 12], 15)
@@ -2225,7 +2262,8 @@ def main():
     a = ap.parse_args()
     _LANG = a.lang
     if a.list:
-        for key, t in TILINGS.items():
+        for key in program_keys():
+            t = TILINGS[key]
             own = ", ".join(t.colourings) or "-"
             pars = ", ".join("%s=%s" % kv for kv in t.params.items()) or "-"
             print("%-28s colourings: %s | params: %s" % (key, own, pars))
@@ -2236,9 +2274,9 @@ def main():
         return
     if not a.tilings:
         if a.show:
-            run_preview({"key": "hexagonal"})
+            run_preview({"key": PROGRAM["start"]})
             return
-        out = a.out or "tilings_%s.pdf" % a.lang
+        out = a.out or "%s_%s.pdf" % (PROGRAM["out"], a.lang)
         build_catalogue(out)
         print("wrote", out)
         return
@@ -2293,7 +2331,8 @@ STRINGS = {
         "s_split": "split complementary", "s_triad": "triad", "s_tetrad": "tetrad (rectangle)",
         "s_square": "square", "s_rainbow": "rainbow", "s_zellij": "zellij palette",
         "s_azulejo": "azulejo palette", "s_girih": "girih palette", "s_earth": "earth tones",
-        "s_grey": "greys",
+        "s_grey": "greys", "s_ramp": "ramp, dark to light", "s_sweep": "sweep of hues",
+        "c_gradient": "gradient across",
         "f_triangular": "Triangular tiling",
         "f_triangular_d": "Six equilateral triangles meet at every vertex. Its uniform colourings are named "
                           "by the colours around a vertex: 121212 alternates two colours, 121314 needs four. "
@@ -2475,7 +2514,8 @@ STRINGS = {
         "s_split": "complementar dividido", "s_triad": "tríade", "s_tetrad": "tétrade (retângulo)",
         "s_square": "quadrado", "s_rainbow": "arco-íris", "s_zellij": "paleta zellij",
         "s_azulejo": "paleta de azulejo", "s_girih": "paleta girih", "s_earth": "tons de terra",
-        "s_grey": "cinzentos",
+        "s_grey": "cinzentos", "s_ramp": "degradê, do escuro ao claro", "s_sweep": "passagem de matizes",
+        "c_gradient": "degradê na diagonal",
         "f_triangular": "Pavimentação triangular",
         "f_triangular_d": "Seis triângulos equiláteros encontram-se em cada vértice. As colorações uniformes "
                           "têm o nome das cores à volta de um vértice: 121212 alterna duas cores, 121314 "
@@ -2660,7 +2700,8 @@ STRINGS = {
         "s_split": "complementario dividido", "s_triad": "tríada", "s_tetrad": "tétrada (rectángulo)",
         "s_square": "cuadrado", "s_rainbow": "arcoíris", "s_zellij": "paleta zellige",
         "s_azulejo": "paleta de azulejo", "s_girih": "paleta girih", "s_earth": "tonos tierra",
-        "s_grey": "grises",
+        "s_grey": "grises", "s_ramp": "degradado, de oscuro a claro", "s_sweep": "recorrido de matices",
+        "c_gradient": "degradado en diagonal",
         "f_triangular": "Teselado triangular",
         "f_triangular_d": "Seis triángulos equiláteros se encuentran en cada vértice. Los coloreados uniformes "
                           "se nombran por los colores alrededor de un vértice: 121212 alterna dos colores, "

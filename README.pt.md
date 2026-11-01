@@ -217,6 +217,42 @@ painéis, exceto quando um painel tem as suas. Tudo é calculado:
 - as de Penrose vêm da deflação de triângulos de ouro;
 - o chapéu vem da substituição de metapeças de Smith, Myers, Kaplan e Goodman-Strauss.
 
+## Mosaicos decorados
+
+O `patterns.py` faz mosaicos cuja forma de base é mais elaborada, sobre o motor do
+`tilings.py`: as mesmas paletas, colorações, saídas, folhas, `--vary` e `--show`. Catálogos
+prontos: [English](patterns_en.pdf), [Português](patterns_pt.pdf), [Español](patterns_es.pdf).
+
+![Seis mosaicos decorados: estrelas em relevo, degraus do tribunal, cabana de troncos, cubos de Rubik, tripés, tecelagem](images/patterns.png)
+
+| Padrão | O que faz | Parâmetros principais |
+|--------|-----------|-----------------------|
+| `facets` | corta cada peça de qualquer pavimentação em triângulos a partir do centro e ilumina-os de um lado: pirâmides, estrelas em relevo, blocos em ampulheta | `base`, `light`, `sun` |
+| `bands` | faixas concêntricas em cada peça, para o centro (degraus do tribunal) ou para um canto (cabana de troncos) | `base`, `bands`, `anchor`, `facets`, `gap`, `gap_colour`, `turn` |
+| `cubes`, `rubik` | cubos isométricos em três tons; cubos de Rubik cortados em quadradinhos | `grid`, `gap`, `top`, `side` |
+| `tripods` | tripés em Y encaixados (cantos de estruturas de cubos) | `arm` (1 ou 2) |
+| `framework` | estrutura isométrica de barras | `spacing`, `depth` |
+| `quilt` | triângulos de meio quadrado (pinwheel, diamonds, chevron, streak, broken_dishes, zigzag, pinwheel_big, storm) ou blocos em ampulheta | `layout`, `groups`, `hourglass` |
+| `jigsaw` | puzzle com encaixes ao acaso | `seed` |
+| `weave` | tafetá ou sarja; as tiras escurecem onde passam por baixo | `width`, `turn`, `twill` |
+| `beadwork` | padrões de píxeis com a simetria do quadrado, como missangas | `n`, `seed`, `colours_used` |
+
+Para as faixas e os degradês juntaram-se dois esquemas, também disponíveis no `tilings.py`:
+`ramp` (um matiz do escuro ao claro) e `sweep` (meia roda a partir do matiz de base). Há
+também a coloração `gradient` (faixas de cor na diagonal da imagem).
+
+```bash
+python3 patterns.py                      # catálogo -> patterns_en.pdf  (--lang pt, --lang es)
+python3 patterns.py --list               # padrões, colorações, parâmetros e layouts de patchwork
+python3 patterns.py --show               # janela de pré-visualização
+python3 patterns.py facets -p base=triangular -c tile --scheme complementary --hue blue -o estrelas.png
+python3 patterns.py bands -p bands=7 -p anchor=alternate -p gap=2.5 -p gap_colour=2ED3C6 --scheme rainbow -o cabana.png
+python3 patterns.py bands -p base=hexagonal -p bands=5 --scheme ramp --hue blue -o aneis.svg
+python3 patterns.py rubik -c rings --scheme rainbow --size 7 -o rubik.pdf
+python3 patterns.py tripods --vary scheme --cols 4 -o tripes.png
+python3 patterns.py quilt -p layout=storm --scheme triad --hue blue-violet -o tempestade.png
+```
+
 ## Outros ficheiros
 
 - `Claude - The Complete Guide to Color Theory.md`: o guia de referência completo, da física

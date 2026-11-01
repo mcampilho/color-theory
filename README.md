@@ -208,6 +208,43 @@ duals join the centres of the tiles around each vertex, Penrose tilings come fro
 deflating golden triangles and the hat from the metatile substitution of Smith, Myers,
 Kaplan and Goodman-Strauss.
 
+## Decorated mosaics
+
+`patterns.py` makes mosaics whose basic shape is more elaborate, on the engine of
+`tilings.py` (same palettes, colourings, outputs, sheets, `--vary` and `--show`).
+Ready-made catalogues: [English](patterns_en.pdf), [Português](patterns_pt.pdf),
+[Español](patterns_es.pdf).
+
+![Six decorated mosaics: 3D stars, courthouse steps, log cabin, Rubik cubes, tripods, weave](images/patterns.png)
+
+| Pattern | What it does | Main parameters |
+|---------|--------------|-----------------|
+| `facets` | cuts every tile of any tiling into triangles from its centre and lights them from one side: pyramids, 3D stars, hourglass blocks | `base`, `light`, `sun` |
+| `bands` | concentric bands towards the centre (courthouse steps) or a corner (log cabin) of every tile | `base`, `bands`, `anchor`, `facets`, `gap`, `gap_colour`, `turn` |
+| `cubes`, `rubik` | isometric cubes in three shades; Rubik cubes cut into stickers | `grid`, `gap`, `top`, `side` |
+| `tripods` | interlocking Y tripods (corners of cube frames) | `arm` (1 or 2) |
+| `framework` | isometric framework of bars | `spacing`, `depth` |
+| `quilt` | half-square triangles: pinwheel, diamonds, chevron, streak, broken_dishes, zigzag, pinwheel_big, storm; or hourglass blocks | `layout`, `groups`, `hourglass` |
+| `jigsaw` | jigsaw puzzle with random tabs | `seed` |
+| `weave` | plain weave or twill, strips darken where they go under | `width`, `turn`, `twill` |
+| `beadwork` | kaleidoscopic pixel patterns with the symmetry of the square | `n`, `seed`, `colours_used` |
+
+Two schemes were added for bands and gradients (also in `tilings.py`): `ramp` (one hue
+from dark to light) and `sweep` (half the wheel from the base hue), and the colouring
+`gradient` (bands of colour across the picture).
+
+```bash
+python3 patterns.py                      # catalogue -> patterns_en.pdf  (--lang pt, --lang es)
+python3 patterns.py --list               # patterns, colourings, parameters, quilt layouts
+python3 patterns.py --show               # preview window
+python3 patterns.py facets -p base=triangular -c tile --scheme complementary --hue blue -o stars.png
+python3 patterns.py bands -p bands=7 -p anchor=alternate -p gap=2.5 -p gap_colour=2ED3C6 --scheme rainbow -o cabin.png
+python3 patterns.py bands -p base=hexagonal -p bands=5 --scheme ramp --hue blue -o rings.svg
+python3 patterns.py rubik -c rings --scheme rainbow --size 7 -o rubik.pdf
+python3 patterns.py tripods --vary scheme --cols 4 -o tripods.png
+python3 patterns.py quilt -p layout=storm --scheme triad --hue blue-violet -o storm.png
+```
+
 ## Other files
 
 - `Claude - The Complete Guide to Color Theory.md`: the full reference guide, from the physics
