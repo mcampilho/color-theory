@@ -325,7 +325,10 @@ python3 wallpapers.py --input onda_azul.avif --show --lang pt      # experimenta
 ```
 
 Na janela, o botão "Abrir imagem..." escolhe a imagem, e o matiz "(manter)" deixa as cores
-originais. Sem `-o`, o nome do ficheiro diz o matiz e o tamanho, por exemplo
+originais. Com `--show` nada é gravado sem o botão "Guardar em tamanho real...": o `-o`
+dá apenas o nome e a pasta propostos nesse diálogo. Os ficheiros sem caminho completo ficam
+na pasta onde o comando foi executado, e o programa escreve sempre o caminho completo do que
+gravou. Sem `-o`, o nome do ficheiro diz o matiz e o tamanho, por exemplo
 `onda_azul_orange_1980x1080.png`.
 
 ## Outros ficheiros

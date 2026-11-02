@@ -316,7 +316,9 @@ python3 wallpapers.py --input blue_wave.avif --show          # try it in the pre
 ```
 
 In the window, "Open picture..." chooses the picture and the hue "(keep)" leaves the original
-colours. Without `-o`, the file name tells the hue and the size, e.g.
+colours. With `--show` nothing is written until you press "Save full size...": `-o` only gives
+the name and folder offered there. Files without a full path go to the folder the command
+runs in, and the program always prints the full path of what it wrote. Without `-o`, the file name tells the hue and the size, e.g.
 `blue_wave_orange_1980x1080.png`.
 
 ## Other files

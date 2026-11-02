@@ -769,14 +769,17 @@ def run_preview(spec):
 
     def save_full():
         sp = state["spec"] or current()
-        name = default_name(spec_defaults(sp))
-        path = filedialog.asksaveasfilename(initialfile=name, defaultextension=".png",
+        out = spec.get("output")                  # -o on the command line: the name offered here
+        name = os.path.basename(out) if out else default_name(spec_defaults(sp))
+        folder = os.path.dirname(os.path.abspath(out)) if out else os.getcwd()
+        path = filedialog.asksaveasfilename(initialdir=folder, initialfile=name, defaultextension=".png",
                                             filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg"), ("WebP", "*.webp")])
         if path:
             status.config(text=T("app_saving"))
             root.update()
             save(render(sp), path)
-            status.config(text=T("app_saved") % path)
+            status.config(text=T("app_saved") % os.path.abspath(path))
+            print("wrote", os.path.abspath(path))
 
     def combo(label, var, values, width):
         ttk.Label(bar, text=T(label)).pack(side="left", padx=(6, 2))
@@ -953,7 +956,7 @@ def main():
     styles = a.styles or (["image"] if a.input else STYLE_KEYS if a.gallery else ["ribbons"])
 
     if a.show:
-        run_preview(dict(base, style=styles[0], seed=a.seed))
+        run_preview(dict(base, style=styles[0], seed=a.seed, output=a.output))
         return
     if a.gallery:
         specs = [dict(base, style=st, seed=a.seed + n) for st in styles for n in range(a.count)]
@@ -962,7 +965,7 @@ def main():
                      for sp in specs]
         path = a.output or "wallpapers_gallery.png"
         gallery(specs, path, cols=min(a.cols, len(specs)))
-        print("wrote", path)
+        print("wrote", os.path.abspath(path))
         return
     for st in styles:
         for n in range(a.count):
@@ -976,7 +979,7 @@ def main():
             else:
                 path = default_name(s)
             save(render(sp), path)
-            print("wrote", path)
+            print("wrote", os.path.abspath(path))
 
 
 if __name__ == "__main__":
