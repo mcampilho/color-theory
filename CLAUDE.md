@@ -101,6 +101,14 @@ repositório, para se poderem usar sem Python. Contém:
     objeto dobra ou acaba, e o objeto de um voxel é dado por (i, j).
   - Outros padrões: `tripods` (cantos na rede (2,-1,-1), (-1,2,-1), a única que encontrei a
     encaixar), `framework`, `quilt` (tabelas `QUILT_LAYOUTS`), `jigsaw`, `weave`, `beadwork`.
+  - Labirintos e espirais: uma grelha periódica de paredes (`wall_patch`), com corredores nas
+    linhas/colunas ímpares (alargados por `wide`) e paredes nas pares, desenhada plana ou com
+    voxels. `maze` é um labirinto perfeito num toro (DFS com semente); `spiral` usa a espiral
+    quadrada (`link` = grega, `pinwheel` = quatro à volta de um canto). Os passos do chão vêm de
+    uma BFS no toro do período (`_distances`), que dá também o caminho mais longo.
+  - `whirl`: polígonos em remoinho sobre qualquer `base`; as colorações `arm`/`twist` seguem os
+    dois sentidos dos braços de espiral.
+  - Peças sem contorno levam no PDF e no SVG um traço fino da própria cor, para tapar as costuras.
   - Para isto o `tilings.py` ganhou:
     - `Tile.shade` (luz aplicada depois da cor), `Tile.colour` (cor fixa, para juntas) e `Tile.stroke`;
     - linhas com papel `line:<largura>[:<hex>]`, e `background` e `lw` por pavimentação;

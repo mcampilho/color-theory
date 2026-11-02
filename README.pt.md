@@ -236,6 +236,9 @@ prontos: [English](patterns_en.pdf), [Português](patterns_pt.pdf), [Español](p
 | `jigsaw` | puzzle com encaixes ao acaso | `seed` |
 | `weave` | tafetá ou sarja; as tiras escurecem onde passam por baixo | `width`, `turn`, `twill` |
 | `beadwork` | padrões de píxeis com a simetria do quadrado, como missangas | `n`, `seed`, `colours_used` |
+| `maze` | labirinto perfeito ao acaso num toro (repete-se sem costuras), com paredes isométricas ou plano; colorações `walls`, `path` (caminho mais longo), `flow` (degradê ao longo dos corredores), `face` | `n`, `seed`, `loops`, `flat`, `wide`, `height`, `steps` |
+| `spiral` | espirais quadradas de parede; `link=1` liga-as numa grega, `pinwheel=1` roda quatro à volta de um canto | `n`, `link`, `pinwheel`, `flat`, `wide`, `height` |
+| `whirl` | polígonos em remoinho sobre qualquer pavimentação: os cantos deslizam pelas arestas passo a passo e os triângulos cortados formam braços de espiral | `base`, `steps`, `t`, `mirror` |
 
 Para as faixas e os degradês juntaram-se dois esquemas, também disponíveis no `tilings.py`:
 `ramp` (um matiz do escuro ao claro) e `sweep` (meia roda a partir do matiz de base). Há
@@ -251,6 +254,10 @@ python3 patterns.py bands -p base=hexagonal -p bands=5 --scheme ramp --hue blue 
 python3 patterns.py rubik -c rings --scheme rainbow --size 7 -o rubik.pdf
 python3 patterns.py tripods --vary scheme --cols 4 -o tripes.png
 python3 patterns.py quilt -p layout=storm --scheme triad --hue blue-violet -o tempestade.png
+python3 patterns.py maze -p seed=7 -c flow --scheme rainbow -o labirinto.png
+python3 patterns.py maze -p flat=1 -p wide=1 -p n=12 -c path --scheme complementary -o labirinto_plano.svg
+python3 patterns.py spiral -p link=1 -p flat=1 -p wide=1 -c walls --size 20 --scheme mono --hue blue -o grega.png
+python3 patterns.py whirl -p base=hexagonal -p mirror=0 -c twist --scheme rainbow -o remoinho.pdf
 ```
 
 ## Outros ficheiros

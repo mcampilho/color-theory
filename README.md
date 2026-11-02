@@ -228,6 +228,9 @@ Ready-made catalogues: [English](patterns_en.pdf), [Português](patterns_pt.pdf)
 | `jigsaw` | jigsaw puzzle with random tabs | `seed` |
 | `weave` | plain weave or twill, strips darken where they go under | `width`, `turn`, `twill` |
 | `beadwork` | kaleidoscopic pixel patterns with the symmetry of the square | `n`, `seed`, `colours_used` |
+| `maze` | random perfect maze on a torus (repeats without seams), isometric walls or flat; colourings `walls`, `path` (longest way), `flow` (ramp along the corridors), `face` | `n`, `seed`, `loops`, `flat`, `wide`, `height`, `steps` |
+| `spiral` | square spirals of wall; `link=1` joins them into a Greek key, `pinwheel=1` turns four round a corner | `n`, `link`, `pinwheel`, `flat`, `wide`, `height` |
+| `whirl` | whirling polygons on any tiling: corners slide along the edges step by step, the cut-off triangles make spiral arms | `base`, `steps`, `t`, `mirror` |
 
 Two schemes were added for bands and gradients (also in `tilings.py`): `ramp` (one hue
 from dark to light) and `sweep` (half the wheel from the base hue), and the colouring
@@ -243,6 +246,10 @@ python3 patterns.py bands -p base=hexagonal -p bands=5 --scheme ramp --hue blue 
 python3 patterns.py rubik -c rings --scheme rainbow --size 7 -o rubik.pdf
 python3 patterns.py tripods --vary scheme --cols 4 -o tripods.png
 python3 patterns.py quilt -p layout=storm --scheme triad --hue blue-violet -o storm.png
+python3 patterns.py maze -p seed=7 -c flow --scheme rainbow -o maze.png
+python3 patterns.py maze -p flat=1 -p wide=1 -p n=12 -c path --scheme complementary -o maze_flat.svg
+python3 patterns.py spiral -p link=1 -p flat=1 -p wide=1 -c walls --size 20 --scheme mono --hue blue -o greek_key.png
+python3 patterns.py whirl -p base=hexagonal -p mirror=0 -c twist --scheme rainbow -o whirl.pdf
 ```
 
 ## Other files

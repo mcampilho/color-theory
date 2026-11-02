@@ -12,7 +12,9 @@ colourings, PNG / SVG / PDF output, sheets, preview window and catalogue):
   - isometric voxels: cubes, Rubik cubes, Y tripods and bar frameworks drawn with
     three shades, one per face direction;
   - quilt layouts of half-square triangles (pinwheels, diamonds, chevrons ...);
-  - jigsaw puzzles, woven strips and kaleidoscopic beadwork in pixels.
+  - jigsaw puzzles, woven strips and kaleidoscopic beadwork in pixels;
+  - mazes (random, seamless), square spirals and Greek keys, flat or isometric,
+    and whirling polygons whose cut-off triangles make spiral arms.
 
     pip install reportlab pillow
     python3 patterns.py                         # catalogue -> patterns_en.pdf
@@ -22,6 +24,8 @@ colourings, PNG / SVG / PDF output, sheets, preview window and catalogue):
     python3 patterns.py facets -p base=triangular --scheme triad -o stars.png
     python3 patterns.py bands -p bands=7 -p anchor=alternate --scheme sweep -o cabin.svg
     python3 patterns.py rubik -c rings --scheme rainbow -o rubik.pdf
+    python3 patterns.py maze -p seed=7 -c flow --scheme rainbow -o maze.png
+    python3 patterns.py spiral -p link=1 -p flat=1 -o greek_key.svg
 
 Every option of tilings.py works here too (--scheme, --hue, --colours, -c, -p,
 --vary, sheets of several patterns, --show ...).
@@ -409,7 +413,224 @@ def beadwork(box, n=21, seed=3, colours_used=6):
 
 
 # ==========================================================================
-# 5. REGISTRY
+# 5. MAZES, MEANDERS AND SPIRALS
+# ==========================================================================
+# A wall grid is a periodic table of cells, True for a wall, drawn flat (one square
+# per cell) or in isometric view (walls of cubes standing on a floor of cubes).
+# Floor cells carry a step 0 .. steps-1, their distance along the corridors from a
+# source cell, so that a ramp of colours flows through the maze or the spiral.
+DIRS = ((1, 0), (0, 1), (-1, 0), (0, -1))
+
+
+def _torus_maze(n, seed, loops):
+    """A perfect maze of n x n rooms on a torus (depth-first, seeded), in a grid of
+    2n x 2n cells: rooms at odd coordinates, walls and pillars at even ones. The grid
+    repeats without seams. loops > 0 knocks down that fraction of the remaining walls."""
+    rng = random.Random(int(seed))
+    P = 2 * n
+    wall = [[True] * P for _ in range(P)]
+    seen = {(0, 0)}
+    stack = [(0, 0)]
+    wall[1][1] = False
+    while stack:
+        i, j = stack[-1]
+        nxt = [(d, ((i + d[0]) % n, (j + d[1]) % n)) for d in DIRS]
+        nxt = [(d, c) for d, c in nxt if c not in seen]
+        if not nxt:
+            stack.pop()
+            continue
+        d, c = rng.choice(nxt)
+        wall[(2 * i + 1 + d[0]) % P][(2 * j + 1 + d[1]) % P] = False
+        wall[2 * c[0] + 1][2 * c[1] + 1] = False
+        seen.add(c)
+        stack.append(c)
+    for x in range(P):
+        for y in range(P):
+            if wall[x][y] and (x + y) % 2 == 1 and rng.random() < float(loops):
+                wall[x][y] = False
+    return wall, (1, 1)
+
+
+def _square_spiral(n):
+    """A square spiral of wall in an n x n block: walk from a corner, turning right
+    whenever going on would touch the wall already drawn."""
+    w = [[False] * n for _ in range(n)]
+
+    def free(x, y):
+        return not (0 <= x < n and 0 <= y < n) or not w[x][y]
+
+    x, y, d = 0, n - 1, 0                 # top left corner, heading +x (rows run from the top)
+    w[x][y] = True
+    turns = 0
+    while turns < 2:
+        dx, dy = DIRS[d]
+        qx, qy = x + dx, y + dy
+        if 0 <= qx < n and 0 <= qy < n and not w[qx][qy] and free(qx + dx, qy + dy):
+            x, y = qx, qy
+            w[x][y] = True
+            turns = 0
+        else:
+            d = (d - 1) % 4               # turn right
+            turns += 1
+    return w
+
+
+def _spiral_grid(n, link, pinwheel):
+    """Square spirals of side n in a grid of period n + 1, a floor line between them.
+    link 1 joins the top walls of a row into one line (the Greek key, or meander);
+    pinwheel turns the four spirals of a 2 x 2 block a quarter turn each, round
+    their common corner."""
+    n = max(3, int(n))
+    s = _square_spiral(n)
+    P = n + 1
+    reps = 2 if int(pinwheel) else 1
+    wall = [[False] * (P * reps) for _ in range(P * reps)]
+    for bi in range(reps):
+        for bj in range(reps):
+            r = ((0, 1), (3, 2))[bi][bj] if int(pinwheel) else 0
+            for x in range(n):
+                for y in range(n):
+                    u, v = x, y
+                    for _ in range(r):    # quarter turns inside the block
+                        u, v = n - 1 - v, u
+                    wall[bi * P + u][bj * P + v] = s[x][y]
+            if int(link):
+                wall[bi * P + n][bj * P + n - 1] = True
+    return wall, (n, n)
+
+
+def _distances(wall, src, steps):
+    """Steps along the corridors (breadth first, on the torus of the period) from src,
+    scaled to 0 .. steps-1; unreachable floor gets the last step."""
+    P, Q = len(wall), len(wall[0])
+    dist = {src: 0}
+    queue = [src]
+    for x, y in queue:
+        for dx, dy in DIRS:
+            c = ((x + dx) % P, (y + dy) % Q)
+            if not wall[c[0]][c[1]] and c not in dist:
+                dist[c] = dist[(x, y)] + 1
+                queue.append(c)
+    top = max(dist.values()) + 1
+    far = max(dist, key=dist.get)
+    path = set()                          # the way from the farthest cell back to the source
+    c = far
+    while c != src:
+        path.add(c)
+        x, y = c
+        c = min((((x + dx) % P, (y + dy) % Q) for dx, dy in DIRS),
+                key=lambda e: dist.get(e, 1 << 30))
+    path.add(src)
+    step = {c: min(steps - 1, d * steps // top) for c, d in dist.items()}
+    return step, path
+
+
+def _widen(wall, src, wide):
+    """Corridors (odd rows and columns) wide cells across, walls (even ones) one cell."""
+    wide = max(1, int(wide))
+    if wide == 1:
+        return wall, src
+    cols = [x for x in range(len(wall)) for _ in range(wide if x % 2 else 1)]
+    rows = [y for y in range(len(wall[0])) for _ in range(wide if y % 2 else 1)]
+    new = [[wall[x][y] for y in rows] for x in cols]
+    return new, (cols.index(src[0]), rows.index(src[1]))
+
+
+def wall_patch(box, wall, src, flat=0, height=1, steps=12, top=.38, side=-.38, wide=1):
+    """Draws a periodic wall grid; cells (kind, 0, step, face): kind 0 floor, 1 wall,
+    2 floor on the longest way from the source."""
+    wall, src = _widen(wall, src, wide)
+    P, Q = len(wall), len(wall[0])
+    steps = max(1, int(steps))
+    step, path = _distances(wall, src, steps)
+
+    def info(x, y):
+        c = (x % P, y % Q)
+        if wall[c[0]][c[1]]:
+            return 1, steps
+        return (2 if c in path else 0), step.get(c, steps - 1)
+
+    if int(flat):
+        tiles = []
+        for x in range(int(math.floor(box[0])) - 1, int(math.ceil(box[2])) + 1):
+            for y in range(int(math.floor(box[1])) - 1, int(math.ceil(box[3])) + 1):
+                kind, st = info(x, -y - 1)        # rows of the grid run downwards
+                tiles.append(Tile([(x, y), (x + 1, y), (x + 1, y + 1), (x, y + 1)],
+                                  ("floor", "wall", "path")[kind], (kind, 0, st, 0), stroke=False))
+        return Patch(tiles)
+    h = max(1, int(height))
+    c30 = EX[0]
+    vox = {}
+    for x in range(-int(box[2] - box[0]) * 2 - 8, int(box[2] - box[0]) * 2 + 8):
+        for y in range(-int(box[2] - box[0]) * 2 - 8, int(box[2] - box[0]) * 2 + 8):
+            px, py = (x - y) * c30, -(x + y) / 2
+            if not (box[0] - 5 < px < box[2] + 5 and box[1] - 5 - h < py < box[3] + 5):
+                continue
+            kind, st = info(x, y)
+            vox[(x, y, 0)] = ((kind if kind != 1 else 0, st), 0, 0)     # one floor, one wall object
+            if kind == 1:
+                for z in range(1, h + 1):
+                    vox[(x, y, z)] = ((1, st), 1, 0)
+    patch = voxel_patch(box, vox, (float(top), 0.0, float(side)))
+    for t in patch.tiles:
+        (kind, st), f = t.cell[2], t.cell[3]
+        t.cell = (kind, 0, st, f)
+    return patch
+
+
+def maze(box, n=8, seed=1, loops=0.0, flat=0, height=1, steps=12, top=.38, side=-.38, wide=2):
+    wall, src = _torus_maze(max(2, int(n)), seed, loops)
+    return wall_patch(box, wall, src, flat, height, steps, top, side, wide)
+
+
+def spiral(box, n=7, link=0, pinwheel=0, flat=0, height=1, steps=12, top=.38, side=-.38, wide=2):
+    wall, src = _spiral_grid(n, link, pinwheel)
+    return wall_patch(box, wall, src, flat, height, steps, top, side, wide)
+
+
+MAZE_COLOURINGS = {               # floor sorts last (99), so it gets the palette's light tint
+    "walls": lambda t: 0 if t.cell[0] == 1 else 99,
+    "path": lambda t: {1: 0, 2: 1}.get(t.cell[0], 99),
+    "flow": lambda t: 99 if t.cell[0] == 1 else t.cell[2],
+    "face": lambda t: t.cell[3] if t.cell[0] == 1 else 99,
+}
+MAZE_PARAMS = {"flat": 0, "wide": 2, "height": 1, "steps": 12, "top": .38, "side": -.38}
+
+
+def whirl(box, base="square", steps=10, t=.18, mirror=1, shear=0.0, turn=0.0):
+    """Whirling polygons: each tile of a base tiling holds a polygon whose corners
+    slide a fraction t along its edges, again and again; the triangles cut off line
+    up in spiral arms. mirror 1 turns neighbouring tiles the other way (checkerboard),
+    so that the arms run on from tile to tile."""
+    t0 = tl.TILINGS[base]
+    kw = {"shear": shear, "turn": turn} if t0.make.__name__ == "make" else {}
+    out = []
+    for n, tile in enumerate(t0.make(box, **kw).tiles):
+        pts = ccw(tile.pts)
+        i, j, k = tile.cell if tile.cell and len(tile.cell) == 3 else (n, 0, 0)
+        f = float(t)
+        if int(mirror) and (i + j) % 2:
+            f = 1 - f                         # the other hand
+        m = len(pts)
+        for s in range(int(steps)):
+            nxt = [add(pts[e], mul(sub(pts[(e + 1) % m], pts[e]), f)) for e in range(m)]
+            for e in range(m):
+                out.append(Tile([nxt[e - 1], pts[e], nxt[e]], "arm", (i, j, k, s, e, m)))
+            pts = nxt
+        out.append(Tile(pts, "core", (i, j, k, int(steps), -1, m)))
+    return Patch(out)
+
+
+WHIRL_COLOURINGS = {
+    "step": _cellkey(lambda i, j, k, s, e, m: s),
+    "arm": _cellkey(lambda i, j, k, s, e, m: 99 if e < 0 else (e - s) % 2 if m % 2 == 0 else (e - s) % m),
+    "twist": _cellkey(lambda i, j, k, s, e, m: 99 if e < 0 else (e + s) % m),
+    "corner": _cellkey(lambda i, j, k, s, e, m: 99 if e < 0 else e),
+}
+
+
+# ==========================================================================
+# 6. REGISTRY
 # ==========================================================================
 def _make(fn, names):
     def make(box, **p):
@@ -443,9 +664,15 @@ reg("beadwork", beadwork, {"n": 21, "seed": 3, "colours_used": 6}, default="kind
     scheme="rainbow", hue=0, stroke=False)
 tl.TILINGS["beadwork"].colourings["value"] = lambda t: t.cell[2]
 tl.TILINGS["beadwork"].default = "value"
+reg("maze", maze, dict({"n": 8, "seed": 1, "loops": 0.0}, **MAZE_PARAMS), colourings=MAZE_COLOURINGS,
+    default="walls", size=14, scheme="mono", hue=8, stroke=False)
+reg("spiral", spiral, dict({"n": 7, "link": 0, "pinwheel": 0}, **MAZE_PARAMS), colourings=MAZE_COLOURINGS,
+    default="flow", size=14, scheme="rainbow", hue=0, stroke=False)
+reg("whirl", whirl, {"base": "square", "steps": 10, "t": .18, "mirror": 1, "shear": 0.0, "turn": 0.0},
+    colourings=WHIRL_COLOURINGS, default="arm", size=6, scheme="complementary", hue=8, lw=.5)
 
 PATTERN_KEYS = ["facets", "bands", "cubes", "rubik", "tripods", "framework", "quilt", "jigsaw", "weave",
-                "beadwork"]
+                "beadwork", "maze", "spiral", "whirl"]
 
 
 # ==========================================================================
@@ -511,6 +738,31 @@ CATALOGUE = [
         V("p_beads3", "beadwork", "value", "triad", 8, params={"seed": 11, "colours_used": 5}),
         V("p_beads4", "beadwork", "value", "zellij", params={"seed": 5, "n": 17}),
     ]),
+    ("mazes", None, [
+        V("p_maze", "maze", "walls", "mono", 8),
+        V("p_maze_path", "maze", "path", "complementary", 2),
+        V("p_maze_flow", "maze", "flow", "rainbow", 0, params={"seed": 3}),
+        V("p_maze_tall", "maze", "face", "triad", 0, params={"height": 2, "wide": 3}, size=20),
+        V("p_maze_flat", "maze", "path", "complementary", 8, params={"flat": 1, "wide": 1}, size=22),
+        V("p_maze_loops", "maze", "flow", "sweep", 6, params={"flat": 1, "wide": 1, "loops": .15, "n": 12},
+          size=26),
+    ]),
+    ("meanders", None, [
+        V("p_spiral", "spiral", "walls", "mono", 1, params={"link": 1}, size=16),
+        V("p_spiral_flow", "spiral", "flow", "rainbow", 0, size=16),
+        V("p_spiral_pinwheel", "spiral", "walls", "mono", 4, params={"pinwheel": 1}, size=22),
+        V("p_greek_key", "spiral", "walls", "mono", 8, params={"link": 1, "flat": 1, "wide": 1}, size=20),
+        V("p_spiral_flat", "spiral", "flow", "rainbow", 0, params={"pinwheel": 1, "flat": 1, "wide": 1}, size=20),
+        V("p_spiral_small", "spiral", "path", "split", 9, params={"n": 9}, size=22),
+    ]),
+    ("whirls", None, [
+        V("p_whirl", "whirl", "arm", "complementary", 8),
+        V("p_whirl_ramp", "whirl", "step", "ramp", 5, params={"steps": 14, "t": .12}),
+        V("p_whirl_hex", "whirl", "twist", "rainbow", 0, params={"base": "hexagonal", "mirror": 0}, size=7),
+        V("p_whirl_tri", "whirl", "step", "sweep", 2, params={"base": "triangular", "steps": 8}, size=5),
+        V("p_whirl_cairo", "whirl", "arm", "analogous", 3, params={"base": "cairo"}, size=8),
+        V("p_whirl_corner", "whirl", "corner", "tetrad", 1, params={"mirror": 0, "steps": 12}),
+    ]),
 ]
 
 
@@ -521,13 +773,13 @@ STRINGS = {
     # ------------------------------------------------------------------ EN
     "en": {
         "title": "DECORATED MOSAICS",
-        "subtitle": "Facets, bands, isometric 3D, quilts, jigsaws, weaves and beadwork",
+        "subtitle": "Facets, bands, isometric 3D, quilts, jigsaws, weaves, beadwork, mazes and spirals",
         "intro": "In these mosaics the basic shape is more than a polygon. Each tile of a tiling can be cut "
                  "into facets lit from one side, so that it stands out like a pyramid, or into concentric "
                  "bands that shrink towards its centre or one of its corners. Seen in isometric view, "
                  "cubes and bars turn the plane into stacks, tripods and frameworks, with three shades "
                  "for the three directions of their faces. Quilts, jigsaw puzzles, woven strips and "
-                 "beadwork complete the set. Colours come from the RYB colour schemes; the ramp and the "
+                 "beadwork, mazes, meanders and whirling spirals complete the set. Colours come from the RYB colour schemes; the ramp and the "
                  "sweep give the smooth steps that bands and gradients need.",
         "f_facets": "Facets and pyramids",
         "f_facets_d": "Every tile is cut into triangles from its centre; each triangle is lit according to "
@@ -604,17 +856,51 @@ STRINGS = {
         "c_tile": "by tile", "c_three": "three colours", "c_face": "by face", "c_group": "by object",
         "c_lattice3": "three colours", "c_quilt": "coloured triangles", "c_quarters": "by quarter",
         "c_strip": "by strip", "c_direction": "by direction", "c_value": "by distance to the centre",
+        "f_mazes": "Mazes",
+        "f_mazes_d": "Perfect mazes (exactly one way between any two points) dug at random from a seed "
+                     "(-p seed=...) on a torus, so that the maze repeats without seams. Drawn as walls of "
+                     "cubes in isometric view or flat from above; the floor can follow a ramp of colours "
+                     "along the corridors, or show the longest way through the maze.",
+        "f_meanders": "Square spirals and meanders",
+        "f_meanders_d": "Square spirals of wall, each turn one corridor further in. Joined along the top they "
+                        "make the Greek key (meander); turned a quarter turn each round a corner they make "
+                        "pinwheels of four spirals. The colours can flow along the corridor into each spiral.",
+        "f_whirls": "Whirling polygons",
+        "f_whirls_d": "In every tile a polygon whose corners slide a little along its edges, again and "
+                      "again: the cut-off triangles line up in spiral arms. Neighbouring tiles turn the other "
+                      "way, so that the arms run on from tile to tile. Works on any tiling (-p base=...).",
+        "p_maze": "Isometric maze",
+        "p_maze_path": "The longest way through the maze",
+        "p_maze_flow": "Colours flowing along the corridors",
+        "p_maze_tall": "Tall walls, wide corridors",
+        "p_maze_flat": "Maze from above, longest way",
+        "p_maze_loops": "Maze with loops, in a sweep of hues",
+        "p_spiral": "Isometric meander",
+        "p_spiral_flow": "Square spirals, rainbow corridors",
+        "p_spiral_pinwheel": "Pinwheels of four spirals",
+        "p_greek_key": "Greek key",
+        "p_spiral_flat": "Spiral pinwheels from above",
+        "p_spiral_small": "Larger spirals, the longest way",
+        "p_whirl": "Whirling squares",
+        "p_whirl_ramp": "Whirling squares in a ramp",
+        "p_whirl_hex": "Whirling hexagons",
+        "p_whirl_tri": "Whirling triangles",
+        "p_whirl_cairo": "Whirls on the Cairo tiling",
+        "p_whirl_corner": "One colour per corner, all turning the same way",
+        "c_walls": "walls and floor", "c_path": "longest way", "c_flow": "along the corridors",
+        "c_step": "by step", "c_arm": "spiral arms", "c_twist": "spiral arms, other hand",
+        "c_corner": "by corner",
     },
     # ------------------------------------------------------------------ PT
     "pt": {
         "title": "MOSAICOS DECORADOS",
-        "subtitle": "Facetas, faixas, 3D isométrico, patchwork, puzzles, tecelagens e missangas",
+        "subtitle": "Facetas, faixas, 3D isométrico, patchwork, puzzles, tecelagens, missangas, labirintos e espirais",
         "intro": "Nestes mosaicos a forma de base é mais do que um polígono. Cada peça de uma pavimentação "
                  "pode ser cortada em facetas iluminadas de um lado, para sobressair como uma pirâmide, ou "
                  "em faixas concêntricas que encolhem para o centro ou para um dos cantos. Em vista "
                  "isométrica, cubos e barras transformam o plano em pilhas, tripés e estruturas, com três "
                  "tons para as três direções das faces. Patchwork, puzzles, tiras entrelaçadas e "
-                 "missangas completam o conjunto. As cores vêm dos esquemas RYB; o degradê e a passagem "
+                 "missangas, labirintos, meandros e espirais em remoinho completam o conjunto. As cores vêm dos esquemas RYB; o degradê e a passagem "
                  "de matizes dão os passos suaves de que as faixas e os gradientes precisam.",
         "f_facets": "Facetas e pirâmides",
         "f_facets_d": "Cada peça é cortada em triângulos a partir do centro; cada triângulo recebe luz "
@@ -692,17 +978,54 @@ STRINGS = {
         "c_tile": "por peça", "c_three": "três cores", "c_face": "por face", "c_group": "por objeto",
         "c_lattice3": "três cores", "c_quilt": "triângulos coloridos", "c_quarters": "por quarto",
         "c_strip": "por tira", "c_direction": "pela direção", "c_value": "pela distância ao centro",
+        "f_mazes": "Labirintos",
+        "f_mazes_d": "Labirintos perfeitos (exatamente um caminho entre quaisquer dois pontos), escavados ao "
+                     "acaso a partir de uma semente (-p seed=...) num toro, para que o labirinto se repita "
+                     "sem costuras. Desenhados com paredes de cubos em vista isométrica ou planos, vistos de "
+                     "cima; o chão pode seguir um degradê de cores ao longo dos corredores, ou mostrar o "
+                     "caminho mais longo do labirinto.",
+        "f_meanders": "Espirais quadradas e meandros",
+        "f_meanders_d": "Espirais quadradas de parede, cada volta um corredor mais para dentro. Ligadas por "
+                        "cima dão a grega (meandro); rodadas um quarto de volta cada à volta de um canto dão "
+                        "cataventos de quatro espirais. As cores podem correr pelo corredor até ao centro de "
+                        "cada espiral.",
+        "f_whirls": "Polígonos em remoinho",
+        "f_whirls_d": "Em cada peça, um polígono cujos cantos deslizam um pouco ao longo das arestas, uma e "
+                      "outra vez: os triângulos cortados alinham-se em braços de espiral. As peças vizinhas "
+                      "rodam ao contrário, para que os braços continuem de peça para peça. Serve para "
+                      "qualquer pavimentação (-p base=...).",
+        "p_maze": "Labirinto isométrico",
+        "p_maze_path": "O caminho mais longo do labirinto",
+        "p_maze_flow": "Cores a correr pelos corredores",
+        "p_maze_tall": "Paredes altas, corredores largos",
+        "p_maze_flat": "Labirinto visto de cima, caminho mais longo",
+        "p_maze_loops": "Labirinto com voltas, numa passagem de matizes",
+        "p_spiral": "Meandro isométrico",
+        "p_spiral_flow": "Espirais quadradas, corredores arco-íris",
+        "p_spiral_pinwheel": "Cataventos de quatro espirais",
+        "p_greek_key": "Grega",
+        "p_spiral_flat": "Cataventos de espirais vistos de cima",
+        "p_spiral_small": "Espirais maiores, o caminho mais longo",
+        "p_whirl": "Quadrados em remoinho",
+        "p_whirl_ramp": "Quadrados em remoinho, em degradê",
+        "p_whirl_hex": "Hexágonos em remoinho",
+        "p_whirl_tri": "Triângulos em remoinho",
+        "p_whirl_cairo": "Remoinhos na pavimentação do Cairo",
+        "p_whirl_corner": "Uma cor por canto, todos a rodar para o mesmo lado",
+        "c_walls": "paredes e chão", "c_path": "caminho mais longo", "c_flow": "ao longo dos corredores",
+        "c_step": "por passo", "c_arm": "braços da espiral", "c_twist": "braços da espiral, ao contrário",
+        "c_corner": "por canto",
     },
     # ------------------------------------------------------------------ ES
     "es": {
         "title": "MOSAICOS DECORADOS",
-        "subtitle": "Facetas, franjas, 3D isométrico, patchwork, puzles, tejidos y abalorios",
+        "subtitle": "Facetas, franjas, 3D isométrico, patchwork, puzles, tejidos, abalorios, laberintos y espirales",
         "intro": "En estos mosaicos la forma base es más que un polígono. Cada pieza de un teselado puede "
                  "cortarse en facetas iluminadas desde un lado, para que resalte como una pirámide, o en "
                  "franjas concéntricas que se encogen hacia el centro o hacia una de sus esquinas. En vista "
                  "isométrica, cubos y barras convierten el plano en pilas, trípodes y estructuras, con tres "
                  "tonos para las tres direcciones de las caras. Patchwork, puzles, tiras entrelazadas y "
-                 "abalorios completan el conjunto. Los colores vienen de los esquemas RYB; el degradado y "
+                 "abalorios, laberintos, meandros y espirales en remolino completan el conjunto. Los colores vienen de los esquemas RYB; el degradado y "
                  "el recorrido de matices dan los pasos suaves que necesitan las franjas y los gradientes.",
         "f_facets": "Facetas y pirámides",
         "f_facets_d": "Cada pieza se corta en triángulos desde su centro; cada triángulo recibe luz según la "
@@ -782,6 +1105,43 @@ STRINGS = {
         "c_tile": "por pieza", "c_three": "tres colores", "c_face": "por cara", "c_group": "por objeto",
         "c_lattice3": "tres colores", "c_quilt": "triángulos coloreados", "c_quarters": "por cuarto",
         "c_strip": "por tira", "c_direction": "por dirección", "c_value": "por distancia al centro",
+        "f_mazes": "Laberintos",
+        "f_mazes_d": "Laberintos perfectos (exactamente un camino entre dos puntos cualesquiera), excavados "
+                     "al azar a partir de una semilla (-p seed=...) en un toro, para que el laberinto se "
+                     "repita sin costuras. Dibujados con paredes de cubos en vista isométrica o planos, "
+                     "vistos desde arriba; el suelo puede seguir un degradado de colores a lo largo de los "
+                     "pasillos, o mostrar el camino más largo del laberinto.",
+        "f_meanders": "Espirales cuadradas y meandros",
+        "f_meanders_d": "Espirales cuadradas de pared, cada vuelta un pasillo más adentro. Unidas por arriba "
+                        "dan la greca (meandro); giradas un cuarto de vuelta cada una alrededor de una "
+                        "esquina dan molinillos de cuatro espirales. Los colores pueden correr por el "
+                        "pasillo hasta el centro de cada espiral.",
+        "f_whirls": "Polígonos en remolino",
+        "f_whirls_d": "En cada pieza, un polígono cuyas esquinas se deslizan un poco a lo largo de sus "
+                      "aristas, una y otra vez: los triángulos recortados se alinean en brazos de espiral. "
+                      "Las piezas vecinas giran al revés, para que los brazos sigan de pieza en pieza. Sirve "
+                      "para cualquier teselado (-p base=...).",
+        "p_maze": "Laberinto isométrico",
+        "p_maze_path": "El camino más largo del laberinto",
+        "p_maze_flow": "Colores que corren por los pasillos",
+        "p_maze_tall": "Paredes altas, pasillos anchos",
+        "p_maze_flat": "Laberinto visto desde arriba, camino más largo",
+        "p_maze_loops": "Laberinto con vueltas, en un recorrido de matices",
+        "p_spiral": "Meandro isométrico",
+        "p_spiral_flow": "Espirales cuadradas, pasillos arcoíris",
+        "p_spiral_pinwheel": "Molinillos de cuatro espirales",
+        "p_greek_key": "Greca",
+        "p_spiral_flat": "Molinillos de espirales vistos desde arriba",
+        "p_spiral_small": "Espirales mayores, el camino más largo",
+        "p_whirl": "Cuadrados en remolino",
+        "p_whirl_ramp": "Cuadrados en remolino, en degradado",
+        "p_whirl_hex": "Hexágonos en remolino",
+        "p_whirl_tri": "Triángulos en remolino",
+        "p_whirl_cairo": "Remolinos en el teselado de El Cairo",
+        "p_whirl_corner": "Un color por esquina, todos girando hacia el mismo lado",
+        "c_walls": "paredes y suelo", "c_path": "camino más largo", "c_flow": "a lo largo de los pasillos",
+        "c_step": "por paso", "c_arm": "brazos de la espiral", "c_twist": "brazos de la espiral, al revés",
+        "c_corner": "por esquina",
     },
 }
 

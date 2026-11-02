@@ -1498,7 +1498,7 @@ def svg_panel(ops, box, x, y, width, uid=0):
     for op in ops:
         if op[0] == "poly":
             _, pts, fill, stroke, lw = op
-            st = ' stroke="%s" stroke-width="%.2f"' % (_hex(stroke), lw * k) if stroke else ""
+            st = ' stroke="%s" stroke-width="%.2f"' % (_hex(stroke or fill), lw * k if stroke else .5)
             out.append('<path d="M%sZ" fill="%s"%s/>' % ("L".join(P(p) for p in pts), _hex(fill), st))
         elif op[0] == "line":
             _, pts, col, lw, closed = op
@@ -1577,7 +1577,10 @@ def draw_ops_pdf(c, ops, box, x, y, w, h):
                 if stroke:
                     c.setStrokeColorRGB(*stroke)
                     c.setLineWidth(lw * k)
-                c.drawPath(path, fill=1, stroke=1 if stroke else 0)
+                else:                     # a hairline of the fill hides the seams between pieces
+                    c.setStrokeColorRGB(*fill)
+                    c.setLineWidth(.5)
+                c.drawPath(path, fill=1, stroke=1)
             else:
                 _, _, col, lw, closed = op
                 if closed:
