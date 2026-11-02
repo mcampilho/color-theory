@@ -252,6 +252,46 @@ python3 patterns.py spiral -p link=1 -p flat=1 -p wide=1 -c walls --size 20 --sc
 python3 patterns.py whirl -p base=hexagonal -p mirror=0 -c twist --scheme rainbow -o whirl.pdf
 ```
 
+## Abstract wallpapers
+
+`wallpapers.py` paints abstract wallpapers for desktops (landscape) and phones or tablets
+(portrait) in the common screen sizes, with the same RYB colour schemes. Every picture
+comes from a seed, so the same options always give the same picture.
+
+![Eight wallpaper styles: mesh gradient, aurora, layered waves, silk ribbons, liquid paint, satin, orbs, light trails](images/wallpapers.png)
+
+| Style | What it paints | Main parameters |
+|-------|----------------|-----------------|
+| `mesh` | soft blobs of colour melting into each other | `blobs`, `warp`, `spread` |
+| `aurora` | curtains of light over a dark sky | `bands`, `rays`, `stars` |
+| `waves` | paper-cut layers of waves, each casting a shadow | `layers`, `height`, `shadow` |
+| `ribbons` | twisting ribbons made of fine coloured threads | `ribbons`, `threads`, `width`, `twist`, `texture` |
+| `fluid` | liquid paint folded by domain warping, glossy, striated | `scale`, `warp`, `lines`, `bands`, `gloss` |
+| `silk` | folds of satin with soft highlights | `folds`, `depth`, `softness`, `sheen` |
+| `orbs` | overlapping spheres with gradients and a rim of light | `orbs`, `size`, `opacity`, `rings` |
+| `trails` | long exposure arcs of glowing light | `lines`, `sweep`, `spiral` |
+
+Sizes: `hd`, `hd+`, `fhd` (default), `wuxga`, `qhd`, `wqxga`, `4k`, `5k`, `ultrawide`,
+`uwqhd`, `macbook-air`, `macbook-pro`, `imac`; phones `phone-hd`, `phone-fhd`, `android`,
+`android-qhd`, `iphone-se`, `iphone-13`, `iphone`, `iphone-pro-max`; tablets `ipad`,
+`ipad-pro`, `tablet`; or any `WxH`. `--orientation` turns a size when needed.
+
+```bash
+pip install numpy scipy pillow
+python3 wallpapers.py --show                          # preview window: change it there, then save
+python3 wallpapers.py --list                          # styles, parameters and sizes
+python3 wallpapers.py ribbons                         # -> wallpaper_ribbons_fhd_1.png
+python3 wallpapers.py fluid --size 4k --scheme triad --hue blue -o fluid.png
+python3 wallpapers.py waves --size iphone --seed 7 -o waves.jpg
+python3 wallpapers.py silk --scheme mono --hue red -p folds=4 -o silk.webp
+python3 wallpapers.py orbs --size ultrawide --colours "#ff6b6b,#4ecdc4,#ffe66d"
+python3 wallpapers.py mesh --count 5                  # seeds 1 .. 5
+python3 wallpapers.py --gallery --size iphone --cols 8    # every style side by side
+```
+
+Other options: `--background dark|black|light|white|<hex>`, `--grain` (film grain),
+`--vignette` (darker corners) and `--lang pt|es` for the preview window and captions.
+
 ## Other files
 
 - `Claude - The Complete Guide to Color Theory.md`: the full reference guide, from the physics

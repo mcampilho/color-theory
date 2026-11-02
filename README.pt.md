@@ -260,6 +260,47 @@ python3 patterns.py spiral -p link=1 -p flat=1 -p wide=1 -c walls --size 20 --sc
 python3 patterns.py whirl -p base=hexagonal -p mirror=0 -c twist --scheme rainbow -o remoinho.pdf
 ```
 
+## Wallpapers abstratos
+
+O `wallpapers.py` pinta wallpapers abstratos para computador (horizontal) e para telemóvel
+ou tablet (vertical), nos tamanhos de ecrã mais comuns, com os mesmos esquemas de cor RYB.
+Cada imagem nasce de uma semente, por isso as mesmas opções dão sempre a mesma imagem.
+
+![Oito estilos de wallpaper: gradiente difuso, aurora, ondas em camadas, fitas de seda, tinta líquida, cetim, esferas, rastos de luz](images/wallpapers.png)
+
+| Estilo | O que pinta | Parâmetros principais |
+|--------|-------------|-----------------------|
+| `mesh` | manchas suaves de cor que se fundem umas nas outras | `blobs`, `warp`, `spread` |
+| `aurora` | cortinas de luz sobre um céu escuro | `bands`, `rays`, `stars` |
+| `waves` | camadas de ondas recortadas em papel, cada uma com a sua sombra | `layers`, `height`, `shadow` |
+| `ribbons` | fitas torcidas feitas de fios de cor finos | `ribbons`, `threads`, `width`, `twist`, `texture` |
+| `fluid` | tinta líquida dobrada por deformação do domínio, brilhante e com estrias | `scale`, `warp`, `lines`, `bands`, `gloss` |
+| `silk` | pregas de cetim com reflexos suaves | `folds`, `depth`, `softness`, `sheen` |
+| `orbs` | esferas sobrepostas com degradês e um contorno de luz | `orbs`, `size`, `opacity`, `rings` |
+| `trails` | arcos de luz em longa exposição | `lines`, `sweep`, `spiral` |
+
+Tamanhos: `hd`, `hd+`, `fhd` (por omissão), `wuxga`, `qhd`, `wqxga`, `4k`, `5k`, `ultrawide`,
+`uwqhd`, `macbook-air`, `macbook-pro`, `imac`; telemóveis `phone-hd`, `phone-fhd`, `android`,
+`android-qhd`, `iphone-se`, `iphone-13`, `iphone`, `iphone-pro-max`; tablets `ipad`,
+`ipad-pro`, `tablet`; ou qualquer `LxA` (por exemplo `2560x1080`). O `--orientation` roda o
+tamanho quando é preciso.
+
+```bash
+pip install numpy scipy pillow
+python3 wallpapers.py --show --lang pt                # janela: muda-se lá e depois guarda-se
+python3 wallpapers.py --list --lang pt                # estilos, parâmetros e tamanhos
+python3 wallpapers.py ribbons                         # -> wallpaper_ribbons_fhd_1.png
+python3 wallpapers.py fluid --size 4k --scheme triad --hue blue -o tinta.png
+python3 wallpapers.py waves --size iphone --seed 7 -o ondas.jpg
+python3 wallpapers.py silk --scheme mono --hue red -p folds=4 -o cetim.webp
+python3 wallpapers.py orbs --size ultrawide --colours "#ff6b6b,#4ecdc4,#ffe66d"
+python3 wallpapers.py mesh --count 5                  # sementes 1 .. 5
+python3 wallpapers.py --gallery --size iphone --cols 8    # todos os estilos lado a lado
+```
+
+Outras opções: `--background dark|black|light|white|<hex>`, `--grain` (grão de filme),
+`--vignette` (cantos mais escuros) e `--lang pt|es` para a janela e as legendas.
+
 ## Outros ficheiros
 
 - `Claude - The Complete Guide to Color Theory.md`: o guia de referência completo, da física

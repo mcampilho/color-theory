@@ -113,6 +113,14 @@ repositório, para se poderem usar sem Python. Contém:
     - `Tile.shade` (luz aplicada depois da cor), `Tile.colour` (cor fixa, para juntas) e `Tile.stroke`;
     - linhas com papel `line:<largura>[:<hex>]`, e `background` e `lw` por pavimentação;
     - os esquemas `ramp` e `sweep` e a coloração `gradient`.
+- `wallpapers.py` — wallpapers abstratos (numpy, scipy, Pillow; usa só `tl.palette` e os
+  nomes de esquemas e matizes do `tilings.py`). Cada estilo é `f(spec, W, H, rng, noise, cols, p)`
+  e devolve um array RGB em 0..1 de qualquer tamanho com o aspeto W x H; o `render()`
+  redimensiona, junta vinheta e grão. Coordenadas em alturas da imagem; formas que dependem
+  do tamanho usam `min(A, 1)`, para servirem também em vertical. `Noise` é ruído fractal
+  periódico (grelhas aleatórias + `map_coordinates` cúbico). Estilos suaves desenham numa
+  grelha reduzida (`grid(W, H, max_px)`); `ribbons` e `trails` desenham linhas com Pillow
+  a 2x. Tamanhos em `SIZES`/`SIZE_GROUPS`; `--show` abre uma janela Tk com comboboxes.
 - `color_theory_poster.py` — versão anterior, só a página 1, sem traduções (ReportLab).
 - PDFs gerados: `colour_theory_en.pdf`, `colour_theory_pt.pdf`, `colour_theory_es.pdf`
   (do `color_theory_document.py`), `colour_wheels_en.pdf`, `colour_wheels_pt.pdf`,
@@ -140,6 +148,9 @@ python3 tilings.py cairo --show                       # janela de pré-visualiza
 python3 tilings.py cairo --vary scheme --cols 4 -o folha.png   # folha de variações
 python3 patterns.py [--lang pt]                       # -> patterns_<lang>.pdf (mosaicos decorados)
 python3 patterns.py tripods --show                    # qualquer opção do tilings.py serve
+python3 wallpapers.py ribbons --size 4k -o r.png      # wallpapers (pip install numpy scipy)
+python3 wallpapers.py --show [--lang pt]              # janela de pré-visualização
+python3 wallpapers.py --gallery --size iphone         # todos os estilos numa folha
 ```
 
 Para ver uma página como imagem:
