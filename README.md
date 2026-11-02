@@ -292,6 +292,33 @@ python3 wallpapers.py --gallery --size iphone --cols 8    # every style side by 
 Other options: `--background dark|black|light|white|<hex>`, `--grain` (film grain),
 `--vignette` (darker corners) and `--lang pt|es` for the preview window and captions.
 
+### Changing the hue and size of a picture
+
+With `--input`, the program takes a picture of yours (PNG, JPG, WebP, AVIF ...) and changes
+its hue and/or its size:
+
+- `--hue`: the new hue. Without `--hue` the colours stay as they are and only the size changes.
+- `--mode shift` (default) turns every hue so that the main hue of the picture becomes
+  `--hue`, keeping the variety of colours; `--mode tint` puts everything in one hue, keeping
+  saturation and lightness; `--mode map` sends the lightness through the colours of a scheme
+  (`--scheme`, best `ramp` or `mono`).
+- `--size`: the new size (by default the size of the original). `--fit cover` (default) fills
+  the screen and crops the rest, `--fit contain` shows the whole picture over a blurred copy
+  of itself, `--fit stretch` stretches it.
+- `-p saturation=1.2 -p brightness=0.9` adjust saturation and brightness.
+
+```bash
+python3 wallpapers.py --input blue_wave.avif --hue orange --size 1980x1080 -o orange_wave.png
+python3 wallpapers.py --input blue_wave.avif --hue orange --mode tint --size fhd
+python3 wallpapers.py --input blue_wave.avif --mode map --scheme ramp --hue blue-green
+python3 wallpapers.py --input blue_wave.avif --hue green --size iphone --fit contain
+python3 wallpapers.py --input blue_wave.avif --show          # try it in the preview window
+```
+
+In the window, "Open picture..." chooses the picture and the hue "(keep)" leaves the original
+colours. Without `-o`, the file name tells the hue and the size, e.g.
+`blue_wave_orange_1980x1080.png`.
+
 ## Other files
 
 - `Claude - The Complete Guide to Color Theory.md`: the full reference guide, from the physics

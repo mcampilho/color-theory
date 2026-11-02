@@ -441,6 +441,98 @@ def orbs(spec, W, H, rng, noise, cols, p):
     return out
 
 
+# --------------------------------------------------------------------------
+# Recolouring an existing picture (style "image", with --input)
+# --------------------------------------------------------------------------
+def rgb_to_hsv(a):
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    mx, mn = a.max(-1), a.min(-1)
+    d = mx - mn
+    h = np.zeros_like(mx)
+    safe = np.where(d > 1e-9, d, 1)
+    h = np.where(mx == r, ((g - b) / safe) % 6, h)
+    h = np.where(mx == g, (b - r) / safe + 2, h)
+    h = np.where(mx == b, (r - g) / safe + 4, h)
+    h = np.where(d > 1e-9, h / 6.0, 0)
+    s = np.where(mx > 1e-9, d / np.where(mx > 1e-9, mx, 1), 0)
+    return np.stack([h % 1.0, s, mx], -1)
+
+
+def hsv_to_rgb(a):
+    h, s, v = a[..., 0] % 1.0, a[..., 1], a[..., 2]
+    i = np.floor(h * 6).astype(int) % 6
+    f = h * 6 - np.floor(h * 6)
+    p, q, t = v * (1 - s), v * (1 - s * f), v * (1 - s * (1 - f))
+    choices = [(v, t, p), (q, v, p), (p, v, t), (p, q, v), (t, p, v), (v, p, q)]
+    out = np.zeros(a.shape)
+    for k, (r, g, b) in enumerate(choices):
+        m = i == k
+        out[..., 0] = np.where(m, r, out[..., 0])
+        out[..., 1] = np.where(m, g, out[..., 1])
+        out[..., 2] = np.where(m, b, out[..., 2])
+    return out
+
+
+def dominant_hue(hsv):
+    """The main hue of a picture (0 .. 1): mean angle of the hues, weighted by how
+    saturated and bright each pixel is."""
+    w = hsv[..., 1] * hsv[..., 2]
+    ang = hsv[..., 0] * 2 * math.pi
+    return (math.atan2((w * np.sin(ang)).sum(), (w * np.cos(ang)).sum()) / (2 * math.pi)) % 1.0
+
+
+def nearest_ryb(h):
+    """The RYB hue (0 .. 11) whose colour has the HSV hue closest to h."""
+    def gap(k):
+        hk = rgb_to_hsv(np.array(tl.ryb_hue(k), float))[0]
+        return min(abs(hk - h), 1 - abs(hk - h))
+    return min(range(12), key=gap)
+
+
+def fit_image(img, W, H, fit):
+    """cover: fill W x H and crop the overflow; contain: the whole picture over a blurred
+    copy of itself; stretch: change the proportions."""
+    w, h = img.size
+    if fit == "stretch":
+        return img.resize((W, H), Image.LANCZOS)
+    k = max(W / w, H / h)
+    big = img.resize((max(W, round(w * k)), max(H, round(h * k))), Image.LANCZOS)
+    x, y = (big.width - W) // 2, (big.height - H) // 2
+    cover = big.crop((x, y, x + W, y + H))
+    if fit == "cover":
+        return cover
+    k = min(W / w, H / h)
+    small = img.resize((max(1, round(w * k)), max(1, round(h * k))), Image.LANCZOS)
+    back = cover.filter(ImageFilter.GaussianBlur(max(W, H) * .03))
+    back = Image.eval(back, lambda c: int(c * .7))
+    back.paste(small, ((W - small.width) // 2, (H - small.height) // 2))
+    return back
+
+
+def recolour(spec, W, H, rng, noise, cols, p):
+    img = fit_image(Image.open(spec["input"]).convert("RGB"), W, H, p["fit"])
+    arr = from_image(img).astype(float)
+    hsv = rgb_to_hsv(arr)
+    mode = p["mode"]
+    if spec["hue"] is not None and mode in ("shift", "tint"):
+        target = rgb_to_hsv(np.array(tl.ryb_hue(spec["hue"]), float))[0]
+        if mode == "shift":               # turn every hue by the same angle: the variety stays
+            hsv[..., 0] = (hsv[..., 0] + target - dominant_hue(hsv)) % 1.0
+        else:                             # one hue for everything, saturation and value kept
+            hsv[..., 0] = target
+    hsv[..., 1] = np.clip(hsv[..., 1] * float(p["saturation"]), 0, 1)
+    hsv[..., 2] = np.clip(hsv[..., 2] * float(p["brightness"]), 0, 1)
+    out = hsv_to_rgb(hsv)
+    if mode == "map":                     # gradient map: lightness through the colour scheme
+        lum = .299 * out[..., 0] + .587 * out[..., 1] + .114 * out[..., 2]
+        lo, hi = np.percentile(lum, 1), np.percentile(lum, 99.5)
+        lum = (lum - lo) / (hi - lo + 1e-9)          # use the whole ramp, even on a dark picture
+        stops = sorted(cols, key=luma)
+        stops = [tl.mix(stops[0], BLACK, .8)] + stops + [tl.mix(stops[-1], WHITE, .7)]
+        out = ramp(stops, lum)
+    return out
+
+
 STYLES = {
     "mesh": (mesh, {"blobs": 8, "warp": .35, "spread": .8},
              dict(scheme="sweep", hue=3, background="dark", grain=.025)),
@@ -458,8 +550,22 @@ STYLES = {
              dict(scheme="analogous", hue=8, background="dark", grain=.02)),
     "trails": (trails, {"lines": 160, "sweep": 2.2, "spiral": .12},
                dict(scheme="sweep", hue=2, background="black", grain=.015)),
+    "image": (recolour, {"mode": "shift", "fit": "cover", "saturation": 1.0, "brightness": 1.0},
+              dict(scheme="ramp", hue=None, background="dark", grain=0.0, vignette=0.0, size="source")),
 }
-STYLE_KEYS = list(STYLES)
+STYLE_KEYS = [k for k in STYLES if k != "image"]       # "image" needs a picture (--input)
+IMAGE_MODES = ["shift", "tint", "map"]
+FITS = ["cover", "contain", "stretch"]
+
+
+def size_of(s):
+    """The size of a spec in pixels; 'source' is the size of its input picture."""
+    if s["size"] == "source":
+        if not s.get("input"):
+            raise SystemExit("size 'source' needs a picture (--input)")
+        w, h = Image.open(s["input"]).size
+        return parse_size("%dx%d" % (w, h), s["orientation"])
+    return parse_size(s["size"], s["orientation"])
 
 
 # ==========================================================================
@@ -467,8 +573,11 @@ STYLE_KEYS = list(STYLES)
 # ==========================================================================
 def spec_defaults(spec):
     fn, params, defaults = STYLES[spec["style"]]
-    s = dict(defaults, colours=None, seed=1, size="fhd", orientation=None, vignette=.25)
+    s = dict(colours=None, seed=1, size="fhd", orientation=None, vignette=.25, input=None)
+    s.update(defaults)
     s.update({k: v for k, v in spec.items() if v is not None})
+    if s["style"] == "image" and not s["input"]:
+        raise SystemExit("the style 'image' needs a picture: --input <file>")
     ps = dict(params)
     for k, val in (spec.get("params") or {}).items():
         if k not in ps:
@@ -482,11 +591,11 @@ def render(spec, W=None, H=None):
     """The wallpaper of a spec as a Pillow image (W x H, by default the spec's size)."""
     s = spec_defaults(spec)
     if W is None:
-        W, H = parse_size(s["size"], s["orientation"])
+        W, H = size_of(s)
     fn, _, _ = STYLES[s["style"]]
     rng = np.random.default_rng(int(s["seed"]))
     noise = Noise(np.random.default_rng(int(s["seed"]) + 1000))
-    cols = tl.palette(s["scheme"], s["hue"], 6, s["colours"])
+    cols = tl.palette(s["scheme"], s["hue"] if s["hue"] is not None else 2, 6, s["colours"])
     arr = fn(s, W, H, rng, noise, cols, s["params"])
     if arr.shape[:2] != (H, W):
         arr = from_image(to_image(arr).resize((W, H), Image.LANCZOS))
@@ -498,6 +607,15 @@ def render(spec, W=None, H=None):
     if float(s["grain"]):                 # grain is per pixel: lighter on small pictures
         arr += np.random.default_rng(int(s["seed"]) + 7).normal(0, float(s["grain"]) * min(1.0, H / 1080.0), (H, W, 1)).astype(np.float32)
     return to_image(arr)
+
+
+def default_name(s):
+    if s["style"] == "image":
+        stem = os.path.splitext(os.path.basename(s["input"]))[0]
+        hue = "same" if s["hue"] is None else tl.HUE_KEYS[s["hue"] % 12]
+        w, h = size_of(s)
+        return "%s_%s_%dx%d.png" % (stem, hue, w, h)
+    return "wallpaper_%s_%s_%d.png" % (s["style"], s["size"], s["seed"])
 
 
 def save(img, path):
@@ -512,11 +630,22 @@ def save(img, path):
 
 def caption(spec):
     s = spec_defaults(spec)
-    if s["colours"]:
-        scheme = T("own_colours")
-    else:
-        scheme = tl.scheme_name(s)
-    return "%s  ·  %s" % (T("st_" + s["style"]), scheme)
+    if s["style"] == "image":
+        mode = s["params"]["mode"]
+        name = os.path.basename(s["input"])
+        if mode == "map":
+            return "%s  ·  %s  ·  %s" % (name, T("m_map"), scheme_label(s))
+        hue = T("hue_keep") if s["hue"] is None else hue_names()[s["hue"] % 12].lower()
+        return "%s  ·  %s  ·  %s" % (name, T("m_" + mode), hue)
+    return "%s  ·  %s" % (T("st_" + s["style"]), scheme_label(s))
+
+
+def scheme_label(s):
+    return T("own_colours") if s["colours"] else tl.scheme_name(dict(s, hue=s["hue"] or 0))
+
+
+def hue_names():
+    return tl.CTD_STRINGS.get(tl._LANG, tl.CTD_STRINGS["en"])["hue_names"]
 
 
 def _font(size):
@@ -530,8 +659,7 @@ def _font(size):
 
 def gallery(specs, path, cols=4, width=480, labels=True):
     """Small versions of several wallpapers side by side, each with a caption."""
-    first = spec_defaults(specs[0])
-    W, H = parse_size(first["size"], first["orientation"])
+    W, H = size_of(spec_defaults(specs[0]))
     w = width
     h = int(round(w * H / W))
     pad, lab = 16, (34 if labels else 0)
@@ -562,13 +690,15 @@ def run_preview(spec):
     root = tk.Tk()
     root.title(T("app_title"))
     s = spec_defaults(spec)
-    hue_names = tl.CTD_STRINGS.get(tl._LANG, tl.CTD_STRINGS["en"])["hue_names"]
-    sizes = [k for _, ks in SIZE_GROUPS for k in ks]
+    hues = list(hue_names()) + [T("hue_keep")]
+    sizes = ["source"] + [k for _, ks in SIZE_GROUPS for k in ks]
+    styles = STYLE_KEYS + ["image"]
+    source = {"input": s["input"]}
     vars_ = {
         "style": tk.StringVar(value=s["style"]),
         "size": tk.StringVar(value=s["size"]),
         "scheme": tk.StringVar(value=s["scheme"]),
-        "hue": tk.StringVar(value=hue_names[s["hue"] % 12]),
+        "hue": tk.StringVar(value=hues[-1] if s["hue"] is None else hues[s["hue"] % 12]),
         "background": tk.StringVar(value=s["background"]),
         "seed": tk.IntVar(value=int(s["seed"])),
         "params": tk.StringVar(value=" ".join("%s=%s" % kv for kv in (spec.get("params") or {}).items())),
@@ -588,18 +718,18 @@ def run_preview(spec):
                 k, val = item.split("=", 1)
                 params[k] = tl.parse_value(val)
         return {"style": vars_["style"].get(), "size": vars_["size"].get(), "scheme": vars_["scheme"].get(),
-                "hue": hue_names.index(vars_["hue"].get()), "background": vars_["background"].get(),
-                "seed": vars_["seed"].get(), "params": params,
-                "colours": s["colours"], "orientation": s["orientation"]}
+                "hue": None if vars_["hue"].get() == hues[-1] else hues.index(vars_["hue"].get()),
+                "background": vars_["background"].get(), "seed": vars_["seed"].get(), "params": params,
+                "colours": s["colours"], "orientation": s["orientation"], "input": source["input"]}
 
     def redraw():
         state["job"] = None
         sp = current()
         try:
-            W, H = parse_size(sp["size"], sp["orientation"])
+            W, H = size_of(spec_defaults(sp))
             k = min(960 / W, 640 / H)
             img = render(sp, max(2, int(W * k)), max(2, int(H * k)))
-        except (SystemExit, ValueError) as e:
+        except (SystemExit, ValueError, OSError) as e:
             status.config(text=str(e))
             return
         state["spec"] = sp
@@ -615,17 +745,31 @@ def run_preview(spec):
     def style_changed(*_):
         st = STYLES[vars_["style"].get()][2]
         vars_["scheme"].set(st["scheme"])
-        vars_["hue"].set(hue_names[st["hue"]])
+        vars_["hue"].set(hues[-1] if st["hue"] is None else hues[st["hue"]])
         vars_["background"].set(st["background"])
-        vars_["params"].set("")
+        if vars_["style"].get() == "image":
+            vars_["size"].set("source")
+            vars_["params"].set("mode=shift fit=cover saturation=1.0 brightness=1.0")
+        else:
+            if vars_["size"].get() == "source":
+                vars_["size"].set("fhd")
+            vars_["params"].set("")
         changed()
+
+    def open_image():
+        path = filedialog.askopenfilename(filetypes=[(T("app_images"), "*.png *.jpg *.jpeg *.webp *.avif *.bmp *.tif *.tiff"),
+                                                     ("*", "*.*")])
+        if path:
+            source["input"] = path
+            vars_["style"].set("image")
+            style_changed()
 
     def new_seed():
         vars_["seed"].set(int(np.random.default_rng().integers(1, 100000)))
 
     def save_full():
         sp = state["spec"] or current()
-        name = "wallpaper_%s_%s_%d.png" % (sp["style"], sp["size"], sp["seed"])
+        name = default_name(spec_defaults(sp))
         path = filedialog.asksaveasfilename(initialfile=name, defaultextension=".png",
                                             filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg"), ("WebP", "*.webp")])
         if path:
@@ -640,10 +784,10 @@ def run_preview(spec):
         cb.pack(side="left")
         return cb
 
-    combo("app_style", vars_["style"], STYLE_KEYS, 9).bind("<<ComboboxSelected>>", style_changed)
+    combo("app_style", vars_["style"], styles, 9).bind("<<ComboboxSelected>>", style_changed)
     combo("app_size", vars_["size"], sizes, 13)
     combo("app_scheme", vars_["scheme"], tl.SCHEMES, 12)
-    combo("app_hue", vars_["hue"], hue_names, 18)
+    combo("app_hue", vars_["hue"], hues, 18)
     combo("app_background", vars_["background"], ["dark", "black", "light", "white"], 7)
     ttk.Label(bar, text=T("app_seed")).pack(side="left", padx=(6, 2))
     ttk.Spinbox(bar, from_=1, to=99999, textvariable=vars_["seed"], width=6).pack(side="left")
@@ -653,7 +797,10 @@ def run_preview(spec):
     ttk.Label(bar2, text=T("app_params")).pack(side="left", padx=(6, 2))
     ent = ttk.Entry(bar2, textvariable=vars_["params"], width=60)
     ent.pack(side="left", fill="x", expand=True)
+    ttk.Button(bar2, text=T("app_open"), command=open_image).pack(side="left", padx=(6, 0))
     ttk.Button(bar2, text=T("app_save"), command=save_full).pack(side="left", padx=6)
+    if s["style"] == "image" and not spec.get("params"):
+        vars_["params"].set(" ".join("%s=%s" % kv for kv in s["params"].items()))
     for key, var in vars_.items():
         var.trace_add("write", changed)
     redraw()
@@ -667,7 +814,10 @@ STRINGS = {
     "en": {
         "st_mesh": "Mesh gradient", "st_aurora": "Aurora", "st_waves": "Layered waves",
         "st_ribbons": "Silk ribbons", "st_fluid": "Liquid paint", "st_silk": "Satin folds",
-        "st_orbs": "Orbs", "st_trails": "Light trails",
+        "st_orbs": "Orbs", "st_trails": "Light trails", "st_image": "Your picture",
+        "d_image": "a picture of yours (--input), with a new hue and size",
+        "hue_keep": "(keep)", "m_shift": "hues turned", "m_tint": "one hue", "m_map": "gradient map",
+        "app_open": "Open picture...", "app_images": "Pictures",
         "d_mesh": "soft blobs of colour melting into each other",
         "d_aurora": "curtains of light over a dark sky",
         "d_waves": "paper-cut layers of waves, each casting a shadow",
@@ -686,7 +836,10 @@ STRINGS = {
     "pt": {
         "st_mesh": "Gradiente difuso", "st_aurora": "Aurora", "st_waves": "Ondas em camadas",
         "st_ribbons": "Fitas de seda", "st_fluid": "Tinta líquida", "st_silk": "Pregas de cetim",
-        "st_orbs": "Esferas", "st_trails": "Rastos de luz",
+        "st_orbs": "Esferas", "st_trails": "Rastos de luz", "st_image": "A sua imagem",
+        "d_image": "uma imagem sua (--input), com novo matiz e novo tamanho",
+        "hue_keep": "(manter)", "m_shift": "matizes rodados", "m_tint": "um só matiz", "m_map": "mapa de degradê",
+        "app_open": "Abrir imagem...", "app_images": "Imagens",
         "d_mesh": "manchas suaves de cor que se fundem umas nas outras",
         "d_aurora": "cortinas de luz sobre um céu escuro",
         "d_waves": "camadas de ondas recortadas em papel, cada uma com a sua sombra",
@@ -705,7 +858,10 @@ STRINGS = {
     "es": {
         "st_mesh": "Degradado difuso", "st_aurora": "Aurora", "st_waves": "Olas en capas",
         "st_ribbons": "Cintas de seda", "st_fluid": "Pintura líquida", "st_silk": "Pliegues de satén",
-        "st_orbs": "Esferas", "st_trails": "Estelas de luz",
+        "st_orbs": "Esferas", "st_trails": "Estelas de luz", "st_image": "Su imagen",
+        "d_image": "una imagen suya (--input), con nuevo matiz y nuevo tamaño",
+        "hue_keep": "(mantener)", "m_shift": "matices girados", "m_tint": "un solo matiz", "m_map": "mapa de degradado",
+        "app_open": "Abrir imagen...", "app_images": "Imágenes",
         "d_mesh": "manchas suaves de color que se funden unas con otras",
         "d_aurora": "cortinas de luz sobre un cielo oscuro",
         "d_waves": "capas de olas recortadas en papel, cada una con su sombra",
@@ -748,6 +904,10 @@ def main():
     ap.add_argument("-o", "--output", help="file (.png, .jpg, .webp); with --count a number is added")
     ap.add_argument("--gallery", action="store_true", help="every style (or the given ones) in one sheet")
     ap.add_argument("--cols", type=int, default=4, help="columns of the gallery")
+    ap.add_argument("-i", "--input", help="a picture of yours to recolour and resize (style image)")
+    ap.add_argument("--mode", choices=IMAGE_MODES, help="with --input: shift (turn all hues so that the main "
+                    "one becomes --hue), tint (one hue) or map (lightness through --scheme)")
+    ap.add_argument("--fit", choices=FITS, help="with --input: cover (crop, default), contain or stretch")
     ap.add_argument("--show", action="store_true", help="preview window")
     ap.add_argument("--list", action="store_true", help="styles, parameters and sizes")
     ap.add_argument("--lang", choices=list(STRINGS), default="en")
@@ -758,7 +918,7 @@ def main():
         print(T("styles") + ":")
         for k, (fn, params, d) in STYLES.items():
             print("  %-8s %s" % (k, T("d_" + k)))
-            print("           %s | scheme=%s hue=%d background=%s" % (
+            print("           %s | scheme=%s hue=%s background=%s" % (
                 ", ".join("%s=%s" % kv for kv in params.items()), d["scheme"], d["hue"], d["background"]))
         print(T("sizes") + ":")
         for g, keys in SIZE_GROUPS:
@@ -781,7 +941,16 @@ def main():
             "hue": tl.parse_hue(a.hue) if a.hue is not None else None,
             "colours": tl.parse_colours(a.colours) if a.colours else None,
             "background": a.background, "grain": a.grain, "vignette": a.vignette, "params": params}
-    styles = a.styles or (STYLE_KEYS if a.gallery else ["ribbons"])
+    if a.input:
+        if not os.path.isfile(a.input):
+            raise SystemExit("picture not found: %s" % a.input)
+        base["input"] = a.input
+        for k in ("mode", "fit"):
+            if getattr(a, k):
+                params[k] = getattr(a, k)
+        if a.vignette is None:
+            base["vignette"] = None
+    styles = a.styles or (["image"] if a.input else STYLE_KEYS if a.gallery else ["ribbons"])
 
     if a.show:
         run_preview(dict(base, style=styles[0], seed=a.seed))
@@ -805,7 +974,7 @@ def main():
                 root, ext = os.path.splitext(a.output)
                 path = "%s_%s_%d%s" % (root, st, sp["seed"], ext or ".png")
             else:
-                path = "wallpaper_%s_%s_%d.png" % (st, str(s["size"]).replace("x", "x"), sp["seed"])
+                path = default_name(s)
             save(render(sp), path)
             print("wrote", path)
 

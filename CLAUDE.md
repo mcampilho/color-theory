@@ -121,6 +121,11 @@ repositório, para se poderem usar sem Python. Contém:
   periódico (grelhas aleatórias + `map_coordinates` cúbico). Estilos suaves desenham numa
   grelha reduzida (`grid(W, H, max_px)`); `ribbons` e `trails` desenham linhas com Pillow
   a 2x. Tamanhos em `SIZES`/`SIZE_GROUPS`; `--show` abre uma janela Tk com comboboxes.
+  - Estilo `image` (com `--input`, fora de `STYLE_KEYS`): `recolour` ajusta a imagem ao
+    tamanho (`fit_image`: cover/contain/stretch) e muda o matiz em HSV (`shift` roda todos os
+    matizes pela diferença entre o `--hue` e o `dominant_hue`; `tint` põe um só matiz; `map`
+    é um mapa de degradê da luminosidade pela paleta). `hue=None` mantém as cores; o tamanho
+    `source` é o da imagem original (`size_of`).
 - `color_theory_poster.py` — versão anterior, só a página 1, sem traduções (ReportLab).
 - PDFs gerados: `colour_theory_en.pdf`, `colour_theory_pt.pdf`, `colour_theory_es.pdf`
   (do `color_theory_document.py`), `colour_wheels_en.pdf`, `colour_wheels_pt.pdf`,

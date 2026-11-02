@@ -301,6 +301,33 @@ python3 wallpapers.py --gallery --size iphone --cols 8    # todos os estilos lad
 Outras opções: `--background dark|black|light|white|<hex>`, `--grain` (grão de filme),
 `--vignette` (cantos mais escuros) e `--lang pt|es` para a janela e as legendas.
 
+### Mudar a tonalidade e o tamanho de uma imagem
+
+Com `--input`, o programa recebe uma imagem sua (PNG, JPG, WebP, AVIF ...) e muda-lhe a
+tonalidade e/ou as dimensões:
+
+- `--hue`: o novo matiz. Sem `--hue`, as cores ficam como estão e só muda o tamanho.
+- `--mode shift` (por omissão) roda todos os matizes de modo a que o matiz principal da imagem
+  passe a ser o `--hue`, e assim a variedade de cores mantém-se; `--mode tint` põe tudo no mesmo
+  matiz, mantendo saturação e luminosidade; `--mode map` passa a luminosidade pelas cores de
+  um esquema (`--scheme`, de preferência `ramp` ou `mono`).
+- `--size`: o novo tamanho (por omissão o da imagem original). `--fit cover` (por omissão)
+  enche o ecrã e corta o que sobra, `--fit contain` mostra a imagem inteira sobre uma cópia
+  desfocada dela própria, `--fit stretch` estica.
+- `-p saturation=1.2 -p brightness=0.9` ajustam a saturação e o brilho.
+
+```bash
+python3 wallpapers.py --input onda_azul.avif --hue orange --size 1980x1080 -o onda_laranja.png
+python3 wallpapers.py --input onda_azul.avif --hue orange --mode tint --size fhd
+python3 wallpapers.py --input onda_azul.avif --mode map --scheme ramp --hue blue-green
+python3 wallpapers.py --input onda_azul.avif --hue green --size iphone --fit contain
+python3 wallpapers.py --input onda_azul.avif --show --lang pt      # experimentar na janela
+```
+
+Na janela, o botão "Abrir imagem..." escolhe a imagem, e o matiz "(manter)" deixa as cores
+originais. Sem `-o`, o nome do ficheiro diz o matiz e o tamanho, por exemplo
+`onda_azul_orange_1980x1080.png`.
+
 ## Outros ficheiros
 
 - `Claude - The Complete Guide to Color Theory.md`: o guia de referência completo, da física
