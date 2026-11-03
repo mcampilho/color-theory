@@ -32,6 +32,10 @@ repositório, para se poderem usar sem Python. Contém:
   funções CIE em `cmf`). O contorno do diagrama CIE usa a tabela oficial `SPECTRAL_LOCUS`, porque o
   ajuste gaussiano de `cmf` se desvia abaixo de ~440 nm e acima de ~650 nm.
   O Inkscape ignora recortes encaixados (`clipPath` dentro de `clipPath`): usar um só recorte.
+  Os vértices coloridos de `RYB_CORNERS` são os primários e secundários da roda da w3schools/
+  Canva; os terciários (a meio das arestas) dão exatamente os terciários dessa roda, porque são
+  as médias dos vizinhos. Mudar estes vértices muda as cores de todo o projeto (documento, rodas,
+  pavimentações, mosaicos e wallpapers). O `color_theory_poster.py` (antigo) tem a sua cópia.
 - `color_wheel.py` — rodas de cores para construir em casa: PDF A4 de 6 páginas (instruções de
   montagem, como usar e glossário; depois os 4 discos para recortar, cada um numa página com
   barra de escala de 100 mm). Disco 1 (misturas): o disco da frente tem 5 patilhas e 5 janelas a

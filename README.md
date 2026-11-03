@@ -18,6 +18,14 @@ values of the CSS colour keywords, the CIE 1931 colour-matching functions and CI
 is copied. Ready-made PDFs: [English](colour_theory_en.pdf), [Português](colour_theory_pt.pdf),
 [Español](colour_theory_es.pdf).
 
+The 12 colours of the RYB wheel are the ones used by
+[w3schools](https://www.w3schools.com/colors/colors_wheels.asp) and
+[Canva](https://www.canva.com/colors/color-wheel/): red `#FE2712`, red-orange `#FC600A`,
+orange `#FB9902`, yellow-orange `#FCCC1A`, yellow `#FEFE33`, yellow-green `#B2D732`,
+green `#66B032`, blue-green `#347C98`, blue `#0247FE`, blue-violet `#4424D6`,
+violet `#8601AF`, red-violet `#C21460`. They sit on the corners and edges of the RYB cube,
+which mixes them like paints (yellow and blue make green), not like light.
+
 | Page | Content |
 |------|---------|
 | 1 | RYB colour wheel, primary/secondary/tertiary colours, tint/tone/shade, colour meanings, colour schemes |

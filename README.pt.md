@@ -20,6 +20,15 @@ correspondência de cor CIE 1931 e o CIELAB. Nenhuma imagem é copiada. PDFs pro
 [English](colour_theory_en.pdf), [Português](colour_theory_pt.pdf),
 [Español](colour_theory_es.pdf).
 
+As 12 cores da roda RYB são as usadas pela
+[w3schools](https://www.w3schools.com/colors/colors_wheels.asp) e pelo
+[Canva](https://www.canva.com/colors/color-wheel/): vermelho `#FE2712`, vermelho-alaranjado
+`#FC600A`, laranja `#FB9902`, amarelo-alaranjado `#FCCC1A`, amarelo `#FEFE33`,
+amarelo-esverdeado `#B2D732`, verde `#66B032`, azul-esverdeado `#347C98`, azul `#0247FE`,
+azul-arroxeado `#4424D6`, violeta `#8601AF`, vermelho-arroxeado `#C21460`. Ficam nos
+vértices e arestas do cubo RYB, que as mistura como tintas (amarelo com azul dá verde) e não
+como luz.
+
 | Página | Conteúdo |
 |--------|----------|
 | 1 | Roda RYB, cores primárias, secundárias e terciárias, tinta/tom/sombra, significados das cores, esquemas de cores |

@@ -832,14 +832,21 @@ def heading(c, text, cx_px, y_px, size=8.4, align="center", max_w_pt=None):
 # ==========================================================================
 # sRGB colours of the 8 corners of the RYB cube; inside the cube colours are
 # trilinearly interpolated with smoothstep easing (Gossett & Chen, 2004).
+# Primaries and secondaries are the RYB wheel of w3schools and Canva; the
+# tertiaries, halfway along the edges, come out as the averages of their two
+# neighbours, which are exactly the tertiaries of that wheel too.
+def _hex(h):
+    return tuple(int(h[k:k + 2], 16) / 255.0 for k in (0, 2, 4))
+
+
 RYB_CORNERS = {
     (0, 0, 0): (1.00, 1.00, 1.00),   # white
-    (1, 0, 0): (0.89, 0.12, 0.13),   # red
-    (0, 1, 0): (1.00, 0.92, 0.00),   # yellow
-    (0, 0, 1): (0.10, 0.30, 0.85),   # blue
-    (1, 1, 0): (0.97, 0.55, 0.08),   # orange  = red + yellow
-    (0, 1, 1): (0.20, 0.66, 0.20),   # green   = yellow + blue
-    (1, 0, 1): (0.52, 0.10, 0.58),   # violet  = red + blue
+    (1, 0, 0): _hex("FE2712"),       # red
+    (0, 1, 0): _hex("FEFE33"),       # yellow
+    (0, 0, 1): _hex("0247FE"),       # blue
+    (1, 1, 0): _hex("FB9902"),       # orange  = red + yellow
+    (0, 1, 1): _hex("66B032"),       # green   = yellow + blue
+    (1, 0, 1): _hex("8601AF"),       # violet  = red + blue
     (1, 1, 1): (0.20, 0.10, 0.08),   # all pigments -> near black
 }
 
