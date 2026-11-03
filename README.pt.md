@@ -4,8 +4,10 @@
 
 Um guia de teoria da cor, um póster vetorial de dez páginas e duas rodas de cores para
 construir em casa, tudo gerado em Python. As rodas podem ser impressas e recortadas, ou
-rodadas no ecrã (aplicação de computador ou página web). Todos os textos existem em inglês,
-português e espanhol.
+rodadas no ecrã (aplicação de computador ou página web). Os textos existem em inglês,
+português e espanhol, e as rodas de cores também em português do Brasil, francês, italiano,
+alemão, neerlandês, polaco, turco, russo, chinês, japonês e coreano (os outros programas vêm a
+seguir; ver [Línguas](#línguas)).
 
 **Experimente as rodas online: https://mcampilho.github.io/color-theory/web/?lang=pt**
 
@@ -72,8 +74,12 @@ valores e regista-se com uma chave nova.
 O `color_wheel.py` cria um PDF A4 de seis páginas, pronto a imprimir, com duas rodas de
 cores em papel para recortar e montar em casa. Cada roda tem um disco de trás, que roda, e
 um disco da frente com janelas, unidos no centro por um atache. PDFs prontos:
-[English](colour_wheels_en.pdf), [Português](colour_wheels_pt.pdf),
-[Español](colour_wheels_es.pdf).
+[English](colour_wheels_en.pdf), [Português (Portugal)](colour_wheels_pt.pdf),
+[Português (Brasil)](colour_wheels_pt-BR.pdf), [Español](colour_wheels_es.pdf),
+[Français](colour_wheels_fr.pdf), [Italiano](colour_wheels_it.pdf),
+[Deutsch](colour_wheels_de.pdf), [Nederlands](colour_wheels_nl.pdf),
+[Polski](colour_wheels_pl.pdf), [Türkçe](colour_wheels_tr.pdf), [Русский](colour_wheels_ru.pdf),
+[简体中文](colour_wheels_zh.pdf), [日本語](colour_wheels_ja.pdf), [한국어](colour_wheels_ko.pdf).
 
 ![Os quatro discos para recortar](images/wheels_pages.png)
 
@@ -94,6 +100,7 @@ trás: aparece na janela quando a cor está mesmo junto à patilha.
 python3 color_wheel.py                 # -> colour_wheels_en.pdf
 python3 color_wheel.py --lang pt       # português
 python3 color_wheel.py --lang es -o es.pdf
+python3 color_wheel.py --lang pt-BR    # também fr, it, de, nl, pl, tr, ru, zh, ja, ko
 ```
 
 As páginas 3 a 6 devem ser impressas em tamanho real (100 %); cada página tem uma barra de
@@ -124,7 +131,7 @@ python3 color_wheel.py --app --theme dark   # --theme auto (por omissão), light
 ```
 
 **Web**: abre-se o `web/index.html` num browser. A caixa de idioma no topo alterna entre
-inglês, português e espanhol. A página carrega os discos de `web/discs/` (SVG) e os textos e
+as 14 línguas, e a página começa na língua do browser, quando a tem. A página carrega os discos de `web/discs/` (SVG) e os textos e
 a geometria dos discos de `web/discs/data.js`, ambos escritos por (cada disco numa versão
 clara e numa escura; `?theme=dark` ou `?lang=pt` no endereço também funcionam):
 
@@ -339,6 +346,26 @@ dá apenas o nome e a pasta propostos nesse diálogo. Os ficheiros sem caminho c
 na pasta onde o comando foi executado, e o programa escreve sempre o caminho completo do que
 gravou. Sem `-o`, o nome do ficheiro diz o matiz e o tamanho, por exemplo
 `onda_azul_orange_1980x1080.png`.
+
+## Línguas
+
+O projeto está a ser traduzido para 15 línguas: inglês, português (de Portugal e do Brasil),
+espanhol, francês, italiano, alemão, neerlandês, polaco, turco, russo, árabe, chinês
+simplificado, japonês e coreano.
+
+| Programa | Línguas até agora |
+|----------|-------------------|
+| `color_wheel.py` (PDF, aplicação, página web) | todas menos o árabe (14) |
+| `color_theory_document.py`, `tilings.py`, `patterns.py`, `wallpapers.py` | inglês, português, espanhol |
+
+O `i18n.py` guarda o que todos os programas partilham: a lista de línguas com os seus nomes,
+os tipos de letra de cada escrita e a quebra de linha para chinês e japonês (entre caracteres,
+nunca antes de pontuação de fecho nem depois de pontuação de abertura). Os PDFs mantêm a
+Helvetica nas línguas da Europa ocidental, sem fonte embutida; polaco, turco e russo usam
+Arial, chinês Microsoft YaHei, japonês Yu Gothic e coreano Malgun Gothic (ou as alternativas
+listadas no `i18n.py`, em Linux e macOS), embutidas só com as letras usadas. Os textos das
+línguas novas estão em `locales/` (um ficheiro por programa); um texto em falta usa o inglês.
+As traduções foram feitas por máquina e convém que sejam revistas por falantes nativos.
 
 ## Ligações
 

@@ -24,14 +24,22 @@
   function startLang() {
     const asked = new URLSearchParams(location.search).get("lang");
     if (asked && D.langs[asked]) return asked;
-    const nav = (navigator.language || "en").slice(0, 2);
-    return D.langs[nav] ? nav : "en";
+    // the browser's languages in order of preference: a full code (pt-BR) first, then
+    // the language alone (fr-CA -> fr, zh-Hans-CN -> zh)
+    for (const code of navigator.languages || [navigator.language || "en"]) {
+      if (D.langs[code]) return code;
+      const base = code.split("-")[0];
+      if (base === "pt" && /-BR$/i.test(code) && D.langs["pt-BR"]) return "pt-BR";
+      if (D.langs[base]) return base;
+    }
+    return "en";
   }
 
   function setLang(l) {
     lang = l;
     const S = D.langs[l];
     document.documentElement.lang = l;
+    document.documentElement.dir = (D.rtl || []).includes(l) ? "rtl" : "ltr";
     document.title = S.app_title;
     $("title").textContent = S.app_title;
     $("lang-label").textContent = S.app_lang;

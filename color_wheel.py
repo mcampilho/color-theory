@@ -43,10 +43,12 @@ import os
 from xml.sax.saxutils import escape as xml_escape
 
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.utils import simpleSplit
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD
+
+import i18n
+from i18n import BOLD, ITAL, LANG_NAMES, REG
 
 from color_theory_document import (HUE_RYB, STRINGS as DOC_STRINGS, arc_text, fill_poly, fit_size,
                                    luma, mix, pol, radial_text, ring_text, ring_wedge, ryb_to_rgb,
@@ -449,6 +451,10 @@ STRINGS = {
                      "Agarre un disco trasero por su borde de color o a través de una ventana."],
     },
 }
+# the other languages are in locales/color_wheel.py
+from locales.color_wheel import STRINGS as _MORE   # noqa: E402
+
+STRINGS.update(_MORE)
 
 _LANG = "en"
 # True while drawing the discs for the screen (desktop app and web page):
@@ -457,12 +463,17 @@ _VIRTUAL = False
 
 
 def T(key):
-    return STRINGS[_LANG].get(key, STRINGS["en"][key])
+    return STRINGS.get(_LANG, STRINGS["en"]).get(key, STRINGS["en"][key])
 
 
 def hue_names():
     """The 12 RYB hue names, clockwise from yellow (from the poster's table)."""
-    return DOC_STRINGS[_LANG]["hue_names"]
+    return DOC_STRINGS.get(_LANG, {}).get("hue_names", DOC_STRINGS["en"]["hue_names"])
+
+
+def languages():
+    """The languages with texts for the wheels, in the order of i18n.LANGS."""
+    return [k for k, _ in i18n.LANGS if k in STRINGS]
 
 
 # ==========================================================================
@@ -471,7 +482,6 @@ def hue_names():
 W, H = A4                                   # 595 x 842 pt, portrait
 MM = 72 / 25.4
 WHITE, BLACK = (1, 1, 1), (0, 0, 0)
-REG, BOLD = "Helvetica", "Helvetica-Bold"
 
 # Theme colours of the discs: the paper, its text, outlines, thin rules and
 # the shapes of the harmony diagram (tetrad, tetrad, triad, split
@@ -653,11 +663,11 @@ def disc_outline(c, r):
 
 def wrap_lines(text, font, size, width_at):
     """Greedy word wrap where width_at(n) gives the width of line n."""
-    words, lines = text.split(), []
+    words, lines = i18n.words(text), []
     while words:
-        line = words.pop(0)
-        while words and stringWidth(line + " " + words[0], font, size) <= width_at(len(lines)):
-            line += " " + words.pop(0)
+        line = words.pop(0)[1]
+        while words and stringWidth(line + "".join(words[0]), font, size) <= width_at(len(lines)):
+            line += "".join(words.pop(0))
         lines.append(line)
     return lines
 
@@ -669,17 +679,20 @@ def flow(c, items, y, bounds, size, x_shift=0.0):
     lead = size * 1.24
     c.setFillColorRGB(*INK)
     for head, body in items:
-        words = [(w, BOLD) for w in (head + ":").split()] + [(w, REG) for w in body.split()]
+        colon = "：" if i18n.script(_LANG) in ("zh", "ja") else ":"
+        words = ([(s, w, BOLD) for s, w in i18n.words(head + colon)]
+                 + [(" " if k == 0 else s, w, REG) for k, (s, w) in enumerate(i18n.words(body))])
         while words:
             x0, x1 = bounds(y)
             x, first = x0 + x_shift, True
             while words:
-                w, font = words[0]
-                ww = stringWidth(w, font, size) + (0 if first else stringWidth(" ", REG, size))
+                sep, w, font = words[0]
+                gap = 0 if first else stringWidth(sep, REG, size)
+                ww = stringWidth(w, font, size) + gap
                 if not first and x + ww > x1:
                     break
                 c.setFont(font, size)
-                c.drawString(x + (0 if first else stringWidth(" ", REG, size)), y, w)
+                c.drawString(x + gap, y, w)
                 x += ww
                 first = False
                 words.pop(0)
@@ -745,7 +758,7 @@ def text_column(c, x, y, width, blocks, size=9.2):
         tracked(c, head, x, y, BOLD, size + 1.6, INK, 1.0, max_w=width)
         y -= lead * 1.6
         for para in paras:
-            lines = simpleSplit(para, REG, size, width - 10)
+            lines = i18n.wrap(para, REG, size, width - 10)
             c.setFillColorRGB(*INK)
             c.circle(x + 2.5, y + size * .32, 1.3, stroke=0, fill=1)
             c.setFont(REG, size)
@@ -805,7 +818,7 @@ def build_page_1(c):
     c.setFont(REG, 9.5)
     c.setFillColorRGB(.3, .3, .3)
     y = H - 92
-    for ln in simpleSplit(T("subtitle"), REG, 9.5, 440):
+    for ln in i18n.wrap(T("subtitle"), REG, 9.5, 440):
         c.drawCentredString(W / 2, y, ln)
         y -= 12
     left = [(T("need_t"), T("need")), (T("print_t"), T("print")), (T("cut_t"), T("cut"))]
@@ -828,10 +841,10 @@ def build_page_2(c):
     y -= size * 2.1
     for term, text in T("gloss"):
         y = flow(c, [(term, text)], y, lambda yy: (x, x + width), size) + size * .2
-    c.setFont("Helvetica-Oblique", 8)
+    c.setFont(ITAL, 8)
     c.setFillColorRGB(.35, .35, .35)
     y -= 8
-    for ln in simpleSplit(T("note"), "Helvetica-Oblique", 8, width):
+    for ln in i18n.wrap(T("note"), ITAL, 8, width):
         c.drawString(x, y, ln)
         y -= 10
     c.setFont(REG, 6.5)
@@ -920,7 +933,7 @@ def build_disc1_front(c):
     c.setFont(REG, 6.8)
     c.setFillColorRGB(*INK)
     y = CY - 12.5 * MM
-    for ln in simpleSplit(T("d1_how"), REG, 6.8, 80 * MM):
+    for ln in i18n.wrap(T("d1_how"), REG, 6.8, 80 * MM):
         c.drawCentredString(CX, y, ln)
         y -= 8.4
     y -= 6
@@ -985,7 +998,7 @@ def side_flow(c, items, side, half, r0, r1, size):
     of the horizontal."""
     t = math.tan(math.radians(half))
     lead = size * 1.24
-    n = sum(len(simpleSplit(h + ": " + b, REG, size, r1 - r0 - 6)) for h, b in items)
+    n = sum(len(i18n.wrap(h + ": " + b, REG, size, r1 - r0 - 6)) for h, b in items)
     y_top = CY + (n * lead + lead * .35 * len(items)) / 2 - size
 
     def bounds(yy):
@@ -1073,7 +1086,7 @@ def build_disc2_front(c):
     c.translate(CX, CY)
     c.rotate(57 - 90)
     y = r1 - 14
-    for ln in simpleSplit(T("d2_title"), BOLD, 7.6, 22 * MM):
+    for ln in i18n.wrap(T("d2_title"), BOLD, 7.6, 22 * MM):
         tracked(c, ln, 0, y, BOLD, 7.6, INK, .6, align="center")
         y -= 9.5
     c.restoreState()
@@ -1094,7 +1107,6 @@ def build_disc2_front(c):
 PARTS = [("d1b", build_disc1_back), ("d1f", build_disc1_front),
          ("d2b", build_disc2_back), ("d2f", build_disc2_front)]
 VIEW_MM = 96                                # half the side of the square round a disc
-LANG_NAMES = {"en": "English", "pt": "Português", "es": "Español"}
 STEP = 30                                   # one hue, in degrees
 
 
@@ -1259,14 +1271,16 @@ def record_part(build, lang, theme="light"):
     """The shapes of one disc (a build_disc* function) in language lang and
     theme "light" or "dark"."""
     global _LANG, _VIRTUAL
-    old = _LANG, _VIRTUAL
+    old = _LANG, _VIRTUAL, i18n.current()
     _LANG, _VIRTUAL = lang, True
+    i18n.use_lang(lang)
     set_theme(theme)
     try:
         rec = ShapeRecorder()
         build(rec)
     finally:
-        _LANG, _VIRTUAL = old
+        _LANG, _VIRTUAL = old[:2]
+        i18n.use_lang(old[2])
         set_theme("light")
     return rec.items
 
@@ -1275,7 +1289,7 @@ def _hex(col):
     return "#%02x%02x%02x" % tuple(int(round(255 * v)) for v in col)
 
 
-def items_to_svg(items):
+def items_to_svg(items, lang="en"):
     """SVG of one disc: a square of 2 * VIEW_MM millimetres centred on it."""
     half = VIEW_MM * MM
     x0, top = CX - half, CY + half
@@ -1283,8 +1297,8 @@ def items_to_svg(items):
     def P(x, y):
         return "%.2f,%.2f" % (x - x0, top - y)
 
-    out = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %.2f %.2f" '
-           'font-family="Helvetica, Arial, \'Liberation Sans\', sans-serif">' % (2 * half, 2 * half)]
+    out = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %.2f %.2f" font-family="%s">'
+           % (2 * half, 2 * half, i18n.css_family(lang).replace('"', "'"))]
     for it in items:
         if it[0] == "path":
             _, subs, fill, stroke, lw, even_odd, closed = it
@@ -1309,29 +1323,23 @@ def items_to_svg(items):
     return "\n".join(out)
 
 
-# Fonts close to Helvetica for the bitmaps (Windows, Linux, macOS).
-_FONT_FILES = {REG: ["arial.ttf", "LiberationSans-Regular.ttf", "Arial.ttf", "DejaVuSans.ttf"],
-               BOLD: ["arialbd.ttf", "LiberationSans-Bold.ttf", "Arial Bold.ttf",
-                      "DejaVuSans-Bold.ttf"]}
+# The bitmaps use the font files of i18n (close to Helvetica for Western languages).
 _fonts = {}
 
 
-def _font(name, px):
+def _font(name, px, lang="en"):
     from PIL import ImageFont
-    key = (name, round(px * 4) / 4.0)
+    key = (i18n.script(lang), name, round(px * 4) / 4.0)
     if key not in _fonts:
-        for f in _FONT_FILES[name]:
-            try:
-                _fonts[key] = ImageFont.truetype(f, key[1])
-                break
-            except OSError:
-                continue
-        else:
-            _fonts[key] = ImageFont.load_default(key[1])
+        path = i18n.font_file(lang, {REG: 0, BOLD: 1, ITAL: 2}.get(name, 0))
+        try:
+            _fonts[key] = ImageFont.truetype(path, key[2])
+        except (OSError, TypeError, AttributeError):
+            _fonts[key] = ImageFont.load_default(key[2])
     return _fonts[key]
 
 
-def items_to_image(items, size, ss=3):
+def items_to_image(items, size, ss=3, lang="en"):
     """Bitmap (Pillow RGBA, size x size pixels) of one disc, drawn ss times
     larger and scaled down for smooth edges. In an even-odd path the first
     subpath is filled and the others are cut out of it."""
@@ -1360,7 +1368,7 @@ def items_to_image(items, size, ss=3):
                               joint="curve")
         elif it[1].strip():
             _, text, x, y, ang, font, fs, col = it
-            f = _font(font, fs * k)
+            f = _font(font, fs * k, lang)
             X, Y = P(x, y)
             if abs(ang) < .01:
                 draw.text((X, Y), text, font=f, fill=_hex(col), anchor="ls")
@@ -1453,8 +1461,8 @@ class WheelApp:
         self.reset_btn.pack(side="right")
         self.theme_btn = ttk.Button(bar, command=self.toggle_theme)
         self.theme_btn.pack(side="right", padx=(0, 8))
-        self.lang_box = ttk.Combobox(bar, state="readonly", width=11,
-                                     values=[LANG_NAMES[k] for k in STRINGS])
+        self.lang_box = ttk.Combobox(bar, state="readonly", width=20,
+                                     values=[LANG_NAMES[k] for k in languages()])
         self.lang_box.pack(side="right", padx=(6, 14))
         self.lang_box.bind("<<ComboboxSelected>>", self.on_lang)
         self.lang_label = ttk.Label(bar)
@@ -1575,8 +1583,8 @@ class WheelApp:
                                     font=("Helvetica", 13), fill=UI_COLOURS[self.theme]["fg"])
             self.root.config(cursor="watch")
             self.root.update()
-            self.images[key] = [items_to_image(record_part(build, lang, self.theme), self.size)
-                                for _, build in PARTS]
+            self.images[key] = [items_to_image(record_part(build, lang, self.theme), self.size,
+                                               lang=lang) for _, build in PARTS]
             self.root.config(cursor="")
         self.canvas.delete("all")
         self.photos = [None, None]
@@ -1712,19 +1720,20 @@ def export_web(folder):
     """Write folder/discs/<lang>/<part>.svg and <part>-dark.svg for every
     language and folder/discs/data.js with the texts and the disc geometry."""
     base = os.path.join(folder, "discs")
-    for lang in STRINGS:
+    for lang in languages():
         os.makedirs(os.path.join(base, lang), exist_ok=True)
         for name, build in PARTS:
             for theme, suffix in (("light", ""), ("dark", "-dark")):
                 path = os.path.join(base, lang, name + suffix + ".svg")
                 with open(path, "w", encoding="utf-8") as f:
-                    f.write(items_to_svg(record_part(build, lang, theme)))
+                    f.write(items_to_svg(record_part(build, lang, theme), lang))
     keys = ["app_title", "app_lang", "app_reset", "app_selected", "parts", "app_help",
             "app_dark", "app_light"]
     data = {"view_r": VIEW_MM, "step": STEP, "parts": [n for n, _ in PARTS],
-            "lang_names": LANG_NAMES, "discs": disc_geometry(),
+            "lang_names": {k: LANG_NAMES[k] for k in languages()}, "discs": disc_geometry(),
+            "rtl": sorted(i18n.RTL & set(languages())),
             "langs": {lang: {k: STRINGS[lang].get(k, STRINGS["en"][k]) for k in keys}
-                      for lang in STRINGS}}
+                      for lang in languages()}}
     with open(os.path.join(base, "data.js"), "w", encoding="utf-8") as f:
         f.write("// Written by color_wheel.py --web: do not edit by hand.\n")
         f.write("window.WHEEL_DATA = %s;\n" % json.dumps(data, ensure_ascii=False, indent=1))
@@ -1760,7 +1769,7 @@ def main():
     global _LANG
     ap = argparse.ArgumentParser(description="Build-your-own colour wheels (A4 PDF), and the "
                                              "same wheels on screen")
-    ap.add_argument("--lang", default="en", choices=sorted(STRINGS), help="text language")
+    ap.add_argument("--lang", default="en", choices=languages(), help="text language")
     ap.add_argument("-o", "--out", default=None, help="output PDF path")
     ap.add_argument("--app", action="store_true", help="open the wheels in a window to turn")
     ap.add_argument("--web", nargs="?", const="web", metavar="DIR",
@@ -1780,6 +1789,7 @@ def main():
         export_web(a.web)
         return
     _LANG = a.lang
+    i18n.use_lang(a.lang)
     out = a.out or "colour_wheels_%s.pdf" % a.lang
     c = canvas.Canvas(out, pagesize=A4)
     c.setTitle(T("doc_title"))

@@ -8,6 +8,19 @@ português europeu: mudar os dois em conjunto. As imagens dos READMEs estão em 
 PDFs atuais (`colour_theory_*.pdf`, `colour_wheels_*.pdf`) e `web/discs/` vão para o
 repositório, para se poderem usar sem Python. Contém:
 
+- `i18n.py` — línguas e fontes partilhadas. Plano: 15 línguas (en, pt, pt-BR, es, fr, it, de,
+  nl, pl, tr, ru, ar, zh, ja, ko), por fases: 1) base comum e 2) rodas de cores — feitas;
+  3) documento; 4) wallpapers; 5) pavimentações e mosaicos; 6) árabe (direita para a
+  esquerda: `arabic-reshaper` + `python-bidi`, texto em arco). Os programas desenham sempre
+  com `REG`/`BOLD`/`ITAL` ("Sans"...); `use_lang(lang)` aponta esses nomes para Helvetica
+  (latim ocidental, sem embutir) ou para uma TTF (Arial, YaHei, Yu Gothic, Malgun). Atenção:
+  o `registerFont` do ReportLab não substitui uma TTF já registada, por isso `use_lang` tira
+  o nome de `pdfmetrics._fonts` antes. `words`/`wrap` quebram linhas em chinês e japonês
+  (o `simpleSplit` só quebra em espaços). Os textos das línguas novas estão em `locales/<programa>.py`
+  e cada programa junta-os à sua `STRINGS`; uma chave em falta usa o inglês. O documento só
+  oferece no `--lang` as línguas completas (`POSTER_LANGS`); para já as línguas novas têm lá
+  só `hue_names` (usados pelas rodas).
+
 - `Claude - The Complete Guide to Color Theory.md` — guia de referência completo (da física da luz
   aos espaços de cor e sistemas de correspondência), em inglês. As versões `.docx` e `.pdf`
   com o mesmo nome são exportações deste texto; se o `.md` mudar, ficam desatualizadas.

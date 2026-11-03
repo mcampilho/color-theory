@@ -48,6 +48,9 @@ from reportlab.lib.utils import ImageReader, simpleSplit
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
+import i18n
+from i18n import BOLD, ITAL, REG
+
 # ==========================================================================
 # 1. TRANSLATIONS
 # ==========================================================================
@@ -664,6 +667,14 @@ STRINGS = {
     },
 }
 
+# the added languages (locales/); until a language has the whole poster translated, only
+# its hue names are there and it is not offered on the command line
+from locales.color_theory_document import STRINGS as _MORE   # noqa: E402
+
+for _lang, _table in _MORE.items():
+    STRINGS.setdefault(_lang, {}).update(_table)
+POSTER_LANGS = [k for k, _ in i18n.LANGS if k in STRINGS and len(STRINGS[k]) >= len(STRINGS["en"])]
+
 _LANG = "en"
 
 
@@ -672,11 +683,12 @@ def set_lang(code):
     if code not in STRINGS:
         raise SystemExit("Unknown language '%s'. Available: %s" % (code, ", ".join(STRINGS)))
     _LANG = code
+    i18n.use_lang(code)
 
 
 def T(key):
     """Translated string for the active language (falls back to English)."""
-    return STRINGS[_LANG].get(key, STRINGS["en"][key])
+    return STRINGS.get(_LANG, STRINGS["en"]).get(key, STRINGS["en"][key])
 
 
 # ==========================================================================
@@ -806,7 +818,7 @@ def swatch_row(c, cx_px, top_px, colors, w=29, h=15, gap=7, radius=3.5):
         c.roundRect(x0 + i * (w + gap), y0, w, h, radius, fill=1, stroke=1)
 
 
-def para(c, text, cx_px, top_px, width_px, size=6.8, leading=8.4, font="Helvetica",
+def para(c, text, cx_px, top_px, width_px, size=6.8, leading=8.4, font=REG,
          color=(0.12, 0.12, 0.12), align="center"):
     """Wrapped paragraph in page-1 layout px. Returns the last baseline (pt)."""
     lines = simpleSplit(text, font, size, width_px * SX)
@@ -821,8 +833,8 @@ def para(c, text, cx_px, top_px, width_px, size=6.8, leading=8.4, font="Helvetic
 
 def heading(c, text, cx_px, y_px, size=8.4, align="center", max_w_pt=None):
     if max_w_pt:
-        size = fit_size(text, "Helvetica-Bold", size, max_w_pt)
-    c.setFont("Helvetica-Bold", size)
+        size = fit_size(text, BOLD, size, max_w_pt)
+    c.setFont(BOLD, size)
     c.setFillColorRGB(0, 0, 0)
     (c.drawCentredString if align == "center" else c.drawString)(X(cx_px), Y(y_px), text)
 
@@ -895,11 +907,11 @@ def draw_ryb_wheel(c, cx, cy, R, segments=12):
             col = text_on(hue_rgb(i))
             l1, l2 = T("tertiary_lbl"), names[i]
             if math.sin(math.radians(mid)) >= -1e-9:
-                arc_text(c, l1, cx, cy, mid_r + cap * .35, mid, "Helvetica-Bold", size, col, False, .5)
-                arc_text(c, l2, cx, cy, mid_r - cap * 1.45, mid, "Helvetica-Bold", size, col, False, .5)
+                arc_text(c, l1, cx, cy, mid_r + cap * .35, mid, BOLD, size, col, False, .5)
+                arc_text(c, l2, cx, cy, mid_r - cap * 1.45, mid, BOLD, size, col, False, .5)
             else:
-                arc_text(c, l1, cx, cy, mid_r - cap * .35, mid, "Helvetica-Bold", size, col, True, .5)
-                arc_text(c, l2, cx, cy, mid_r + cap * 1.45, mid, "Helvetica-Bold", size, col, True, .5)
+                arc_text(c, l1, cx, cy, mid_r - cap * .35, mid, BOLD, size, col, True, .5)
+                arc_text(c, l2, cx, cy, mid_r + cap * 1.45, mid, BOLD, size, col, True, .5)
 
     rh = r_in - 0.5                                       # centre hexagon
     Yv, Ov, Rv = pol(cx, cy, rh, 90), pol(cx, cy, rh, 30), pol(cx, cy, rh, -30)
@@ -925,7 +937,7 @@ def draw_ryb_wheel(c, cx, cy, R, segments=12):
         c.translate(gx, gy)
         c.rotate(rot)
         c.setFillColorRGB(*text_on(col))
-        c.setFont("Helvetica-Bold", size)
+        c.setFont(BOLD, size)
         c.drawCentredString(0, 1.2, l1)
         c.drawCentredString(0, -size - 0.4, l2)
         c.restoreState()
@@ -944,12 +956,12 @@ def draw_ryb_wheel(c, cx, cy, R, segments=12):
         c.setStrokeColorRGB(0.35, 0.35, 0.35)
         c.setLineWidth(0.9)
         c.line(a[0], a[1], b[0], b[1])
-    arc_text(c, T("cold"), cx, cy, rr, 90 + 14, "Helvetica", 6.4, grey, False, 0.9)
-    arc_text(c, T("warm"), cx, cy, rr, 90 - 14, "Helvetica", 6.4, grey, False, 0.9)
+    arc_text(c, T("cold"), cx, cy, rr, 90 + 14, REG, 6.4, grey, False, 0.9)
+    arc_text(c, T("warm"), cx, cy, rr, 90 - 14, REG, 6.4, grey, False, 0.9)
     arc_arrow(c, cx, cy, rr + 2.5, 90 + 24, 90 + 42)
     arc_arrow(c, cx, cy, rr + 2.5, 90 - 24, 90 - 42)
-    arc_text(c, T("cold"), cx, cy, rr + 5, 270 - 14, "Helvetica", 6.4, grey, True, 0.9)
-    arc_text(c, T("warm"), cx, cy, rr + 5, 270 + 14, "Helvetica", 6.4, grey, True, 0.9)
+    arc_text(c, T("cold"), cx, cy, rr + 5, 270 - 14, REG, 6.4, grey, True, 0.9)
+    arc_text(c, T("warm"), cx, cy, rr + 5, 270 + 14, REG, 6.4, grey, True, 0.9)
     arc_arrow(c, cx, cy, rr + 2.5, 270 - 24, 270 - 42)
     arc_arrow(c, cx, cy, rr + 2.5, 270 + 24, 270 + 42)
 
@@ -982,7 +994,7 @@ def draw_mini_ryb(c, cx, cy, r, picks=None):
 def scheme_item(c, cx_px, cy_px, r_pt, picks, caption):
     cx, cy = X(cx_px), Y(cy_px)
     draw_mini_ryb(c, cx, cy, r_pt, picks)
-    c.setFont("Helvetica-Bold", 6.8)
+    c.setFont(BOLD, 6.8)
     c.setFillColorRGB(0, 0, 0)
     x, y = cx + r_pt + 6, cy + 3 * (len(caption) - 1)
     for ln in caption:
@@ -997,7 +1009,7 @@ def build_page_1(c):
     c.setFillColorRGB(1, 1, 1)
     c.rect(0, 0, W, H, fill=1, stroke=0)
 
-    tracked(c, T("title1"), X(375), Y(50), "Helvetica-Oblique", 43, (.05, .05, .05),
+    tracked(c, T("title1"), X(375), Y(50), ITAL, 43, (.05, .05, .05),
             tracking=1.2, align="center", max_w=430)
 
     # ---- left column
@@ -1044,7 +1056,7 @@ def build_page_1(c):
     para(c, T("mono_d"), RX, 250, RW)
 
     heading(c, T("meaning_t"), RX, 306, size=8.2, max_w_pt=140)
-    c.setFont("Helvetica", 5.6)
+    c.setFont(REG, 5.6)
     c.setFillColorRGB(.2, .2, .2)
     c.drawCentredString(X(RX), Y(315), T("meaning_sub"))
     label_cols = [hue_rgb(4), hue_rgb(2), (.90, .72, 0), hue_rgb(10), hue_rgb(8), hue_rgb(6),
@@ -1052,10 +1064,10 @@ def build_page_1(c):
                   (.82, .62, .25), (.88, .80, .50)]
     y = 331
     for (lab, txt), col in zip(T("meanings1"), label_cols):
-        c.setFont("Helvetica-Bold", 6.2)
+        c.setFont(BOLD, 6.2)
         c.setFillColorRGB(*col)
         c.drawCentredString(X(RX), Y(y), lab)
-        c.setFont("Helvetica", 5.6)
+        c.setFont(REG, 5.6)
         c.setFillColorRGB(.1, .1, .1)
         c.drawCentredString(X(RX), Y(y + 9), txt)
         y += 19.2
@@ -1260,12 +1272,12 @@ def build_page_2(c):
     c.setFillColorRGB(1, 1, 1)
     c.rect(0, 0, W, H, fill=1, stroke=0)
 
-    tracked(c, T("title2"), W / 2, 566, "Helvetica-Bold", 26, INK, tracking=3.2,
+    tracked(c, T("title2"), W / 2, 566, BOLD, 26, INK, tracking=3.2,
             align="center", max_w=470)
 
     # ---------------------------------------------------------------- models
     LXL = 26
-    tracked(c, T("models_h"), LXL, 528, "Helvetica-Bold", 10.5, INK, 1.6, max_w=170)
+    tracked(c, T("models_h"), LXL, 528, BOLD, 10.5, INK, 1.6, max_w=170)
     models = [
         ("m_cmyk", [(.0, .63, .89), (.90, .0, .50), (1, .93, 0)][::1], "multiply"),
         ("m_rgb", [(1, 0, 0), (0, 1, 0), (0, 0, 1)], "add"),
@@ -1282,14 +1294,14 @@ def build_page_2(c):
     top = 514
     for key, _cols, mode in models:
         name, d1, d2 = T(key)
-        c.setFont("Helvetica-Bold", 6.4)
+        c.setFont(BOLD, 6.4)
         c.setFillColorRGB(*INK)
         c.drawString(LXL, top - 6, name)
-        c.setFont("Helvetica", 5.3)
+        c.setFont(REG, 5.3)
         c.setFillColorRGB(.3, .3, .3)
         y = top - 14.5
         c.drawString(LXL, y, d1)
-        for ln in simpleSplit(d2, "Helvetica", 5.3, 165):
+        for ln in simpleSplit(d2, REG, 5.3, 165):
             y -= 6.6
             c.drawString(LXL, y, ln)
         venn(c, LXL + 21, top - 45, 9.5, venn_cols[key], mode)
@@ -1303,7 +1315,7 @@ def build_page_2(c):
 
     # -------------------------------------------------------------- meanings
     RXL = 592
-    tracked(c, T("meanings_h"), RXL, 528, "Helvetica-Bold", 10.5, INK, 1.6, max_w=182)
+    tracked(c, T("meanings_h"), RXL, 528, BOLD, 10.5, INK, 1.6, max_w=182)
     sw = [(1, .10, .05), (1, 0, .50), (1, .87, 0), (.40, .95, .10), (1, .60, 0),
           (.27, .40, 1), (.45, .10, 1), (.40, .20, 0), (.70, .70, .70),
           (.10, .10, .10), (.94, .94, .94)]
@@ -1311,29 +1323,29 @@ def build_page_2(c):
     for col, txt in zip(sw, T("meanings2")):
         c.setFillColorRGB(*col)
         c.rect(RXL, top - 12, 12, 12, stroke=0, fill=1)
-        c.setFont("Helvetica-Bold", 5.0)
+        c.setFont(BOLD, 5.0)
         c.setFillColorRGB(.25, .25, .25)
         y = top - 4.8
-        for ln in simpleSplit(txt, "Helvetica-Bold", 5.0, 160)[:2]:
+        for ln in simpleSplit(txt, BOLD, 5.0, 160)[:2]:
             c.drawString(RXL + 18, y, ln)
             y -= 6.2
         top -= 21.5
 
     # ------------------------------------------------------------ properties
     xs = [66 + 110 * k for k in range(7)]
-    tracked(c, T("properties_h"), W / 2, 258, "Helvetica-Bold", 10.5, INK, 1.6,
+    tracked(c, T("properties_h"), W / 2, 258, BOLD, 10.5, INK, 1.6,
             align="center", max_w=300)
     modes = ["warm", "cool", "saturated", "desaturated", "bright", "dark", "mono"]
     for x, m, lab in zip(xs, modes, T("properties")):
         draw_prop_wheel(c, x, 212, 31, m)
-        tracked(c, lab, x, 169, "Helvetica-Bold", 5.6, INK, .5, align="center", max_w=100)
+        tracked(c, lab, x, 169, BOLD, 5.6, INK, .5, align="center", max_w=100)
 
     # ------------------------------------------------------------- harmonies
-    tracked(c, T("harmonies_h"), W / 2, 136, "Helvetica-Bold", 10.5, INK, 1.6,
+    tracked(c, T("harmonies_h"), W / 2, 136, BOLD, 10.5, INK, 1.6,
             align="center", max_w=300)
     for k, (x, lab) in enumerate(zip(xs, T("harmonies"))):
         draw_harmony_wheel(c, x, 92, 31, k)
-        tracked(c, lab, x, 49, "Helvetica-Bold", 5.6, INK, .5, align="center", max_w=104)
+        tracked(c, lab, x, 49, BOLD, 5.6, INK, .5, align="center", max_w=104)
 
 
 # ==========================================================================
@@ -1345,22 +1357,22 @@ WHITE, BLACK, GREY = (1, 1, 1), (0, 0, 0), (.5, .5, .5)
 def page_start(c, title_key):
     c.setFillColorRGB(1, 1, 1)
     c.rect(0, 0, W, H, fill=1, stroke=0)
-    tracked(c, T(title_key), W / 2, 566, "Helvetica-Bold", 26, INK, tracking=3.2,
+    tracked(c, T(title_key), W / 2, 566, BOLD, 26, INK, tracking=3.2,
             align="center", max_w=600)
 
 
 def caption(c, x, y, head, desc, width, align="center", size=5.8, cols=(INK, (.3, .3, .3))):
     """Section heading at baseline y with a wrapped description below it."""
-    tracked(c, head, x, y, "Helvetica-Bold", 8.4, cols[0], 1.2, align=align, max_w=width)
-    c.setFont("Helvetica", size)
+    tracked(c, head, x, y, BOLD, 8.4, cols[0], 1.2, align=align, max_w=width)
+    c.setFont(REG, size)
     c.setFillColorRGB(*cols[1])
     yy = y - 11
-    for ln in simpleSplit(desc, "Helvetica", size, width):
+    for ln in simpleSplit(desc, REG, size, width):
         (c.drawCentredString if align == "center" else c.drawString)(x, yy, ln)
         yy -= size * 1.3
 
 
-def ring_text(c, text, cx, cy, r, mid, size, color, max_w, font="Helvetica-Bold"):
+def ring_text(c, text, cx, cy, r, mid, size, color, max_w, font=BOLD):
     """Text along an arc, visually centred on radius r, upright on both halves."""
     size = fit_size(text, font, size, max_w, 0.3)
     inward = math.sin(math.radians(mid)) < -1e-9
@@ -1368,7 +1380,7 @@ def ring_text(c, text, cx, cy, r, mid, size, color, max_w, font="Helvetica-Bold"
     arc_text(c, text, cx, cy, rb, mid, font, size, color, inward, 0.3)
 
 
-def radial_text(c, text, cx, cy, r0, mid, size, color, font="Helvetica-Bold"):
+def radial_text(c, text, cx, cy, r0, mid, size, color, font=BOLD):
     """Text along the radius at angle mid, starting at r0 and reading outward
     (kept upright by flipping it on the left half)."""
     c.saveState()
@@ -1420,8 +1432,8 @@ def draw_hue_cross(c, x0, top, cell, cols=19, rows=38, arm=(8, 15), stem=(6, 13)
             c.setLineWidth(0.8)
             c.rect(x0 + i * cell, top - (j + 1) * cell, cell, cell, fill=1, stroke=1)
     ya = top - arm[0] * cell + 4
-    tracked(c, T("plus_white"), x0, ya, "Helvetica-Bold", 5.6, INK, .4)
-    tracked(c, T("plus_black"), x0 + cols * cell, ya, "Helvetica-Bold", 5.6, INK, .4,
+    tracked(c, T("plus_white"), x0, ya, BOLD, 5.6, INK, .4)
+    tracked(c, T("plus_black"), x0 + cols * cell, ya, BOLD, 5.6, INK, .4,
             align="right")
 
 
@@ -1489,7 +1501,7 @@ def draw_rgb_hexagon(c, cx, cy, N, d):
         x, y = pol(cx, cy, N * d + rc + 9, ang)
         align = "left" if math.cos(math.radians(ang)) > .1 else (
             "right" if math.cos(math.radians(ang)) < -.1 else "center")
-        tracked(c, name, x, y - 2.2, "Helvetica-Bold", 6.2, INK, .6, align=align)
+        tracked(c, name, x, y - 2.2, BOLD, 6.2, INK, .6, align=align)
 
 
 def build_page_3(c):
@@ -1536,26 +1548,26 @@ def draw_mix_system(c, x, cy, key, cols, mode, letters, comp, dark=False):
     venn(c, x, cy, r, cols, mode)
     # big coloured letters
     size = 30
-    widths = [stringWidth(ch, "Helvetica", size) for ch, _ in letters]
+    widths = [stringWidth(ch, REG, size) for ch, _ in letters]
     lx = x - sum(widths) / 2
     for (ch, col), w in zip(letters, widths):
         c.setFillColorRGB(*col)
-        c.setFont("Helvetica", size)
+        c.setFont(REG, size)
         c.drawString(lx, cy - 92, ch)
         lx += w
-    tracked(c, head, x, cy - 106, "Helvetica-Bold", 7.6, INK, 1.0, align="center", max_w=160)
-    c.setFont("Helvetica", 5.8)
+    tracked(c, head, x, cy - 106, BOLD, 7.6, INK, 1.0, align="center", max_w=160)
+    c.setFont(REG, 5.8)
     c.setFillColorRGB(.3, .3, .3)
     y = cy - 117
-    for ln in simpleSplit(l1, "Helvetica", 5.8, 160) + simpleSplit(l2, "Helvetica", 5.8, 160):
+    for ln in simpleSplit(l1, REG, 5.8, 160) + simpleSplit(l2, REG, 5.8, 160):
         c.drawCentredString(x, y, ln)
         y -= 7.4
-    tw = stringWidth(comp_lbl, "Helvetica-Bold", 5.8)
+    tw = stringWidth(comp_lbl, BOLD, 5.8)
     sx = x - (tw + 26) / 2
     for k, col in enumerate(comp):
         c.setFillColorRGB(*col)
         c.rect(sx + k * 11, y - 3.5, 10, 10, stroke=0, fill=1)
-    c.setFont("Helvetica-Bold", 5.8)
+    c.setFont(BOLD, 5.8)
     c.setFillColorRGB(*INK)
     c.drawString(sx + 26, y - 1, comp_lbl)
 
@@ -1603,7 +1615,7 @@ def draw_cmy_star(c, cx, cy, s):
                 col = cmy_to_rgb([v / 10.0 for v in vals])
                 fill_poly(c, list(tri), col, WHITE, .8)
                 lines = ["%s%d" % (n, 10 * v) for n, v in zip("CMY", vals) if v]
-                c.setFont("Helvetica", 3.5)
+                c.setFont(REG, 3.5)
                 c.setFillColorRGB(*text_on(col))
                 y = g[1] + (len(lines) - 1) * 2.0 - 1.2
                 for ln in lines:
@@ -1613,7 +1625,7 @@ def draw_cmy_star(c, cx, cy, s):
     for name, ang in zip(names, (90, 30, -30, -90, -150, 150)):
         x, y = pol(cx, cy, r_tip, ang)                # labels above / below each point
         y += 7 if ang > 0 else -13
-        tracked(c, name, x, y, "Helvetica-Bold", 6.6, INK, .6, align="center")
+        tracked(c, name, x, y, BOLD, 6.6, INK, .6, align="center")
 
 
 def draw_web_safe(c, x0, top, cell):
@@ -1628,7 +1640,7 @@ def draw_web_safe(c, x0, top, cell):
                 x, y = bx + b * cell, by - (g + 1) * cell
                 c.setFillColorRGB(*col)
                 c.rect(x, y, cell, cell, stroke=0, fill=1)
-                c.setFont("Helvetica-Bold", 5.0)
+                c.setFont(BOLD, 5.0)
                 c.setFillColorRGB(*text_on(col))
                 c.drawCentredString(x + cell / 2, y + cell / 2 - 1.8, digits[rr] + digits[g] + digits[b])
     c.setStrokeColorRGB(1, 1, 1)
@@ -1729,11 +1741,11 @@ def draw_overlap_wheel(c, cx, cy, d):
     for k in range(6):
         ang = 90 - 60 * k
         x, y = pol(cx, cy, d + rc * .38, ang)
-        tracked(c, names[2 * k], x, y - 2.5, "Helvetica-Bold", 7, text_on(hue_rgb(2 * k)), .5,
+        tracked(c, names[2 * k], x, y - 2.5, BOLD, 7, text_on(hue_rgb(2 * k)), .5,
                 align="center", max_w=rc * 1.25)
         x, y = pol(cx, cy, d * math.cos(math.radians(30)), ang - 30)
         lens = T("lens_names")[k]
-        tracked(c, lens, x, y - 2.2, "Helvetica-Bold", 6.2, text_on(hue_rgb(2 * k + 1)), .3,
+        tracked(c, lens, x, y - 2.2, BOLD, 6.2, text_on(hue_rgb(2 * k + 1)), .3,
                 align="center", max_w=2 * rc - d - 4)
 
 
@@ -1750,7 +1762,7 @@ def draw_css_wheel(c, cx, cy, r_out):
         fill_poly(c, ring_wedge(cx, cy, r_in, r_out, mid - step / 2, mid + step / 2, 4), col,
                   WHITE if luma(col) < .9 else (.8, .8, .8), .4)
         text = "%s  #%s" % (name, hx)
-        size = fit_size(text, "Helvetica-Bold", 4.9, r_out - r_in - 6)
+        size = fit_size(text, BOLD, 4.9, r_out - r_in - 6)
         radial_text(c, text, cx, cy, r_in + 3, mid, size, text_on(col))
     i = 0
     for fam, name, hx in zip(fams, T("css_families"), CSS_FAMILY_COLOURS):
@@ -1815,7 +1827,7 @@ def draw_plutchik(c, cx, cy, R):
             ca, sa = abs(math.cos(math.radians(a))), abs(math.sin(math.radians(a)))
             width = min(along / ca if ca > 1e-6 else 1e9, across / sa if sa > 1e-6 else 1e9)
             x, y = pol(cx, cy, rm, a)
-            tracked(c, words[b], x, y - 2.3, "Helvetica-Bold", 6.6 if b == 1 else 5.8,
+            tracked(c, words[b], x, y - 2.3, BOLD, 6.6 if b == 1 else 5.8,
                     text_on(cols[b]), .3, align="center", max_w=width)
     c.setFillColorRGB(1, 1, 1)
     c.circle(cx, cy, r_c, stroke=0, fill=1)
@@ -1824,7 +1836,7 @@ def draw_plutchik(c, cx, cy, R):
         x, y = pol(cx, cy, .86 * R, a)
         col = mix(mix(hsb(EMOTION_HUES[k], 1, 1), hsb(EMOTION_HUES[(k + 1) % 8], 1, 1), .5),
                   BLACK, .35)
-        tracked(c, word, x, y - 2, "Helvetica-Bold", 5.8, col, .3, align="center", max_w=62)
+        tracked(c, word, x, y - 2, BOLD, 5.8, col, .3, align="center", max_w=62)
 
 
 def draw_rosette(c, cx, cy, R, rings=15, n=24, twist=8.0):
@@ -1944,11 +1956,11 @@ def draw_named_wheel(c, cx, cy, d):
                   max_w=math.radians(22) * rm)
     for k, name in enumerate(T("cw_circles")):
         x, y = pol(cx, cy, 1.5 * d, 90 - 60 * k)
-        tracked(c, name, x, y - 3, "Helvetica-Bold", 8.5, text_on(hues[k]), .4,
+        tracked(c, name, x, y - 3, BOLD, 8.5, text_on(hues[k]), .4,
                 align="center", max_w=.8 * d)
     for k, name in enumerate(T("cw_lenses")):
         x, y = pol(cx, cy, 1.07 * d, 60 - 60 * k)
-        tracked(c, name, x, y - 2.6, "Helvetica-Bold", 7.4, text_on(lenses[k]), .3,
+        tracked(c, name, x, y - 2.6, BOLD, 7.4, text_on(lenses[k]), .3,
                 align="center", max_w=.72 * d)
 
 
@@ -1990,7 +2002,7 @@ def build_page_7(c):
     c.setStrokeColorRGB(*INK)
     c.setLineWidth(1.2)
     c.rect(20, 20, 420, 572, stroke=1, fill=0)
-    tracked(c, T("cw_title"), 230, 532, "Helvetica", 30, INK, 2.5, align="center", max_w=390)
+    tracked(c, T("cw_title"), 230, 532, REG, 30, INK, 2.5, align="center", max_w=390)
     draw_named_wheel(c, 230, 262, 88)
 
     c.setFillColorRGB(.02, .02, .02)
@@ -2133,12 +2145,12 @@ def draw_cie(c, ox, oy, s):
         c.line(*P(0, k / 10.0), *P(.8, k / 10.0))
     c.setDash()
     c.setFillColorRGB(*INK)
-    c.setFont("Helvetica", 7)
+    c.setFont(REG, 7)
     for k in range(9):
         c.drawCentredString(P(k / 10.0, 0)[0], oy - 11, "0" if k == 0 else ".%d" % k)
     for k in range(10):
         c.drawRightString(ox - 4, P(0, k / 10.0)[1] - 2.5, "0" if k == 0 else ".%d" % k)
-    c.setFont("Helvetica-Oblique", 10)
+    c.setFont(ITAL, 10)
     c.drawCentredString(ox + .4 * s, oy - 25, "x")
     c.drawCentredString(ox - 24, oy + .45 * s, "y")
 
@@ -2152,7 +2164,7 @@ def draw_cie(c, ox, oy, s):
     c.rect(ox, oy, .8 * s, .9 * s, stroke=1, fill=0)
 
     # wavelength ticks, pointing away from white
-    c.setFont("Helvetica", 5.6)
+    c.setFont(REG, 5.6)
     for lam in list(range(450, 631, 5)) + [700]:
         (x0, y0), (x1, y1), (x, y) = locus_xy(lam - 5), locus_xy(lam + 5), locus_xy(lam)
         nx, ny = y1 - y0, x0 - x1
@@ -2170,7 +2182,7 @@ def draw_cie(c, ox, oy, s):
     temps = [1000 * 25 ** (k / 60.0) for k in range(61)]
     c.setLineWidth(.8)
     c.drawPath(polyline([planck_xy(t) for t in temps]), stroke=1, fill=0)
-    c.setFont("Helvetica", 5)
+    c.setFont(REG, 5)
     for t in CIE_KELVIN:
         bx, by = P(*planck_xy(t))
         c.circle(bx, by, 1.5, stroke=0, fill=1)
@@ -2181,7 +2193,7 @@ def draw_cie(c, ox, oy, s):
     c.setLineWidth(.7)
     c.drawPath(polyline(SRGB_XY, True), stroke=1, fill=0)
     c.setDash()
-    c.setFont("Helvetica-Bold", 6.5)
+    c.setFont(BOLD, 6.5)
     gx, gy = P(*SRGB_XY[1])
     c.drawString(gx + 5, gy + 1, "sRGB")
     ex, ey = P(1 / 3.0, 1 / 3.0)
@@ -2190,7 +2202,7 @@ def draw_cie(c, ox, oy, s):
 
     for name, (x, y) in zip(T("cie_regions"), CIE_REGION_XY):
         bx, by = P(x, y)
-        tracked(c, name, bx, by - 2, "Helvetica", 5.4, text_on(xy_colour(x, y)), align="center")
+        tracked(c, name, bx, by - 2, REG, 5.4, text_on(xy_colour(x, y)), align="center")
 
 
 def draw_legend_glyph(c, k, x, y):
@@ -2247,13 +2259,13 @@ def draw_spectrum(c, x0, y0, w, h_curves, h_strip):
         c.drawPath(p, stroke=1, fill=0)
         lx, ly = max(pts, key=lambda q: q[1])
         c.setFillColorRGB(*col)
-        c.setFont("Helvetica-Oblique", 8)
+        c.setFont(ITAL, 8)
         c.drawCentredString(lx, ly + 4, label)
     c.setStrokeColorRGB(*INK)
     c.setLineWidth(.5)
     c.line(x0, base, x0 + w, base)
     c.setFillColorRGB(*INK)
-    c.setFont("Helvetica", 6)
+    c.setFont(REG, 6)
     for lam in range(400, 701, 50):
         x = x0 + (lam - 380) * sx
         c.line(x, y0 - 2, x, y0)
@@ -2269,7 +2281,7 @@ def build_page_8(c):
     y = 410
     for k, text in enumerate(T("cie_legend")):
         draw_legend_glyph(c, k, x0, y + 2)
-        tracked(c, text, x0 + 28, y, "Helvetica", 6.6, INK, max_w=212)
+        tracked(c, text, x0 + 28, y, REG, 6.6, INK, max_w=212)
         y -= 17
     caption(c, x0, 300, T("spectrum_t"), T("spectrum_d"), 240, align="left", size=6.4)
     draw_spectrum(c, x0, 90, 240, 130, 16)
@@ -2297,7 +2309,7 @@ def build_page_9(c):
     """Rows of base colours: 90 % ... 10 % white on the left (tints), the
     base colour in the middle, 10 % ... 90 % black on the right (shades)."""
     page_start(c, "title9")
-    tracked(c, T("ts_sub"), W / 2, 538, "Helvetica", 10, INK, align="center", max_w=600)
+    tracked(c, T("ts_sub"), W / 2, 538, REG, 10, INK, align="center", max_w=600)
     steps = [-.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9]
     x0, cell, step, top, row = 112, 29, 34.5, 452, 38.5   # top = bottom of the first row
     xb = x0 + 9 * step                             # base column
@@ -2306,34 +2318,34 @@ def build_page_9(c):
     c.setLineWidth(.8)
     c.roundRect(xb - 3.5, top - 9 * row - 4, cell + 7, 9 * row + cell + 33, 5,
                 stroke=1, fill=0)
-    tracked(c, T("add_white"), x0 + 4.5 * step + cell / 2, 508, "Helvetica-Bold", 7, INK, 1,
+    tracked(c, T("add_white"), x0 + 4.5 * step + cell / 2, 508, BOLD, 7, INK, 1,
             align="center", max_w=200)
     arrow(c, xb - 8, x0, 501)
-    tracked(c, T("add_black"), x0 + 13.5 * step + cell / 2, 508, "Helvetica-Bold", 7, INK, 1,
+    tracked(c, T("add_black"), x0 + 13.5 * step + cell / 2, 508, BOLD, 7, INK, 1,
             align="center", max_w=200)
     arrow(c, xb + cell + 8, x0 + 18 * step + cell, 501)
     for i, t in enumerate(steps):
         x = x0 + i * step + cell / 2
         if t == 0:
-            tracked(c, T("base_colour"), x, 499, "Helvetica-Bold", 6, INK, align="center",
+            tracked(c, T("base_colour"), x, 499, BOLD, 6, INK, align="center",
                     max_w=46)
         else:
-            tracked(c, "%d%%" % round(abs(t) * 100), x, top + cell + 6, "Helvetica-Bold", 6.6,
+            tracked(c, "%d%%" % round(abs(t) * 100), x, top + cell + 6, BOLD, 6.6,
                     INK, align="center")
 
     for r, (name, base) in enumerate(zip(T("ts_rows"), TS_BASES)):
         y = top - r * row
         c.setFillColorRGB(*base)
         c.circle(32, y + cell / 2, 7, stroke=0, fill=1)
-        tracked(c, name, 44, y + cell / 2 - 2.3, "Helvetica-Bold", 6.4, INK, max_w=62)
+        tracked(c, name, 44, y + cell / 2 - 2.3, BOLD, 6.4, INK, max_w=62)
         for i, t in enumerate(steps):
             c.setFillColorRGB(*tweak(base, -t))
             c.roundRect(x0 + i * step, y, cell, cell, 3, stroke=0, fill=1)
 
-    c.setFont("Helvetica", 8)
+    c.setFont(REG, 8)
     c.setFillColorRGB(*INK)
     yy = 62
-    for ln in simpleSplit(T("ts_note"), "Helvetica", 8, 520):
+    for ln in simpleSplit(T("ts_note"), REG, 8, 520):
         c.drawCentredString(W / 2, yy, ln)
         yy -= 10.5
 
@@ -2396,10 +2408,10 @@ def draw_munsell(c, cx, cy, R, side):
 
 def coloured_word(c, x, y, letters, size):
     """Letters each in its own colour, with a thin dark outline."""
-    w = sum(stringWidth(ch, "Helvetica-Bold", size) for ch, _ in letters) + 1.5 * (len(letters) - 1)
+    w = sum(stringWidth(ch, BOLD, size) for ch, _ in letters) + 1.5 * (len(letters) - 1)
     c.saveState()
     t = c.beginText()
-    t.setFont("Helvetica-Bold", size)
+    t.setFont(BOLD, size)
     t.setTextRenderMode(2)
     t.setTextOrigin(x - w / 2, y)
     t.setCharSpace(1.5)
@@ -2436,7 +2448,7 @@ def draw_hue_star(c, cx, cy, R, cols, names):
         align = "left" if ca > .3 else "right" if ca < -.3 else "center"
         sa = math.sin(math.radians(a))
         dy = 2 if sa > .9 else -8 if sa < -.9 else -2.5
-        tracked(c, name, x, y + dy, "Helvetica-Bold" if main else "Helvetica",
+        tracked(c, name, x, y + dy, BOLD if main else REG,
                 8.2 if main else 6.4, INK, .3, align=align, max_w=95)
 
 
@@ -2467,7 +2479,7 @@ PAGES = {1: build_page_1, 2: build_page_2, 3: build_page_3, 4: build_page_4,
 
 def main():
     ap = argparse.ArgumentParser(description="Colour theory poster (PDF)")
-    ap.add_argument("--lang", default="en", choices=sorted(STRINGS), help="text language")
+    ap.add_argument("--lang", default="en", choices=POSTER_LANGS, help="text language")
     ap.add_argument("-o", "--out", default=None, help="output PDF path")
     ap.add_argument("--pages", type=int, nargs="+", default=sorted(PAGES), choices=sorted(PAGES),
                     help="which pages to render (default: all)")

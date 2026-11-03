@@ -4,7 +4,9 @@
 
 A colour theory guide, a ten-page vector poster and two build-your-own colour wheels,
 all generated with Python. The wheels can be printed and cut out, or turned on screen
-(desktop app or web page). Every text is available in English, Portuguese and Spanish.
+(desktop app or web page). The texts are in English, Portuguese and Spanish, and the colour
+wheels also in Brazilian Portuguese, French, Italian, German, Dutch, Polish, Turkish, Russian,
+Chinese, Japanese and Korean (the other programs follow; see [Languages](#languages)).
 
 **Try the wheels online: https://mcampilho.github.io/color-theory/web/**
 
@@ -69,8 +71,12 @@ it under a new key.
 `color_wheel.py` makes a printable A4 PDF (six pages) with two paper colour wheels to cut
 out and assemble at home. Each wheel has a back disc that turns and a front disc with
 windows, joined at the centre by a split pin. Ready-made PDFs:
-[English](colour_wheels_en.pdf), [Português](colour_wheels_pt.pdf),
-[Español](colour_wheels_es.pdf).
+[English](colour_wheels_en.pdf), [Português (Portugal)](colour_wheels_pt.pdf),
+[Português (Brasil)](colour_wheels_pt-BR.pdf), [Español](colour_wheels_es.pdf),
+[Français](colour_wheels_fr.pdf), [Italiano](colour_wheels_it.pdf),
+[Deutsch](colour_wheels_de.pdf), [Nederlands](colour_wheels_nl.pdf),
+[Polski](colour_wheels_pl.pdf), [Türkçe](colour_wheels_tr.pdf), [Русский](colour_wheels_ru.pdf),
+[简体中文](colour_wheels_zh.pdf), [日本語](colour_wheels_ja.pdf), [한국어](colour_wheels_ko.pdf).
 
 ![The four discs to cut out](images/wheels_pages.png)
 
@@ -91,6 +97,7 @@ the window when the hue stands just beyond the tab.
 python3 color_wheel.py                 # -> colour_wheels_en.pdf
 python3 color_wheel.py --lang pt       # Portuguese
 python3 color_wheel.py --lang es -o es.pdf
+python3 color_wheel.py --lang pt-BR    # also fr, it, de, nl, pl, tr, ru, zh, ja, ko
 ```
 
 Print pages 3 to 6 at actual size (100 %); each page has a 100 mm bar to check the scale.
@@ -121,7 +128,7 @@ python3 color_wheel.py --app --theme dark   # --theme auto (default), light or d
 ```
 
 **Web**: open `web/index.html` in a browser. The language box at the top switches between
-English, Portuguese and Spanish. The page loads the discs from `web/discs/` (SVG) and the
+the 14 languages, and the page starts in the browser's language when it has it. The page loads the discs from `web/discs/` (SVG) and the
 texts and disc geometry from `web/discs/data.js`, both written by (each disc in a light
 and a dark version; `?theme=dark` or `?lang=pt` in the address also work):
 
@@ -328,6 +335,26 @@ colours. With `--show` nothing is written until you press "Save full size...": `
 the name and folder offered there. Files without a full path go to the folder the command
 runs in, and the program always prints the full path of what it wrote. Without `-o`, the file name tells the hue and the size, e.g.
 `blue_wave_orange_1980x1080.png`.
+
+## Languages
+
+The project is being translated into 15 languages: English, Portuguese (Portugal and
+Brazil), Spanish, French, Italian, German, Dutch, Polish, Turkish, Russian, Arabic,
+Chinese (Simplified), Japanese and Korean.
+
+| Program | Languages so far |
+|---------|------------------|
+| `color_wheel.py` (PDF, desktop app, web page) | all except Arabic (14) |
+| `color_theory_document.py`, `tilings.py`, `patterns.py`, `wallpapers.py` | English, Portuguese, Spanish |
+
+`i18n.py` holds what all programs share: the list of languages with their names, the fonts
+of each script and line breaking for Chinese and Japanese (between characters, never before
+closing or after opening punctuation). The PDFs keep Helvetica for Western European
+languages, so they need no embedded font; Polish, Turkish and Russian use Arial, Chinese
+Microsoft YaHei, Japanese Yu Gothic and Korean Malgun Gothic (or the other fonts listed in
+`i18n.py`, on Linux and macOS), embedded with only the letters used. The texts of the added
+languages are in `locales/` (one file per program); a missing text falls back to English.
+The translations were made by machine and would benefit from a review by native speakers.
 
 ## Links
 
