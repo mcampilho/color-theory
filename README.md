@@ -329,6 +329,27 @@ the name and folder offered there. Files without a full path go to the folder th
 runs in, and the program always prints the full path of what it wrote. Without `-o`, the file name tells the hue and the size, e.g.
 `blue_wave_orange_1980x1080.png`.
 
+## Links
+
+The RYB colour wheel (the 12 colours used here):
+
+- [w3schools: colour wheels](https://www.w3schools.com/colors/colors_wheels.asp)
+- [Canva: colour wheel](https://www.canva.com/colors/color-wheel/)
+
+Colour mixers on the web, to try other mixtures:
+
+- [colors.tools](https://www.colors.tools/color-mixer/)
+- [CalcBE](https://calcbe.com/en/tools/color-mixer/)
+- [Trycolors](https://trycolors.com/mixer)
+- [Gradients.app](https://gradients.app/en/mix)
+- [ColorMagic](https://colormagic.app/color-mixer)
+- [Colordesigner.io](https://colordesigner.io/color-mixer)
+- [Paleta Color Pro](https://paletacolorpro.com/en/color-mixer)
+
+Some of them average the RGB channels, which mixes colours like light (yellow and blue
+make a grey); others simulate paints, as the colour wheels here do (yellow and blue make
+green), so the same pair can give quite different results.
+
 ## Other files
 
 - `Claude - The Complete Guide to Color Theory.md`: the full reference guide, from the physics

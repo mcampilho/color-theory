@@ -340,6 +340,27 @@ na pasta onde o comando foi executado, e o programa escreve sempre o caminho com
 gravou. Sem `-o`, o nome do ficheiro diz o matiz e o tamanho, por exemplo
 `onda_azul_orange_1980x1080.png`.
 
+## Ligações
+
+A roda de cores RYB (as 12 cores usadas aqui):
+
+- [w3schools: rodas de cores](https://www.w3schools.com/colors/colors_wheels.asp)
+- [Canva: roda de cores](https://www.canva.com/colors/color-wheel/)
+
+Misturadores de cores na web, para experimentar outras misturas:
+
+- [colors.tools](https://www.colors.tools/color-mixer/)
+- [CalcBE](https://calcbe.com/en/tools/color-mixer/)
+- [Trycolors](https://trycolors.com/mixer)
+- [Gradients.app](https://gradients.app/en/mix)
+- [ColorMagic](https://colormagic.app/color-mixer)
+- [Colordesigner.io](https://colordesigner.io/color-mixer)
+- [Paleta Color Pro](https://paletacolorpro.com/en/color-mixer)
+
+Alguns fazem a média dos canais RGB, que mistura as cores como luz (amarelo com azul dá um
+cinzento); outros simulam tintas, como as rodas de cores daqui (amarelo com azul dá verde),
+por isso o mesmo par pode dar resultados bem diferentes.
+
 ## Outros ficheiros
 
 - `Claude - The Complete Guide to Color Theory.md`: o guia de referência completo, da física
