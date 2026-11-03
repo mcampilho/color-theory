@@ -530,12 +530,24 @@ TAB_COLOURS = [ryb_to_rgb(1, 0, 0), ryb_to_rgb(0, 1, 0), ryb_to_rgb(0, 0, 1), WH
 def mixture(i, k):
     """Hue i mixed in equal parts with what tab k adds. Paints are averaged
     in the RYB cube and scaled so the strongest pigment is full; white
-    lightens the colour instead."""
+    lightens the colour instead.
+
+    Where the three pigments come out nearly balanced (a colour and its
+    complement), the cube alone would give the same near-black for every
+    pair. Real paints give a dark, dull colour that keeps a bias towards the
+    two paints mixed (red + green a brown, violet + yellow a greyish tan,
+    orange + blue a slate grey), so the result moves towards the average of
+    the two paints, darkened, as the mixture becomes neutral."""
     if ADDED_RYB[k] is None:
         return mix(hue_colour(i), WHITE, .5)
     s = [(a + b) / 2.0 for a, b in zip(HUE_RYB[i], ADDED_RYB[k])]
     top = max(s)
-    return ryb_to_rgb(*(v / top for v in s))
+    cube = ryb_to_rgb(*(v / top for v in s))
+    if k > 2:                              # black paint: a shade, not a mixture of hues
+        return cube
+    neutral = (min(s) / top) ** 2          # 0 for two neighbouring hues, 1 for complements
+    paints = mix(hue_colour(i), ryb_to_rgb(*ADDED_RYB[k]), .5)
+    return mix(cube, mix(paints, BLACK, .22), .85 * neutral)
 
 
 def grey_value(v):
