@@ -8,10 +8,17 @@ português europeu: mudar os dois em conjunto. As imagens dos READMEs estão em 
 PDFs atuais (`colour_theory_*.pdf`, `colour_wheels_*.pdf`) e `web/discs/` vão para o
 repositório, para se poderem usar sem Python. Contém:
 
-- `i18n.py` — línguas e fontes partilhadas. Plano: 15 línguas (en, pt, pt-BR, es, fr, it, de,
-  nl, pl, tr, ru, ar, zh, ja, ko), por fases: 1) base comum, 2) rodas de cores, 3) documento, 4) wallpapers e
-  5) pavimentações e mosaicos — feitas; 6) árabe (direita para a
-  esquerda: `arabic-reshaper` + `python-bidi`, texto em arco). Os programas desenham sempre
+- `i18n.py` — línguas e fontes partilhadas. Todos os programas estão nas 15 línguas (en, pt,
+  pt-BR, es, fr, it, de, nl, pl, tr, ru, ar, zh, ja, ko). Árabe (direita para a esquerda):
+  `visual(text)` liga as letras (`arabic-reshaper`) e põe a linha na ordem de leitura
+  (`python-bidi`). O `i18n` remenda `Canvas.drawString/drawCentredString/drawRightString` e
+  `PDFTextObject.textOut/textLine` para chamarem `visual()` uma só vez (por isso os programas
+  passam sempre o texto lógico); o `ShapeRecorder` do `color_wheel.py` faz o mesmo. Texto letra
+  a letra (em arco) percorre `visual(text)`. Para o Pillow usar `visual()` + `pil_font()` (layout
+  BASIC); no SVG `svg_bidi()`; o Tk 9 molda sozinho, por isso as janelas recebem o texto lógico.
+  Linhas de parágrafo com `draw_line(c, x, y, texto, largura)` (alinha à direita em árabe);
+  `tracked` tira o espaçamento entre letras em árabe; o catálogo espelha a página. O Arial
+  itálico não tem árabe: em árabe o `ITAL` usa o Arial normal. Os programas desenham sempre
   com `REG`/`BOLD`/`ITAL` ("Sans"...); `use_lang(lang)` aponta esses nomes para Helvetica
   (latim ocidental, sem embutir) ou para uma TTF (Arial, YaHei, Yu Gothic, Malgun). Atenção:
   o `registerFont` do ReportLab não substitui uma TTF já registada, por isso `use_lang` tira
@@ -182,9 +189,10 @@ Para ver uma página como imagem:
 
 - Desenho 100% vetorial em ReportLab (página carta em paisagem, 792×612 pt). A página 1 usa a
   grelha 750×570 (`X()`/`Y()`); as páginas 2–6 usam pontos com origem em baixo à esquerda.
-- Texto novo vai para `STRINGS` nos três idiomas, nunca diretamente no código de desenho.
-  Os nomes das cores CSS (`CSS_COLOURS`) são palavras-chave e não se traduzem.
+- Texto novo vai para `STRINGS` (en, pt, es) e para `locales/<programa>.py` nas outras 12
+  línguas, nunca diretamente no código de desenho. Os nomes das cores CSS (`CSS_COLOURS`) são
+  palavras-chave e não se traduzem.
 - Cada página nova é uma função `build_page_N(c)` registada em `PAGES`.
 - O script principal é `color_theory_document.py`; o `color_theory_poster.py` fica como referência.
-- Depois de mudar o desenho, verificar as páginas visualmente nos três idiomas
-  (os textos em pt/es são mais compridos).
+- Depois de mudar o desenho, verificar as páginas visualmente nas várias línguas: as mais
+  compridas (pl, ru, pt), o chinês/japonês/coreano e o árabe (direita para a esquerda).

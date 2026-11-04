@@ -732,6 +732,10 @@ def fit_size(text, font, size, max_w, tracking=0.0):
 
 def tracked(c, text, x, y, font, size, color, tracking=0.0, align="left", max_w=None):
     """Draw letter-spaced text (x = left, centre or right per `align`)."""
+    if i18n.rtl():                          # spaced letters would break Arabic joins
+        tracking = 0.0
+        if align == "left" and max_w:       # start at the right edge of the box
+            align, x = "right", x + max_w
     if max_w:
         size = fit_size(text, font, size, max_w, tracking)
     w = stringWidth(text, font, size) + tracking * (len(text) - 1)
@@ -768,6 +772,8 @@ def ring_wedge(cx, cy, r_in, r_out, a0, a1, steps=24):
 def arc_text(c, text, cx, cy, base_r, mid_deg, font, size, color, inward=False, tracking=0.0):
     """Text along a circular arc centred on mid_deg (inward=True keeps the
     lower half of a wheel upright)."""
+    if i18n.rtl():                          # joined letters in display order, unspaced
+        text, tracking = i18n.visual(text), 0.0
     widths = [stringWidth(ch, font, size) + tracking for ch in text]
     total, pos = sum(widths), 0.0
     for ch, w in zip(text, widths):
@@ -826,7 +832,10 @@ def para(c, text, cx_px, top_px, width_px, size=6.8, leading=8.4, font=REG,
     c.setFont(font, size)
     c.setFillColorRGB(*color)
     for ln in lines:
-        (c.drawCentredString if align == "center" else c.drawString)(X(cx_px), y, ln)
+        if align == "center":
+            c.drawCentredString(X(cx_px), y, ln)
+        else:
+            i18n.draw_line(c, X(cx_px), y, ln, width_px * SX)
         y -= leading
     return y + leading
 
@@ -836,7 +845,10 @@ def heading(c, text, cx_px, y_px, size=8.4, align="center", max_w_pt=None):
         size = fit_size(text, BOLD, size, max_w_pt)
     c.setFont(BOLD, size)
     c.setFillColorRGB(0, 0, 0)
-    (c.drawCentredString if align == "center" else c.drawString)(X(cx_px), Y(y_px), text)
+    if align == "center":
+        c.drawCentredString(X(cx_px), Y(y_px), text)
+    else:
+        i18n.draw_line(c, X(cx_px), Y(y_px), text, max_w_pt or 0)
 
 
 # ==========================================================================
@@ -1296,14 +1308,14 @@ def build_page_2(c):
         name, d1, d2 = T(key)
         c.setFont(BOLD, 6.4)
         c.setFillColorRGB(*INK)
-        c.drawString(LXL, top - 6, name)
+        i18n.draw_line(c, LXL, top - 6, name, 165)
         c.setFont(REG, 5.3)
         c.setFillColorRGB(.3, .3, .3)
         y = top - 14.5
-        c.drawString(LXL, y, d1)
+        i18n.draw_line(c, LXL, y, d1, 165)
         for ln in i18n.wrap(d2, REG, 5.3, 165):
             y -= 6.6
-            c.drawString(LXL, y, ln)
+            i18n.draw_line(c, LXL, y, ln, 165)
         venn(c, LXL + 21, top - 45, 9.5, venn_cols[key], mode)
         top -= 65
 
@@ -1327,7 +1339,7 @@ def build_page_2(c):
         c.setFillColorRGB(.25, .25, .25)
         y = top - 4.8
         for ln in i18n.wrap(txt, BOLD, 5.0, 160)[:2]:
-            c.drawString(RXL + 18, y, ln)
+            i18n.draw_line(c, RXL + 18, y, ln, 160)
             y -= 6.2
         top -= 21.5
 
@@ -1368,7 +1380,10 @@ def caption(c, x, y, head, desc, width, align="center", size=5.8, cols=(INK, (.3
     c.setFillColorRGB(*cols[1])
     yy = y - 11
     for ln in i18n.wrap(desc, REG, size, width):
-        (c.drawCentredString if align == "center" else c.drawString)(x, yy, ln)
+        if align == "center":
+            c.drawCentredString(x, yy, ln)
+        else:
+            i18n.draw_line(c, x, yy, ln, width)
         yy -= size * 1.3
 
 

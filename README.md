@@ -4,9 +4,9 @@
 
 A colour theory guide, a ten-page vector poster and two build-your-own colour wheels,
 all generated with Python. The wheels can be printed and cut out, or turned on screen
-(desktop app or web page). Every program speaks 14 languages: English, Portuguese (Portugal
-and Brazil), Spanish, French, Italian, German, Dutch, Polish, Turkish, Russian, Chinese,
-Japanese and Korean (see [Languages](#languages)).
+(desktop app or web page). Every program speaks 15 languages: English, Portuguese (Portugal
+and Brazil), Spanish, French, Italian, German, Dutch, Polish, Turkish, Russian, Arabic,
+Chinese, Japanese and Korean (see [Languages](#languages)).
 
 **Try the wheels online: https://mcampilho.github.io/color-theory/web/**
 
@@ -22,7 +22,7 @@ is copied. Ready-made PDFs:
 [Português (Brasil)](colour_theory_pt-BR.pdf), [Español](colour_theory_es.pdf),
 [Français](colour_theory_fr.pdf), [Italiano](colour_theory_it.pdf), [Deutsch](colour_theory_de.pdf),
 [Nederlands](colour_theory_nl.pdf), [Polski](colour_theory_pl.pdf), [Türkçe](colour_theory_tr.pdf),
-[Русский](colour_theory_ru.pdf), [简体中文](colour_theory_zh.pdf), [日本語](colour_theory_ja.pdf),
+[Русский](colour_theory_ru.pdf), [العربية](colour_theory_ar.pdf), [简体中文](colour_theory_zh.pdf), [日本語](colour_theory_ja.pdf),
 [한국어](colour_theory_ko.pdf).
 
 The 12 colours of the RYB wheel are the ones used by
@@ -80,7 +80,7 @@ windows, joined at the centre by a split pin. Ready-made PDFs:
 [Português (Brasil)](colour_wheels_pt-BR.pdf), [Español](colour_wheels_es.pdf),
 [Français](colour_wheels_fr.pdf), [Italiano](colour_wheels_it.pdf),
 [Deutsch](colour_wheels_de.pdf), [Nederlands](colour_wheels_nl.pdf),
-[Polski](colour_wheels_pl.pdf), [Türkçe](colour_wheels_tr.pdf), [Русский](colour_wheels_ru.pdf),
+[Polski](colour_wheels_pl.pdf), [Türkçe](colour_wheels_tr.pdf), [Русский](colour_wheels_ru.pdf), [العربية](colour_wheels_ar.pdf),
 [简体中文](colour_wheels_zh.pdf), [日本語](colour_wheels_ja.pdf), [한국어](colour_wheels_ko.pdf).
 
 ![The four discs to cut out](images/wheels_pages.png)
@@ -133,7 +133,7 @@ python3 color_wheel.py --app --theme dark   # --theme auto (default), light or d
 ```
 
 **Web**: open `web/index.html` in a browser. The language box at the top switches between
-the 14 languages, and the page starts in the browser's language when it has it. The page loads the discs from `web/discs/` (SVG) and the
+the 15 languages, and the page starts in the browser's language when it has it. The page loads the discs from `web/discs/` (SVG) and the
 texts and disc geometry from `web/discs/data.js`, both written by (each disc in a light
 and a dark version; `?theme=dark` or `?lang=pt` in the address also work):
 
@@ -165,7 +165,7 @@ several colourings and with colours from the colour schemes above. Ready-made ca
 [Português (Brasil)](tilings_pt-BR.pdf), [Español](tilings_es.pdf),
 [Français](tilings_fr.pdf), [Italiano](tilings_it.pdf), [Deutsch](tilings_de.pdf),
 [Nederlands](tilings_nl.pdf), [Polski](tilings_pl.pdf), [Türkçe](tilings_tr.pdf),
-[Русский](tilings_ru.pdf), [简体中文](tilings_zh.pdf), [日本語](tilings_ja.pdf),
+[Русский](tilings_ru.pdf), [العربية](tilings_ar.pdf), [简体中文](tilings_zh.pdf), [日本語](tilings_ja.pdf),
 [한국어](tilings_ko.pdf).
 
 ![Six tilings: hat, zellij, Penrose, stars and crosses, rhombille, seven-colour hexagons](images/tilings.png)
@@ -243,7 +243,7 @@ Ready-made catalogues:
 [Português (Brasil)](patterns_pt-BR.pdf), [Español](patterns_es.pdf),
 [Français](patterns_fr.pdf), [Italiano](patterns_it.pdf), [Deutsch](patterns_de.pdf),
 [Nederlands](patterns_nl.pdf), [Polski](patterns_pl.pdf), [Türkçe](patterns_tr.pdf),
-[Русский](patterns_ru.pdf), [简体中文](patterns_zh.pdf), [日本語](patterns_ja.pdf),
+[Русский](patterns_ru.pdf), [العربية](patterns_ar.pdf), [简体中文](patterns_zh.pdf), [日本語](patterns_ja.pdf),
 [한국어](patterns_ko.pdf).
 
 ![Six decorated mosaics: 3D stars, courthouse steps, log cabin, Rubik cubes, tripods, weave](images/patterns.png)
@@ -321,7 +321,7 @@ python3 wallpapers.py --gallery --size iphone --cols 8    # every style side by 
 ```
 
 Other options: `--background dark|black|light|white|<hex>`, `--grain` (film grain),
-`--vignette` (darker corners) and `--lang` (any of the 14 languages) for the preview window and captions.
+`--vignette` (darker corners) and `--lang` (any of the 15 languages) for the preview window and captions.
 
 ### Changing the hue and size of a picture
 
@@ -354,20 +354,21 @@ runs in, and the program always prints the full path of what it wrote. Without `
 
 ## Languages
 
-The project is being translated into 15 languages: English, Portuguese (Portugal and
-Brazil), Spanish, French, Italian, German, Dutch, Polish, Turkish, Russian, Arabic,
-Chinese (Simplified), Japanese and Korean.
-
-| Program | Languages so far |
-|---------|------------------|
-| `color_wheel.py` (PDF, desktop app, web page), `color_theory_document.py`, `wallpapers.py`, `tilings.py`, `patterns.py` | all except Arabic (14) |
+All programs (the PDFs, the colour wheel app and web page, the wallpapers and the
+catalogues) are in 15 languages: English, Portuguese (Portugal and Brazil), Spanish,
+French, Italian, German, Dutch, Polish, Turkish, Russian, Arabic, Chinese (Simplified),
+Japanese and Korean.
 
 `i18n.py` holds what all programs share: the list of languages with their names, the fonts
 of each script and line breaking for Chinese and Japanese (between characters, never before
 closing or after opening punctuation). The PDFs keep Helvetica for Western European
 languages, so they need no embedded font; Polish, Turkish and Russian use Arial, Chinese
 Microsoft YaHei, Japanese Yu Gothic and Korean Malgun Gothic (or the other fonts listed in
-`i18n.py`, on Linux and macOS), embedded with only the letters used. The texts of the added
+`i18n.py`, on Linux and macOS), embedded with only the letters used.
+Arabic is written right to left and its letters change shape with their neighbours, which
+a PDF does not do by itself: `i18n.visual()` joins the letters (`arabic-reshaper`) and puts
+each line in display order (`python-bidi`), and paragraphs, catalogue pages and the web page
+are mirrored. It needs `pip install arabic-reshaper python-bidi`. The texts of the added
 languages are in `locales/` (one file per program); a missing text falls back to English.
 The translations were made by machine and would benefit from a review by native speakers.
 

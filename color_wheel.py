@@ -677,6 +677,7 @@ def flow(c, items, y, bounds, size, x_shift=0.0):
     line may have its own extent: bounds(y) -> (x0, x1) in the current
     frame. The heading is bold and runs into the text. Returns the next y."""
     lead = size * 1.24
+    rtl = i18n.rtl()                        # Arabic: words go from the right edge leftwards
     c.setFillColorRGB(*INK)
     for head, body in items:
         colon = "：" if i18n.script(_LANG) in ("zh", "ja") else ":"
@@ -688,11 +689,14 @@ def flow(c, items, y, bounds, size, x_shift=0.0):
             while words:
                 sep, w, font = words[0]
                 gap = 0 if first else stringWidth(sep, REG, size)
-                ww = stringWidth(w, font, size) + gap
+                ww = stringWidth(i18n.visual(w), font, size) + gap   # joined letters are narrower
                 if not first and x + ww > x1:
                     break
                 c.setFont(font, size)
-                c.drawString(x + gap, y, w)
+                if rtl:
+                    c.drawRightString(x1 - (x - x0 - x_shift) - gap, y, w)
+                else:
+                    c.drawString(x + gap, y, w)
                 x += ww
                 first = False
                 words.pop(0)
@@ -760,10 +764,10 @@ def text_column(c, x, y, width, blocks, size=9.2):
         for para in paras:
             lines = i18n.wrap(para, REG, size, width - 10)
             c.setFillColorRGB(*INK)
-            c.circle(x + 2.5, y + size * .32, 1.3, stroke=0, fill=1)
+            c.circle(x + width - 2.5 if i18n.rtl() else x + 2.5, y + size * .32, 1.3, stroke=0, fill=1)
             c.setFont(REG, size)
             for ln in lines:
-                c.drawString(x + 10, y, ln)
+                i18n.draw_line(c, x + (0 if i18n.rtl() else 10), y, ln, width - 10)
                 y -= lead
             y -= lead * .3
         y -= lead * .8
@@ -835,8 +839,9 @@ def build_page_2(c):
     c.setFillColorRGB(1, 1, 1)
     c.rect(0, 0, W, H, stroke=0, fill=1)
     tracked(c, T("use_t"), W / 2, H - 70, BOLD, 21, INK, 2.2, align="center", max_w=W - 70)
-    text_column(c, 48, H - 120, 240, [(T("use1_t"), T("use1")), (T("use2_t"), T("use2"))])
-    x, y, width, size = 312, H - 120, 240, 8.6
+    left, right = (312, 48) if i18n.rtl() else (48, 312)    # Arabic reads the right column first
+    text_column(c, left, H - 120, 240, [(T("use1_t"), T("use1")), (T("use2_t"), T("use2"))])
+    x, y, width, size = right, H - 120, 240, 8.6
     tracked(c, T("gloss_t"), x, y, BOLD, size + 1.6, INK, 1.0, max_w=width)
     y -= size * 2.1
     for term, text in T("gloss"):
@@ -845,7 +850,7 @@ def build_page_2(c):
     c.setFillColorRGB(.35, .35, .35)
     y -= 8
     for ln in i18n.wrap(T("note"), ITAL, 8, width):
-        c.drawString(x, y, ln)
+        i18n.draw_line(c, x, y, ln, width)
         y -= 10
     c.setFont(REG, 6.5)
     c.setFillColorRGB(*INK)
@@ -1155,6 +1160,7 @@ class _RecText:
         self.colour = (r, g, b)
 
     def textOut(self, text):
+        text = i18n.visual(text)
         self.runs.append((text, self.x, self.y, self.font, self.size, self.space, self.colour))
         self.x += stringWidth(text, self.font, self.size) + self.space * len(text)
 
@@ -1249,13 +1255,16 @@ class ShapeRecorder:
         self.items.append(("text", text, X, Y, ang, font, size * self._scale(), colour))
 
     def drawString(self, x, y, text):
+        text = i18n.visual(text)
         self._text(text, x, y, self._font[0], self._font[1], self._fill)
 
     def drawCentredString(self, x, y, text):
+        text = i18n.visual(text)
         w = stringWidth(text, *self._font)
         self._text(text, x - w / 2.0, y, self._font[0], self._font[1], self._fill)
 
     def drawRightString(self, x, y, text):
+        text = i18n.visual(text)
         w = stringWidth(text, *self._font)
         self._text(text, x - w, y, self._font[0], self._font[1], self._fill)
 
@@ -1314,7 +1323,7 @@ def items_to_svg(items, lang="en"):
         elif it[1].strip():
             _, text, x, y, ang, font, size, col = it
             X, Y = x - x0, top - y
-            extra = ' font-weight="bold"' if font == BOLD else ""
+            extra = (' font-weight="bold"' if font == BOLD else "") + i18n.svg_bidi(lang)
             if abs(ang) > .01:
                 extra += ' transform="rotate(%.2f %.2f %.2f)"' % (-ang, X, Y)
             out.append('<text x="%.2f" y="%.2f" font-size="%.2f" fill="%s"%s>%s</text>'
@@ -1329,13 +1338,13 @@ _fonts = {}
 
 def _font(name, px, lang="en"):
     from PIL import ImageFont
-    key = (i18n.script(lang), name, round(px * 4) / 4.0)
+    key = (i18n.script(lang), i18n.rtl(lang), name, round(px * 4) / 4.0)
     if key not in _fonts:
         path = i18n.font_file(lang, {REG: 0, BOLD: 1, ITAL: 2}.get(name, 0))
         try:
-            _fonts[key] = ImageFont.truetype(path, key[2])
+            _fonts[key] = i18n.pil_font(path, key[3], lang)
         except (OSError, TypeError, AttributeError):
-            _fonts[key] = ImageFont.load_default(key[2])
+            _fonts[key] = ImageFont.load_default(key[3])
     return _fonts[key]
 
 

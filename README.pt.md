@@ -4,9 +4,9 @@
 
 Um guia de teoria da cor, um póster vetorial de dez páginas e duas rodas de cores para
 construir em casa, tudo gerado em Python. As rodas podem ser impressas e recortadas, ou
-rodadas no ecrã (aplicação de computador ou página web). Todos os programas falam 14 línguas:
+rodadas no ecrã (aplicação de computador ou página web). Todos os programas falam 15 línguas:
 inglês, português (de Portugal e do Brasil), espanhol, francês, italiano, alemão, neerlandês,
-polaco, turco, russo, chinês, japonês e coreano (ver [Línguas](#línguas)).
+polaco, turco, russo, árabe, chinês, japonês e coreano (ver [Línguas](#línguas)).
 
 **Experimente as rodas online: https://mcampilho.github.io/color-theory/web/?lang=pt**
 
@@ -22,7 +22,7 @@ correspondência de cor CIE 1931 e o CIELAB. Nenhuma imagem é copiada. PDFs pro
 [Português (Brasil)](colour_theory_pt-BR.pdf), [Español](colour_theory_es.pdf),
 [Français](colour_theory_fr.pdf), [Italiano](colour_theory_it.pdf), [Deutsch](colour_theory_de.pdf),
 [Nederlands](colour_theory_nl.pdf), [Polski](colour_theory_pl.pdf), [Türkçe](colour_theory_tr.pdf),
-[Русский](colour_theory_ru.pdf), [简体中文](colour_theory_zh.pdf), [日本語](colour_theory_ja.pdf),
+[Русский](colour_theory_ru.pdf), [العربية](colour_theory_ar.pdf), [简体中文](colour_theory_zh.pdf), [日本語](colour_theory_ja.pdf),
 [한국어](colour_theory_ko.pdf).
 
 As 12 cores da roda RYB são as usadas pela
@@ -81,7 +81,7 @@ um disco da frente com janelas, unidos no centro por um atache. PDFs prontos:
 [Português (Brasil)](colour_wheels_pt-BR.pdf), [Español](colour_wheels_es.pdf),
 [Français](colour_wheels_fr.pdf), [Italiano](colour_wheels_it.pdf),
 [Deutsch](colour_wheels_de.pdf), [Nederlands](colour_wheels_nl.pdf),
-[Polski](colour_wheels_pl.pdf), [Türkçe](colour_wheels_tr.pdf), [Русский](colour_wheels_ru.pdf),
+[Polski](colour_wheels_pl.pdf), [Türkçe](colour_wheels_tr.pdf), [Русский](colour_wheels_ru.pdf), [العربية](colour_wheels_ar.pdf),
 [简体中文](colour_wheels_zh.pdf), [日本語](colour_wheels_ja.pdf), [한국어](colour_wheels_ko.pdf).
 
 ![Os quatro discos para recortar](images/wheels_pages.png)
@@ -134,7 +134,7 @@ python3 color_wheel.py --app --theme dark   # --theme auto (por omissão), light
 ```
 
 **Web**: abre-se o `web/index.html` num browser. A caixa de idioma no topo alterna entre
-as 14 línguas, e a página começa na língua do browser, quando a tem. A página carrega os discos de `web/discs/` (SVG) e os textos e
+as 15 línguas, e a página começa na língua do browser, quando a tem. A página carrega os discos de `web/discs/` (SVG) e os textos e
 a geometria dos discos de `web/discs/data.js`, ambos escritos por (cada disco numa versão
 clara e numa escura; `?theme=dark` ou `?lang=pt` no endereço também funcionam):
 
@@ -166,7 +166,7 @@ prontos (A4, 22 páginas):
 [Português (Brasil)](tilings_pt-BR.pdf), [Español](tilings_es.pdf),
 [Français](tilings_fr.pdf), [Italiano](tilings_it.pdf), [Deutsch](tilings_de.pdf),
 [Nederlands](tilings_nl.pdf), [Polski](tilings_pl.pdf), [Türkçe](tilings_tr.pdf),
-[Русский](tilings_ru.pdf), [简体中文](tilings_zh.pdf), [日本語](tilings_ja.pdf),
+[Русский](tilings_ru.pdf), [العربية](tilings_ar.pdf), [简体中文](tilings_zh.pdf), [日本語](tilings_ja.pdf),
 [한국어](tilings_ko.pdf).
 
 ![Seis pavimentações: chapéu, zellij, Penrose, estrelas e cruzes, losangos, hexágonos em sete cores](images/tilings.png)
@@ -250,7 +250,7 @@ prontos:
 [Português (Brasil)](patterns_pt-BR.pdf), [Español](patterns_es.pdf),
 [Français](patterns_fr.pdf), [Italiano](patterns_it.pdf), [Deutsch](patterns_de.pdf),
 [Nederlands](patterns_nl.pdf), [Polski](patterns_pl.pdf), [Türkçe](patterns_tr.pdf),
-[Русский](patterns_ru.pdf), [简体中文](patterns_zh.pdf), [日本語](patterns_ja.pdf),
+[Русский](patterns_ru.pdf), [العربية](patterns_ar.pdf), [简体中文](patterns_zh.pdf), [日本語](patterns_ja.pdf),
 [한국어](patterns_ko.pdf).
 
 ![Seis mosaicos decorados: estrelas em relevo, degraus do tribunal, cabana de troncos, cubos de Rubik, tripés, tecelagem](images/patterns.png)
@@ -329,7 +329,7 @@ python3 wallpapers.py --gallery --size iphone --cols 8    # todos os estilos lad
 ```
 
 Outras opções: `--background dark|black|light|white|<hex>`, `--grain` (grão de filme),
-`--vignette` (cantos mais escuros) e `--lang` (qualquer das 14 línguas) para a janela e as legendas.
+`--vignette` (cantos mais escuros) e `--lang` (qualquer das 15 línguas) para a janela e as legendas.
 
 ### Mudar a tonalidade e o tamanho de uma imagem
 
@@ -363,20 +363,21 @@ gravou. Sem `-o`, o nome do ficheiro diz o matiz e o tamanho, por exemplo
 
 ## Línguas
 
-O projeto está a ser traduzido para 15 línguas: inglês, português (de Portugal e do Brasil),
-espanhol, francês, italiano, alemão, neerlandês, polaco, turco, russo, árabe, chinês
-simplificado, japonês e coreano.
-
-| Programa | Línguas até agora |
-|----------|-------------------|
-| `color_wheel.py` (PDF, aplicação, página web), `color_theory_document.py`, `wallpapers.py`, `tilings.py`, `patterns.py` | todas menos o árabe (14) |
+Todos os programas (os PDFs, a aplicação e a página web das rodas, os wallpapers e os
+catálogos) estão em 15 línguas: inglês, português (de Portugal e do Brasil), espanhol,
+francês, italiano, alemão, neerlandês, polaco, turco, russo, árabe, chinês simplificado,
+japonês e coreano.
 
 O `i18n.py` guarda o que todos os programas partilham: a lista de línguas com os seus nomes,
 os tipos de letra de cada escrita e a quebra de linha para chinês e japonês (entre caracteres,
 nunca antes de pontuação de fecho nem depois de pontuação de abertura). Os PDFs mantêm a
 Helvetica nas línguas da Europa ocidental, sem fonte embutida; polaco, turco e russo usam
 Arial, chinês Microsoft YaHei, japonês Yu Gothic e coreano Malgun Gothic (ou as alternativas
-listadas no `i18n.py`, em Linux e macOS), embutidas só com as letras usadas. Os textos das
+listadas no `i18n.py`, em Linux e macOS), embutidas só com as letras usadas.
+O árabe escreve-se da direita para a esquerda e as letras mudam de forma conforme as
+vizinhas, o que um PDF não faz sozinho: o `i18n.visual()` liga as letras (`arabic-reshaper`)
+e põe cada linha na ordem de leitura (`python-bidi`), e os parágrafos, as páginas dos
+catálogos e a página web ficam espelhados. É preciso `pip install arabic-reshaper python-bidi`. Os textos das
 línguas novas estão em `locales/` (um ficheiro por programa); um texto em falta usa o inglês.
 As traduções foram feitas por máquina e convém que sejam revistas por falantes nativos.
 

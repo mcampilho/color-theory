@@ -653,7 +653,7 @@ def _font(size):
     """A font for the captions, with the letters of the language in use."""
     for name in (i18n.font_file(tl._LANG), "arial.ttf", "DejaVuSans.ttf", "Helvetica.ttc"):
         try:
-            return ImageFont.truetype(name, size)
+            return i18n.pil_font(name, size)
         except (OSError, TypeError, AttributeError):
             continue
     return ImageFont.load_default()
@@ -675,9 +675,11 @@ def gallery(specs, path, cols=4, width=480, labels=True):
         sheet.paste(render(sp, w, h), (x, y))
         if labels:
             text = caption(sp)
-            while font.getlength(text) > w and len(text) > 4:
+            while font.getlength(i18n.visual(text)) > w and len(text) > 4:
                 text = text[:-2]
-            d.text((x, y + h + 8), text, fill=(60, 60, 60), font=font)
+            text = i18n.visual(text)          # Arabic: joined letters, right-aligned
+            tx = x + w - font.getlength(text) if i18n.rtl() else x
+            d.text((tx, y + h + 8), text, fill=(60, 60, 60), font=font)
     save(sheet, path)
 
 
@@ -922,6 +924,7 @@ def main():
     ap.add_argument("--lang", choices=[k for k, _ in i18n.LANGS if k in STRINGS], default="en")
     a = ap.parse_args()
     tl._LANG = a.lang
+    i18n.use_lang(a.lang)
 
     if a.list:
         print(T("styles") + ":")

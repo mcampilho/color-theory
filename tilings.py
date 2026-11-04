@@ -1802,7 +1802,7 @@ def paragraph(c, text, x, y, width, font=REG, size=9.5, leading=13, colour=(.25,
     c.setFont(font, size)
     c.setFillColorRGB(*colour)
     for line in i18n.wrap(text, font, size, width):
-        c.drawString(x, y, line)
+        i18n.draw_line(c, x, y, line, width)
         y -= leading
     return y
 
@@ -1812,6 +1812,11 @@ def build_catalogue(path):
     from reportlab.pdfgen import canvas
     W, H = A4
     M = 40
+    rtl = i18n.rtl()                      # Arabic: the page is mirrored (text from the right)
+
+    def line(text, y, x=M, width=None):   # a line that starts at the margin of its side
+        i18n.draw_line(c, x, y, text, W - M - x if width is None else width)
+
     c = canvas.Canvas(path, pagesize=A4)
     c.setTitle(T("title").title())
     page = [1]
@@ -1819,9 +1824,14 @@ def build_catalogue(path):
     def footer():
         c.setFont(REG, 7.5)
         c.setFillColorRGB(.5, .5, .5)
-        c.drawString(M, 24, T("title"))
         label = T("page")                 # "page" or, where the number goes inside, "第 %d 页"
-        c.drawRightString(W - M, 24, label % page[0] if "%d" in label else "%s %d" % (label, page[0]))
+        label = label % page[0] if "%d" in label else "%s %d" % (label, page[0])
+        if rtl:
+            c.drawRightString(W - M, 24, T("title"))
+            c.drawString(M, 24, label)
+        else:
+            c.drawString(M, 24, T("title"))
+            c.drawRightString(W - M, 24, label)
         c.showPage()
         page[0] += 1
 
@@ -1835,19 +1845,20 @@ def build_catalogue(path):
     # ---- cover: title, introduction, colour schemes, contents
     c.setFillColorRGB(.12, .12, .12)
     c.setFont(BOLD, 26)
-    c.drawString(M, H - 78, T("title"))
+    line(T("title"), H - 78)
     c.setFont(REG, fit_size(T("subtitle"), REG, 12, W - 2 * M))
     c.setFillColorRGB(.35, .35, .35)
-    c.drawString(M, H - 98, T("subtitle"))
+    line(T("subtitle"), H - 98)
     y = paragraph(c, T("intro"), M, H - 128, W - 2 * M)
     y -= 14
     c.setFont(BOLD, 12)
     c.setFillColorRGB(.12, .12, .12)
-    c.drawString(M, y, T("schemes_t"))
+    line(T("schemes_t"), y)
     y = paragraph(c, T("schemes_d"), M, y - 16, W - 2 * M, size=8.5, leading=11.5)
     y -= 6
     for k, sch in enumerate(SCHEMES):
-        col_x = M + (k % 2) * (W - 2 * M) / 2
+        half = (W - 2 * M) / 2
+        col_x = M + ((1 - k % 2) if rtl else (k % 2)) * half
         row_y = y - (k // 2) * 22
         s = {"scheme": sch, "hue": 4}
         cols = NAMED_PALETTES.get(sch) or palette(sch, 4, len(SCHEME_OFFSETS.get(sch, range(6))))
@@ -1855,25 +1866,38 @@ def build_catalogue(path):
             c.setFillColorRGB(*col)
             c.setStrokeColorRGB(.6, .6, .6)
             c.setLineWidth(.4)
-            c.rect(col_x + i * 15, row_y - 4, 13, 13, fill=1, stroke=1)
+            sx = col_x + half - 13 - i * 15 if rtl else col_x + i * 15
+            c.rect(sx, row_y - 4, 13, 13, fill=1, stroke=1)
         c.setFillColorRGB(.2, .2, .2)
         name = scheme_name(s)
-        c.setFont(REG, fit_size(name, REG, 8.5, (W - 2 * M) / 2 - 118))
-        c.drawString(col_x + 112, row_y, name)
+        c.setFont(REG, fit_size(name, REG, 8.5, half - 118))
+        if rtl:
+            c.drawRightString(col_x + half - 112, row_y, name)
+        else:
+            c.drawString(col_x + 112, row_y, name)
     y -= (len(SCHEMES) + 1) // 2 * 22 + 14
     c.setFont(BOLD, 12)
     c.setFillColorRGB(.12, .12, .12)
-    c.drawString(M, y, T("contents"))
+    line(T("contents"), y)
     y -= 18
     for fam, art, vs in PROGRAM["catalogue"]:
         c.setFont(REG, 9.5)
         c.setFillColorRGB(.2, .2, .2)
-        c.drawString(M + 8, y, T("f_" + fam))
+        if rtl:
+            c.drawRightString(W - M - 8, y, T("f_" + fam))
+        else:
+            c.drawString(M + 8, y, T("f_" + fam))
         c.setFillColorRGB(.55, .55, .55)
         if art:
-            c.drawString(M + 230, y, "Wikipedia: " + art)
+            if rtl:
+                c.drawRightString(W - M - 230, y, "Wikipedia: " + art)
+            else:
+                c.drawString(M + 230, y, "Wikipedia: " + art)
         c.setFillColorRGB(.2, .2, .2)
-        c.drawRightString(W - M, y, str(starts[fam]))
+        if rtl:
+            c.drawString(M, y, str(starts[fam]))
+        else:
+            c.drawRightString(W - M, y, str(starts[fam]))
         y -= 13.5
     footer()
 
@@ -1885,16 +1909,16 @@ def build_catalogue(path):
             c.setFillColorRGB(.12, .12, .12)
             c.setFont(BOLD, 20)
             title = T("f_" + fam) + ("" if first == 0 else "  (%s)" % T("cont"))
-            c.drawString(M, H - 66, title)
+            line(title, H - 66)
             c.setFont(REG, 8.5)
             c.setFillColorRGB(.5, .5, .5)
             if art:
-                c.drawString(M, H - 82, "Wikipedia: " + art + "  —  en.wikipedia.org/wiki/" + art.replace(" ", "_"))
+                line("Wikipedia: " + art + "  —  en.wikipedia.org/wiki/" + art.replace(" ", "_"), H - 82)
             paragraph(c, T("f_%s_d" % fam), M, H - 102, W - 2 * M)
             top = H - 160
             for n_, v in enumerate(vs[first:first + per_page]):
                 col, row = n_ % 2, n_ // 2
-                x = M + col * (pw + gap)
+                x = M + (1 - col if rtl else col) * (pw + gap)
                 y0 = top - row * (ph + 46) - ph
                 spec = dict(v)
                 spec["aspect"] = ph / pw
@@ -1908,11 +1932,11 @@ def build_catalogue(path):
                 c.setFont(BOLD, 8.6)
                 yy = y0 - 12
                 for ln in i18n.wrap(line1, BOLD, 8.6, pw)[:2]:
-                    c.drawString(x, yy, ln)
+                    line(ln, yy, x, pw)
                     yy -= 10.5
                 c.setFont(REG, fit_size(line2, REG, 7.6, pw))
                 c.setFillColorRGB(.42, .42, .42)
-                c.drawString(x, yy, line2)
+                line(line2, yy, x, pw)
             footer()
     c.save()
 
@@ -2012,7 +2036,7 @@ def _font(px):
     from PIL import ImageFont
     for name in (i18n.font_file(_LANG), "arial.ttf", "LiberationSans-Regular.ttf", "DejaVuSans.ttf"):
         try:
-            return ImageFont.truetype(name, int(px))
+            return i18n.pil_font(name, int(px))
         except (OSError, TypeError, AttributeError):
             pass
     return ImageFont.load_default()
@@ -2029,12 +2053,13 @@ def render_sheet(specs, cols=3, width=1800, labels=True, ss=2):
         img.paste(render_image(ops, box, int(round(pw)), ss), (int(round(x)), int(round(y))))
         d.rectangle((x - 1, y - 1, x + pw, y + ph), outline=(150, 150, 150))
         if labels:
-            text, px = label_of(spec), lab * .62
+            text, px = i18n.visual(label_of(spec)), lab * .62
             font = _font(px)
             while px > 7 and font.getlength(text) > pw:
                 px *= .92
                 font = _font(px)
-            d.text((x, y + ph + lab * .2), text, fill=(60, 60, 60), font=font)
+            tx = x + pw - font.getlength(text) if i18n.rtl() else x
+            d.text((tx, y + ph + lab * .2), text, fill=(60, 60, 60), font=font)
     return img
 
 
@@ -2062,10 +2087,13 @@ def write_sheet(specs, path, cols=3, width=1800, labels=True):
                        % (x, y, pw, ph))
             if labels:
                 text = label_of(spec)
+                rtl = i18n.rtl()
                 out.append('<text x="%.2f" y="%.2f" font-family="%s" '
-                           'font-size="%.1f" fill="#3c3c3c">%s</text>'
-                           % (x, y + ph + lab * .8, i18n.css_family(_LANG).replace('"', "'"),
-                              label_size(text, lab, pw), text.replace("&", "&amp;")))
+                           'font-size="%.1f" fill="#3c3c3c"%s%s>%s</text>'
+                           % (x + pw if rtl else x, y + ph + lab * .8,
+                              i18n.css_family(_LANG).replace('"', "'"), label_size(text, lab, pw),
+                              ' text-anchor="end"' if rtl else "", i18n.svg_bidi(),
+                              i18n.visual(text).replace("&", "&amp;").replace("<", "&lt;")))
         out.append("</svg>")
         with open(path, "w", encoding="utf-8") as f:
             f.write("\n".join(out))
@@ -2082,7 +2110,7 @@ def write_sheet(specs, path, cols=3, width=1800, labels=True):
             text = label_of(spec)
             c.setFillColorRGB(.24, .24, .24)
             c.setFont(REG, label_size(text, lab, pw))
-            c.drawString(x, H - y - ph - lab * .8, text)
+            i18n.draw_line(c, x, H - y - ph - lab * .8, text, pw)
     c.showPage()
     c.save()
 
