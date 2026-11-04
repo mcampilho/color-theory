@@ -5,7 +5,7 @@
 Um guia de teoria da cor, um póster vetorial de dez páginas e duas rodas de cores para
 construir em casa, tudo gerado em Python. As rodas podem ser impressas e recortadas, ou
 rodadas no ecrã (aplicação de computador ou página web). Os textos existem em inglês,
-português e espanhol, e o póster e as rodas de cores também em português do Brasil, francês, italiano,
+português e espanhol, e o póster, as rodas de cores e os wallpapers também em português do Brasil, francês, italiano,
 alemão, neerlandês, polaco, turco, russo, chinês, japonês e coreano (os outros programas vêm a
 seguir; ver [Línguas](#línguas)).
 
@@ -319,7 +319,7 @@ python3 wallpapers.py --gallery --size iphone --cols 8    # todos os estilos lad
 ```
 
 Outras opções: `--background dark|black|light|white|<hex>`, `--grain` (grão de filme),
-`--vignette` (cantos mais escuros) e `--lang pt|es` para a janela e as legendas.
+`--vignette` (cantos mais escuros) e `--lang` (qualquer das 14 línguas) para a janela e as legendas.
 
 ### Mudar a tonalidade e o tamanho de uma imagem
 
@@ -359,8 +359,8 @@ simplificado, japonês e coreano.
 
 | Programa | Línguas até agora |
 |----------|-------------------|
-| `color_wheel.py` (PDF, aplicação, página web), `color_theory_document.py` | todas menos o árabe (14) |
-| `tilings.py`, `patterns.py`, `wallpapers.py` | inglês, português, espanhol |
+| `color_wheel.py` (PDF, aplicação, página web), `color_theory_document.py`, `wallpapers.py` | todas menos o árabe (14) |
+| `tilings.py`, `patterns.py` | inglês, português, espanhol (nomes dos esquemas de cor nas 14) |
 
 O `i18n.py` guarda o que todos os programas partilham: a lista de línguas com os seus nomes,
 os tipos de letra de cada escrita e a quebra de linha para chinês e japonês (entre caracteres,

@@ -4,8 +4,8 @@
 
 A colour theory guide, a ten-page vector poster and two build-your-own colour wheels,
 all generated with Python. The wheels can be printed and cut out, or turned on screen
-(desktop app or web page). The texts are in English, Portuguese and Spanish, and the poster and
-the colour wheels also in Brazilian Portuguese, French, Italian, German, Dutch, Polish, Turkish, Russian,
+(desktop app or web page). The texts are in English, Portuguese and Spanish, and the poster, the
+colour wheels and the wallpapers also in Brazilian Portuguese, French, Italian, German, Dutch, Polish, Turkish, Russian,
 Chinese, Japanese and Korean (the other programs follow; see [Languages](#languages)).
 
 **Try the wheels online: https://mcampilho.github.io/color-theory/web/**
@@ -310,7 +310,7 @@ python3 wallpapers.py --gallery --size iphone --cols 8    # every style side by 
 ```
 
 Other options: `--background dark|black|light|white|<hex>`, `--grain` (film grain),
-`--vignette` (darker corners) and `--lang pt|es` for the preview window and captions.
+`--vignette` (darker corners) and `--lang` (any of the 14 languages) for the preview window and captions.
 
 ### Changing the hue and size of a picture
 
@@ -349,8 +349,8 @@ Chinese (Simplified), Japanese and Korean.
 
 | Program | Languages so far |
 |---------|------------------|
-| `color_wheel.py` (PDF, desktop app, web page), `color_theory_document.py` | all except Arabic (14) |
-| `tilings.py`, `patterns.py`, `wallpapers.py` | English, Portuguese, Spanish |
+| `color_wheel.py` (PDF, desktop app, web page), `color_theory_document.py`, `wallpapers.py` | all except Arabic (14) |
+| `tilings.py`, `patterns.py` | English, Portuguese, Spanish (colour scheme names in all 14) |
 
 `i18n.py` holds what all programs share: the list of languages with their names, the fonts
 of each script and line breaking for Chinese and Japanese (between characters, never before

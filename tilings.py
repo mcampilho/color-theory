@@ -2260,7 +2260,7 @@ def main():
     ap.add_argument("--width", type=int, help="image width in pixels (PNG, SVG; points for PDF); "
                                               "default 1200, or 1800 for a sheet")
     ap.add_argument("--seed", type=int, default=1, help="seed of the random colouring")
-    ap.add_argument("--lang", default="en", choices=sorted(STRINGS), help="language of the catalogue")
+    ap.add_argument("--lang", default="en", choices=catalogue_langs(), help="language of the catalogue")
     ap.add_argument("-o", "--out", help="output file: .png, .svg or .pdf")
     a = ap.parse_args()
     _LANG = a.lang
@@ -2865,6 +2865,19 @@ STRINGS = {
         "app_params": "Parámetros", "app_params_hint": "nombre=valor, separados por espacios; Intro aplica",
     },
 }
+
+# the added languages (locales/): for now only the names of the colour schemes, so they
+# are not offered for the catalogue until it is translated
+from locales.tilings import STRINGS as _MORE   # noqa: E402
+
+for _lang, _table in _MORE.items():
+    STRINGS.setdefault(_lang, {}).update(_table)
+
+
+def catalogue_langs():
+    """The languages with every text of the catalogue (of tilings.py or of patterns.py)."""
+    import i18n
+    return [k for k, _ in i18n.LANGS if k in STRINGS and len(STRINGS[k]) >= len(STRINGS["en"])]
 
 
 if __name__ == "__main__":

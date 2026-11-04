@@ -36,6 +36,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from scipy import ndimage
 
+import i18n
 import tilings as tl
 
 WHITE, BLACK = (1.0, 1.0, 1.0), (0.0, 0.0, 0.0)
@@ -649,10 +650,11 @@ def hue_names():
 
 
 def _font(size):
-    for name in ("arial.ttf", "DejaVuSans.ttf", "Helvetica.ttc"):
+    """A font for the captions, with the letters of the language in use."""
+    for name in (i18n.font_file(tl._LANG), "arial.ttf", "DejaVuSans.ttf", "Helvetica.ttc"):
         try:
             return ImageFont.truetype(name, size)
-        except OSError:
+        except (OSError, TypeError, AttributeError):
             continue
     return ImageFont.load_default()
 
@@ -881,6 +883,10 @@ STRINGS = {
         "app_saving": "Dibujando a tamaño real...", "app_saved": "Guardado en %s",
     },
 }
+# the other languages are in locales/wallpapers.py
+from locales.wallpapers import STRINGS as _MORE   # noqa: E402
+
+STRINGS.update(_MORE)
 
 
 def T(key):
@@ -913,7 +919,7 @@ def main():
     ap.add_argument("--fit", choices=FITS, help="with --input: cover (crop, default), contain or stretch")
     ap.add_argument("--show", action="store_true", help="preview window")
     ap.add_argument("--list", action="store_true", help="styles, parameters and sizes")
-    ap.add_argument("--lang", choices=list(STRINGS), default="en")
+    ap.add_argument("--lang", choices=[k for k, _ in i18n.LANGS if k in STRINGS], default="en")
     a = ap.parse_args()
     tl._LANG = a.lang
 
