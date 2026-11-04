@@ -4,8 +4,8 @@
 
 A colour theory guide, a ten-page vector poster and two build-your-own colour wheels,
 all generated with Python. The wheels can be printed and cut out, or turned on screen
-(desktop app or web page). The texts are in English, Portuguese and Spanish, and the colour
-wheels also in Brazilian Portuguese, French, Italian, German, Dutch, Polish, Turkish, Russian,
+(desktop app or web page). The texts are in English, Portuguese and Spanish, and the poster and
+the colour wheels also in Brazilian Portuguese, French, Italian, German, Dutch, Polish, Turkish, Russian,
 Chinese, Japanese and Korean (the other programs follow; see [Languages](#languages)).
 
 **Try the wheels online: https://mcampilho.github.io/color-theory/web/**
@@ -17,8 +17,13 @@ Chinese, Japanese and Korean (the other programs follow; see [Languages](#langua
 `color_theory_document.py` draws a ten-page, landscape US Letter poster with ReportLab.
 Every colour is computed: the RYB cube, HSB, the RGB cube, a simple CMY ink model, the
 values of the CSS colour keywords, the CIE 1931 colour-matching functions and CIELAB. No image
-is copied. Ready-made PDFs: [English](colour_theory_en.pdf), [Português](colour_theory_pt.pdf),
-[Español](colour_theory_es.pdf).
+is copied. Ready-made PDFs:
+[English](colour_theory_en.pdf), [Português (Portugal)](colour_theory_pt.pdf),
+[Português (Brasil)](colour_theory_pt-BR.pdf), [Español](colour_theory_es.pdf),
+[Français](colour_theory_fr.pdf), [Italiano](colour_theory_it.pdf), [Deutsch](colour_theory_de.pdf),
+[Nederlands](colour_theory_nl.pdf), [Polski](colour_theory_pl.pdf), [Türkçe](colour_theory_tr.pdf),
+[Русский](colour_theory_ru.pdf), [简体中文](colour_theory_zh.pdf), [日本語](colour_theory_ja.pdf),
+[한국어](colour_theory_ko.pdf).
 
 The 12 colours of the RYB wheel are the ones used by
 [w3schools](https://www.w3schools.com/colors/colors_wheels.asp) and
@@ -59,7 +64,7 @@ python3 color_theory_document.py --pages 3 4     # only some pages
 
 Options:
 
-- `--lang {en,pt,es}`: text language (default `en`).
+- `--lang`: text language (default `en`): en, pt, pt-BR, es, fr, it, de, nl, pl, tr, ru, zh, ja, ko.
 - `-o, --out PATH`: output PDF (default `colour_theory_<lang>.pdf`).
 - `--pages N [N ...]`: pages to render (default: all ten).
 
@@ -344,8 +349,8 @@ Chinese (Simplified), Japanese and Korean.
 
 | Program | Languages so far |
 |---------|------------------|
-| `color_wheel.py` (PDF, desktop app, web page) | all except Arabic (14) |
-| `color_theory_document.py`, `tilings.py`, `patterns.py`, `wallpapers.py` | English, Portuguese, Spanish |
+| `color_wheel.py` (PDF, desktop app, web page), `color_theory_document.py` | all except Arabic (14) |
+| `tilings.py`, `patterns.py`, `wallpapers.py` | English, Portuguese, Spanish |
 
 `i18n.py` holds what all programs share: the list of languages with their names, the fonts
 of each script and line breaking for Chinese and Japanese (between characters, never before

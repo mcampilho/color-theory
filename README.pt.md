@@ -5,7 +5,7 @@
 Um guia de teoria da cor, um póster vetorial de dez páginas e duas rodas de cores para
 construir em casa, tudo gerado em Python. As rodas podem ser impressas e recortadas, ou
 rodadas no ecrã (aplicação de computador ou página web). Os textos existem em inglês,
-português e espanhol, e as rodas de cores também em português do Brasil, francês, italiano,
+português e espanhol, e o póster e as rodas de cores também em português do Brasil, francês, italiano,
 alemão, neerlandês, polaco, turco, russo, chinês, japonês e coreano (os outros programas vêm a
 seguir; ver [Línguas](#línguas)).
 
@@ -19,8 +19,12 @@ O `color_theory_document.py` desenha com o ReportLab um póster de dez páginas 
 carta, na horizontal. Todas as cores são calculadas: o cubo RYB, o HSB, o cubo RGB, um
 modelo simples de tintas CMY, os valores das palavras-chave de cor do CSS, as funções de
 correspondência de cor CIE 1931 e o CIELAB. Nenhuma imagem é copiada. PDFs prontos:
-[English](colour_theory_en.pdf), [Português](colour_theory_pt.pdf),
-[Español](colour_theory_es.pdf).
+[English](colour_theory_en.pdf), [Português (Portugal)](colour_theory_pt.pdf),
+[Português (Brasil)](colour_theory_pt-BR.pdf), [Español](colour_theory_es.pdf),
+[Français](colour_theory_fr.pdf), [Italiano](colour_theory_it.pdf), [Deutsch](colour_theory_de.pdf),
+[Nederlands](colour_theory_nl.pdf), [Polski](colour_theory_pl.pdf), [Türkçe](colour_theory_tr.pdf),
+[Русский](colour_theory_ru.pdf), [简体中文](colour_theory_zh.pdf), [日本語](colour_theory_ja.pdf),
+[한국어](colour_theory_ko.pdf).
 
 As 12 cores da roda RYB são as usadas pela
 [w3schools](https://www.w3schools.com/colors/colors_wheels.asp) e pelo
@@ -62,7 +66,7 @@ python3 color_theory_document.py --pages 3 4     # só algumas páginas
 
 Opções:
 
-- `--lang {en,pt,es}`: idioma do texto (por omissão `en`).
+- `--lang`: idioma do texto (por omissão `en`): en, pt, pt-BR, es, fr, it, de, nl, pl, tr, ru, zh, ja, ko.
 - `-o, --out CAMINHO`: PDF de saída (por omissão `colour_theory_<lang>.pdf`).
 - `--pages N [N ...]`: páginas a desenhar (por omissão, as dez).
 
@@ -355,8 +359,8 @@ simplificado, japonês e coreano.
 
 | Programa | Línguas até agora |
 |----------|-------------------|
-| `color_wheel.py` (PDF, aplicação, página web) | todas menos o árabe (14) |
-| `color_theory_document.py`, `tilings.py`, `patterns.py`, `wallpapers.py` | inglês, português, espanhol |
+| `color_wheel.py` (PDF, aplicação, página web), `color_theory_document.py` | todas menos o árabe (14) |
+| `tilings.py`, `patterns.py`, `wallpapers.py` | inglês, português, espanhol |
 
 O `i18n.py` guarda o que todos os programas partilham: a lista de línguas com os seus nomes,
 os tipos de letra de cada escrita e a quebra de linha para chinês e japonês (entre caracteres,

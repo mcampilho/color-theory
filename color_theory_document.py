@@ -44,7 +44,7 @@ import colorsys
 import math
 
 from reportlab.lib.pagesizes import landscape, letter
-from reportlab.lib.utils import ImageReader, simpleSplit
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
@@ -821,7 +821,7 @@ def swatch_row(c, cx_px, top_px, colors, w=29, h=15, gap=7, radius=3.5):
 def para(c, text, cx_px, top_px, width_px, size=6.8, leading=8.4, font=REG,
          color=(0.12, 0.12, 0.12), align="center"):
     """Wrapped paragraph in page-1 layout px. Returns the last baseline (pt)."""
-    lines = simpleSplit(text, font, size, width_px * SX)
+    lines = i18n.wrap(text, font, size, width_px * SX)
     y = Y(top_px) - size
     c.setFont(font, size)
     c.setFillColorRGB(*color)
@@ -1301,7 +1301,7 @@ def build_page_2(c):
         c.setFillColorRGB(.3, .3, .3)
         y = top - 14.5
         c.drawString(LXL, y, d1)
-        for ln in simpleSplit(d2, REG, 5.3, 165):
+        for ln in i18n.wrap(d2, REG, 5.3, 165):
             y -= 6.6
             c.drawString(LXL, y, ln)
         venn(c, LXL + 21, top - 45, 9.5, venn_cols[key], mode)
@@ -1326,7 +1326,7 @@ def build_page_2(c):
         c.setFont(BOLD, 5.0)
         c.setFillColorRGB(.25, .25, .25)
         y = top - 4.8
-        for ln in simpleSplit(txt, BOLD, 5.0, 160)[:2]:
+        for ln in i18n.wrap(txt, BOLD, 5.0, 160)[:2]:
             c.drawString(RXL + 18, y, ln)
             y -= 6.2
         top -= 21.5
@@ -1367,7 +1367,7 @@ def caption(c, x, y, head, desc, width, align="center", size=5.8, cols=(INK, (.3
     c.setFont(REG, size)
     c.setFillColorRGB(*cols[1])
     yy = y - 11
-    for ln in simpleSplit(desc, REG, size, width):
+    for ln in i18n.wrap(desc, REG, size, width):
         (c.drawCentredString if align == "center" else c.drawString)(x, yy, ln)
         yy -= size * 1.3
 
@@ -1559,9 +1559,10 @@ def draw_mix_system(c, x, cy, key, cols, mode, letters, comp, dark=False):
     c.setFont(REG, 5.8)
     c.setFillColorRGB(.3, .3, .3)
     y = cy - 117
-    for ln in simpleSplit(l1, REG, 5.8, 160) + simpleSplit(l2, REG, 5.8, 160):
+    for ln in i18n.wrap(l1, REG, 5.8, 160) + i18n.wrap(l2, REG, 5.8, 160):
         c.drawCentredString(x, y, ln)
         y -= 7.4
+    y -= 2.5                                # keep the swatches clear of the descenders above
     tw = stringWidth(comp_lbl, BOLD, 5.8)
     sx = x - (tw + 26) / 2
     for k, col in enumerate(comp):
@@ -2345,7 +2346,7 @@ def build_page_9(c):
     c.setFont(REG, 8)
     c.setFillColorRGB(*INK)
     yy = 62
-    for ln in simpleSplit(T("ts_note"), REG, 8, 520):
+    for ln in i18n.wrap(T("ts_note"), REG, 8, 520):
         c.drawCentredString(W / 2, yy, ln)
         yy -= 10.5
 
@@ -2449,7 +2450,7 @@ def draw_hue_star(c, cx, cy, R, cols, names):
         sa = math.sin(math.radians(a))
         dy = 2 if sa > .9 else -8 if sa < -.9 else -2.5
         tracked(c, name, x, y + dy, BOLD if main else REG,
-                8.2 if main else 6.4, INK, .3, align=align, max_w=95)
+                8.2 if main else 6.4, INK, .3, align=align, max_w=70)   # clear of the text beside
 
 
 def build_page_10(c):
