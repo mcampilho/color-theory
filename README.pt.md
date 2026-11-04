@@ -4,10 +4,9 @@
 
 Um guia de teoria da cor, um póster vetorial de dez páginas e duas rodas de cores para
 construir em casa, tudo gerado em Python. As rodas podem ser impressas e recortadas, ou
-rodadas no ecrã (aplicação de computador ou página web). Os textos existem em inglês,
-português e espanhol, e o póster, as rodas de cores e os wallpapers também em português do Brasil, francês, italiano,
-alemão, neerlandês, polaco, turco, russo, chinês, japonês e coreano (os outros programas vêm a
-seguir; ver [Línguas](#línguas)).
+rodadas no ecrã (aplicação de computador ou página web). Todos os programas falam 14 línguas:
+inglês, português (de Portugal e do Brasil), espanhol, francês, italiano, alemão, neerlandês,
+polaco, turco, russo, chinês, japonês e coreano (ver [Línguas](#línguas)).
 
 **Experimente as rodas online: https://mcampilho.github.io/color-theory/web/?lang=pt**
 
@@ -162,8 +161,13 @@ No Windows usa o Edge WebView2, que já vem com o Windows 10 e 11.
 
 O `tilings.py` desenha as pavimentações dos artigos da Wikipedia listados no `tiles.md`,
 cada uma com várias colorações e com as cores dos esquemas de cores acima. Catálogos
-prontos (A4, 22 páginas): [English](tilings_en.pdf), [Português](tilings_pt.pdf),
-[Español](tilings_es.pdf).
+prontos (A4, 22 páginas):
+[English](tilings_en.pdf), [Português (Portugal)](tilings_pt.pdf),
+[Português (Brasil)](tilings_pt-BR.pdf), [Español](tilings_es.pdf),
+[Français](tilings_fr.pdf), [Italiano](tilings_it.pdf), [Deutsch](tilings_de.pdf),
+[Nederlands](tilings_nl.pdf), [Polski](tilings_pl.pdf), [Türkçe](tilings_tr.pdf),
+[Русский](tilings_ru.pdf), [简体中文](tilings_zh.pdf), [日本語](tilings_ja.pdf),
+[한국어](tilings_ko.pdf).
 
 ![Seis pavimentações: chapéu, zellij, Penrose, estrelas e cruzes, losangos, hexágonos em sete cores](images/tilings.png)
 
@@ -189,7 +193,7 @@ partir de qualquer matiz da roda RYB; as paletas `zellij`, `azulejo`, `girih`, `
 `grey`; ou cores à escolha.
 
 ```bash
-python3 tilings.py                       # catálogo -> tilings_en.pdf  (--lang pt, --lang es)
+python3 tilings.py                       # catálogo -> tilings_en.pdf  (--lang pt, fr, de, zh ...)
 python3 tilings.py --list                # pavimentações, colorações e parâmetros
 python3 tilings.py hexagonal -c 7 --scheme rainbow -o hex.svg
 python3 tilings.py penrose_p2 -c orientation --scheme analogous --hue blue -o p2.png
@@ -241,7 +245,13 @@ painéis, exceto quando um painel tem as suas. Tudo é calculado:
 
 O `patterns.py` faz mosaicos cuja forma de base é mais elaborada, sobre o motor do
 `tilings.py`: as mesmas paletas, colorações, saídas, folhas, `--vary` e `--show`. Catálogos
-prontos: [English](patterns_en.pdf), [Português](patterns_pt.pdf), [Español](patterns_es.pdf).
+prontos:
+[English](patterns_en.pdf), [Português (Portugal)](patterns_pt.pdf),
+[Português (Brasil)](patterns_pt-BR.pdf), [Español](patterns_es.pdf),
+[Français](patterns_fr.pdf), [Italiano](patterns_it.pdf), [Deutsch](patterns_de.pdf),
+[Nederlands](patterns_nl.pdf), [Polski](patterns_pl.pdf), [Türkçe](patterns_tr.pdf),
+[Русский](patterns_ru.pdf), [简体中文](patterns_zh.pdf), [日本語](patterns_ja.pdf),
+[한국어](patterns_ko.pdf).
 
 ![Seis mosaicos decorados: estrelas em relevo, degraus do tribunal, cabana de troncos, cubos de Rubik, tripés, tecelagem](images/patterns.png)
 
@@ -265,7 +275,7 @@ Para as faixas e os degradês juntaram-se dois esquemas, também disponíveis no
 também a coloração `gradient` (faixas de cor na diagonal da imagem).
 
 ```bash
-python3 patterns.py                      # catálogo -> patterns_en.pdf  (--lang pt, --lang es)
+python3 patterns.py                      # catálogo -> patterns_en.pdf  (--lang pt, fr, de, zh ...)
 python3 patterns.py --list               # padrões, colorações, parâmetros e layouts de patchwork
 python3 patterns.py --show               # janela de pré-visualização
 python3 patterns.py facets -p base=triangular -c tile --scheme complementary --hue blue -o estrelas.png
@@ -359,8 +369,7 @@ simplificado, japonês e coreano.
 
 | Programa | Línguas até agora |
 |----------|-------------------|
-| `color_wheel.py` (PDF, aplicação, página web), `color_theory_document.py`, `wallpapers.py` | todas menos o árabe (14) |
-| `tilings.py`, `patterns.py` | inglês, português, espanhol (nomes dos esquemas de cor nas 14) |
+| `color_wheel.py` (PDF, aplicação, página web), `color_theory_document.py`, `wallpapers.py`, `tilings.py`, `patterns.py` | todas menos o árabe (14) |
 
 O `i18n.py` guarda o que todos os programas partilham: a lista de línguas com os seus nomes,
 os tipos de letra de cada escrita e a quebra de linha para chinês e japonês (entre caracteres,

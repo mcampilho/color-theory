@@ -35,6 +35,8 @@ from collections import defaultdict
 
 from color_theory_document import STRINGS as CTD_STRINGS
 from color_theory_document import hue_ryb, luma, mix, ryb_to_rgb
+import i18n
+from i18n import BOLD, REG
 
 S3 = math.sqrt(3)
 H3 = S3 / 2
@@ -1789,11 +1791,17 @@ def caption_lines(v):
     return text, "%s: %s  ·  %s" % (T("colouring"), cname, scheme_name(s))
 
 
-def paragraph(c, text, x, y, width, font="Helvetica", size=9.5, leading=13, colour=(.25, .25, .25)):
-    from reportlab.lib.utils import simpleSplit
+def fit_size(text, font, size, width):
+    """size, or smaller so that text fits in width (pt)."""
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    w = stringWidth(text, font, size)
+    return size if w <= width else size * width / w
+
+
+def paragraph(c, text, x, y, width, font=REG, size=9.5, leading=13, colour=(.25, .25, .25)):
     c.setFont(font, size)
     c.setFillColorRGB(*colour)
-    for line in simpleSplit(text, font, size, width):
+    for line in i18n.wrap(text, font, size, width):
         c.drawString(x, y, line)
         y -= leading
     return y
@@ -1809,10 +1817,11 @@ def build_catalogue(path):
     page = [1]
 
     def footer():
-        c.setFont("Helvetica", 7.5)
+        c.setFont(REG, 7.5)
         c.setFillColorRGB(.5, .5, .5)
         c.drawString(M, 24, T("title"))
-        c.drawRightString(W - M, 24, "%s %d" % (T("page"), page[0]))
+        label = T("page")                 # "page" or, where the number goes inside, "第 %d 页"
+        c.drawRightString(W - M, 24, label % page[0] if "%d" in label else "%s %d" % (label, page[0]))
         c.showPage()
         page[0] += 1
 
@@ -1825,14 +1834,14 @@ def build_catalogue(path):
 
     # ---- cover: title, introduction, colour schemes, contents
     c.setFillColorRGB(.12, .12, .12)
-    c.setFont("Helvetica-Bold", 26)
+    c.setFont(BOLD, 26)
     c.drawString(M, H - 78, T("title"))
-    c.setFont("Helvetica", 12)
+    c.setFont(REG, fit_size(T("subtitle"), REG, 12, W - 2 * M))
     c.setFillColorRGB(.35, .35, .35)
     c.drawString(M, H - 98, T("subtitle"))
     y = paragraph(c, T("intro"), M, H - 128, W - 2 * M)
     y -= 14
-    c.setFont("Helvetica-Bold", 12)
+    c.setFont(BOLD, 12)
     c.setFillColorRGB(.12, .12, .12)
     c.drawString(M, y, T("schemes_t"))
     y = paragraph(c, T("schemes_d"), M, y - 16, W - 2 * M, size=8.5, leading=11.5)
@@ -1848,15 +1857,16 @@ def build_catalogue(path):
             c.setLineWidth(.4)
             c.rect(col_x + i * 15, row_y - 4, 13, 13, fill=1, stroke=1)
         c.setFillColorRGB(.2, .2, .2)
-        c.setFont("Helvetica", 8.5)
-        c.drawString(col_x + 112, row_y, scheme_name(s))
+        name = scheme_name(s)
+        c.setFont(REG, fit_size(name, REG, 8.5, (W - 2 * M) / 2 - 118))
+        c.drawString(col_x + 112, row_y, name)
     y -= (len(SCHEMES) + 1) // 2 * 22 + 14
-    c.setFont("Helvetica-Bold", 12)
+    c.setFont(BOLD, 12)
     c.setFillColorRGB(.12, .12, .12)
     c.drawString(M, y, T("contents"))
     y -= 18
     for fam, art, vs in PROGRAM["catalogue"]:
-        c.setFont("Helvetica", 9.5)
+        c.setFont(REG, 9.5)
         c.setFillColorRGB(.2, .2, .2)
         c.drawString(M + 8, y, T("f_" + fam))
         c.setFillColorRGB(.55, .55, .55)
@@ -1873,10 +1883,10 @@ def build_catalogue(path):
     for fam, art, vs in PROGRAM["catalogue"]:
         for first in range(0, len(vs), per_page):
             c.setFillColorRGB(.12, .12, .12)
-            c.setFont("Helvetica-Bold", 20)
+            c.setFont(BOLD, 20)
             title = T("f_" + fam) + ("" if first == 0 else "  (%s)" % T("cont"))
             c.drawString(M, H - 66, title)
-            c.setFont("Helvetica", 8.5)
+            c.setFont(REG, 8.5)
             c.setFillColorRGB(.5, .5, .5)
             if art:
                 c.drawString(M, H - 82, "Wikipedia: " + art + "  —  en.wikipedia.org/wiki/" + art.replace(" ", "_"))
@@ -1895,13 +1905,12 @@ def build_catalogue(path):
                 c.rect(x, y0, pw, ph, fill=0, stroke=1)
                 line1, line2 = caption_lines(v)
                 c.setFillColorRGB(.12, .12, .12)
-                c.setFont("Helvetica-Bold", 8.6)
-                from reportlab.lib.utils import simpleSplit
+                c.setFont(BOLD, 8.6)
                 yy = y0 - 12
-                for ln in simpleSplit(line1, "Helvetica-Bold", 8.6, pw)[:2]:
+                for ln in i18n.wrap(line1, BOLD, 8.6, pw)[:2]:
                     c.drawString(x, yy, ln)
                     yy -= 10.5
-                c.setFont("Helvetica", 7.6)
+                c.setFont(REG, fit_size(line2, REG, 7.6, pw))
                 c.setFillColorRGB(.42, .42, .42)
                 c.drawString(x, yy, line2)
             footer()
@@ -2001,10 +2010,10 @@ def sheet_layout(n, cols, width, aspect, labels):
 
 def _font(px):
     from PIL import ImageFont
-    for name in ("arial.ttf", "LiberationSans-Regular.ttf", "DejaVuSans.ttf"):
+    for name in (i18n.font_file(_LANG), "arial.ttf", "LiberationSans-Regular.ttf", "DejaVuSans.ttf"):
         try:
             return ImageFont.truetype(name, int(px))
-        except OSError:
+        except (OSError, TypeError, AttributeError):
             pass
     return ImageFont.load_default()
 
@@ -2033,7 +2042,7 @@ def label_size(text, lab, max_w):
     """Font size of a caption: lab * 0.62, smaller if it would be wider than the panel."""
     from reportlab.pdfbase.pdfmetrics import stringWidth
     size = lab * .62
-    return min(size, size * max_w / max(1e-6, stringWidth(text, "Helvetica", size)))
+    return min(size, size * max_w / max(1e-6, stringWidth(text, REG, size)))
 
 
 def write_sheet(specs, path, cols=3, width=1800, labels=True):
@@ -2053,9 +2062,10 @@ def write_sheet(specs, path, cols=3, width=1800, labels=True):
                        % (x, y, pw, ph))
             if labels:
                 text = label_of(spec)
-                out.append('<text x="%.2f" y="%.2f" font-family="Helvetica, Arial, sans-serif" '
+                out.append('<text x="%.2f" y="%.2f" font-family="%s" '
                            'font-size="%.1f" fill="#3c3c3c">%s</text>'
-                           % (x, y + ph + lab * .8, label_size(text, lab, pw), text.replace("&", "&amp;")))
+                           % (x, y + ph + lab * .8, i18n.css_family(_LANG).replace('"', "'"),
+                              label_size(text, lab, pw), text.replace("&", "&amp;")))
         out.append("</svg>")
         with open(path, "w", encoding="utf-8") as f:
             f.write("\n".join(out))
@@ -2071,7 +2081,7 @@ def write_sheet(specs, path, cols=3, width=1800, labels=True):
         if labels:
             text = label_of(spec)
             c.setFillColorRGB(.24, .24, .24)
-            c.setFont("Helvetica", label_size(text, lab, pw))
+            c.setFont(REG, label_size(text, lab, pw))
             c.drawString(x, H - y - ph - lab * .8, text)
     c.showPage()
     c.save()
@@ -2264,6 +2274,7 @@ def main():
     ap.add_argument("-o", "--out", help="output file: .png, .svg or .pdf")
     a = ap.parse_args()
     _LANG = a.lang
+    i18n.use_lang(a.lang)
     if a.list:
         for key in program_keys():
             t = TILINGS[key]

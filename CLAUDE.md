@@ -9,8 +9,8 @@ PDFs atuais (`colour_theory_*.pdf`, `colour_wheels_*.pdf`) e `web/discs/` vão p
 repositório, para se poderem usar sem Python. Contém:
 
 - `i18n.py` — línguas e fontes partilhadas. Plano: 15 línguas (en, pt, pt-BR, es, fr, it, de,
-  nl, pl, tr, ru, ar, zh, ja, ko), por fases: 1) base comum, 2) rodas de cores, 3) documento e 4) wallpapers —
-  feitas; 5) pavimentações e mosaicos; 6) árabe (direita para a
+  nl, pl, tr, ru, ar, zh, ja, ko), por fases: 1) base comum, 2) rodas de cores, 3) documento, 4) wallpapers e
+  5) pavimentações e mosaicos — feitas; 6) árabe (direita para a
   esquerda: `arabic-reshaper` + `python-bidi`, texto em arco). Os programas desenham sempre
   com `REG`/`BOLD`/`ITAL` ("Sans"...); `use_lang(lang)` aponta esses nomes para Helvetica
   (latim ocidental, sem embutir) ou para uma TTF (Arial, YaHei, Yu Gothic, Malgun). Atenção:
@@ -19,8 +19,7 @@ repositório, para se poderem usar sem Python. Contém:
   (o `simpleSplit` só quebra em espaços). Os textos das línguas novas estão em `locales/<programa>.py`
   e cada programa junta-os à sua `STRINGS`; uma chave em falta usa o inglês. O documento só
   oferece no `--lang` as línguas completas (`POSTER_LANGS`); o `tilings.py`/`patterns.py` também
-  (`catalogue_langs()`), e por enquanto `locales/tilings.py` só tem os nomes dos esquemas (`s_*`),
-  usados pelas legendas dos wallpapers.
+  (`catalogue_langs()`). Os textos com número embutido (`page` = "第 %d 页") aceitam `%d`.
 
 - `Claude - The Complete Guide to Color Theory.md` — guia de referência completo (da física da luz
   aos espaços de cor e sistemas de correspondência), em inglês. As versões `.docx` e `.pdf`

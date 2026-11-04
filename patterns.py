@@ -1144,11 +1144,15 @@ STRINGS = {
         "c_corner": "por esquina",
     },
 }
+# the other languages are in locales/patterns.py
+from locales.patterns import STRINGS as _MORE   # noqa: E402
+
+STRINGS.update(_MORE)
 
 
 def main():
     for lang, table in STRINGS.items():
-        tl.STRINGS[lang].update(table)
+        tl.STRINGS.setdefault(lang, {}).update(table)
     tl.PROGRAM.update(catalogue=CATALOGUE, keys=PATTERN_KEYS, out="patterns", start="tripods")
     tl.main()
     if "--list" in sys.argv:
