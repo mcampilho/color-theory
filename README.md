@@ -418,8 +418,8 @@ green), so the same pair can give quite different results.
 
 ## Other files
 
-- `Claude - The Complete Guide to Color Theory.md`: the full reference guide, from the physics
-  of light to colour spaces (also as `.docx` and `.pdf`).
+- [`docs/The Complete Guide to Color Theory.md`](<docs/The Complete Guide to Color Theory.md>): the full reference guide, from the physics
+  of light to colour spaces (also as [`.docx`](<docs/The Complete Guide to Color Theory.docx>) and [`.pdf`](<docs/The Complete Guide to Color Theory.pdf>)).
 - `poster.py`: the earlier single-page poster, English only.
 - `images/`: the pictures in this README.
 

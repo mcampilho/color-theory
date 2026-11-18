@@ -428,8 +428,8 @@ por isso o mesmo par pode dar resultados bem diferentes.
 
 ## Outros ficheiros
 
-- `Claude - The Complete Guide to Color Theory.md`: o guia de referência completo, da física
-  da luz aos espaços de cor, em inglês (também em `.docx` e `.pdf`).
+- [`docs/The Complete Guide to Color Theory.md`](<docs/The Complete Guide to Color Theory.md>): o guia de referência completo, da física
+  da luz aos espaços de cor, em inglês (também em [`.docx`](<docs/The Complete Guide to Color Theory.docx>) e [`.pdf`](<docs/The Complete Guide to Color Theory.pdf>)).
 - `poster.py`: o póster anterior, de uma página, só em inglês.
 - `images/`: as imagens deste README.
 

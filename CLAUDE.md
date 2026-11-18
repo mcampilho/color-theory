@@ -28,9 +28,9 @@ repositório, para se poderem usar sem Python. Contém:
   oferece no `--lang` as línguas completas (`POSTER_LANGS`); o `tilings.py`/`patterns.py` também
   (`catalogue_langs()`). Os textos com número embutido (`page` = "第 %d 页") aceitam `%d`.
 
-- `Claude - The Complete Guide to Color Theory.md` — guia de referência completo (da física da luz
+- `docs/The Complete Guide to Color Theory.md` — guia de referência completo (da física da luz
   aos espaços de cor e sistemas de correspondência), em inglês. As versões `.docx` e `.pdf`
-  com o mesmo nome são exportações deste texto; se o `.md` mudar, ficam desatualizadas.
+  da mesma pasta são exportações deste texto; se o `.md` mudar, ficam desatualizadas.
 - `document.py` — póster de 10 páginas em PDF vetorial (ReportLab + Pillow):
   1. roda RYB, esquemas e significados;
   2. modelos de cor, disco de matiz/saturação e harmonias;
