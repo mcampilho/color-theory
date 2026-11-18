@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-color_wheel.py
+wheel.py
 --------------
 Build-your-own colour wheels: a printable A4 PDF with two paper colour
 wheels to cut out and assemble at home, plus the instructions.
@@ -22,18 +22,18 @@ that turns, with all the colours, and a front disc with windows.
            central diagram shows.
 
     pip install reportlab pillow
-    python3 color_wheel.py                  # English -> colour_wheels_en.pdf
-    python3 color_wheel.py --lang pt        # Portuguese
-    python3 color_wheel.py --lang es -o es.pdf
-    python3 color_wheel.py --app [--lang pt]  # the wheels in a window (Tkinter)
-    python3 color_wheel.py --web              # SVG discs + data for web/index.html
-    python3 color_wheel.py --webview          # that web page in its own window (pywebview)
+    python3 -m colortheory.wheel                  # English -> colour_wheels_en.pdf
+    python3 -m colortheory.wheel --lang pt        # Portuguese
+    python3 -m colortheory.wheel --lang es -o es.pdf
+    python3 -m colortheory.wheel --app [--lang pt]  # the wheels in a window (Tkinter)
+    python3 -m colortheory.wheel --web              # SVG discs + data for web/index.html
+    python3 -m colortheory.wheel --webview          # that web page in its own window (pywebview)
     --theme auto|light|dark                   # colours of --app and --webview
 
 On screen every part of both wheels turns: drag it with the mouse, use the
 mouse wheel, or the arrow keys (up/down choose the part).
 
-The colours and several helpers come from color_theory_document.py, which
+The colours and several helpers come from document.py, which
 must sit in the same folder.
 """
 import argparse
@@ -47,12 +47,12 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD
 
-import i18n
-from i18n import BOLD, ITAL, LANG_NAMES, REG
+from colortheory import i18n
+from colortheory.i18n import BOLD, ITAL, LANG_NAMES, REG
 
-from color_theory_document import (HUE_RYB, STRINGS as DOC_STRINGS, arc_text, fill_poly, fit_size,
-                                   luma, mix, pol, radial_text, ring_text, ring_wedge, ryb_to_rgb,
-                                   srgb_gamma, text_on, tracked)
+from colortheory.document import (STRINGS as DOC_STRINGS, arc_text, fill_poly, fit_size, pol, radial_text,
+                                   ring_text, ring_wedge, tracked)
+from colortheory.colour import HUE_RYB, luma, mix, ryb_to_rgb, srgb_gamma, text_on
 
 # ==========================================================================
 # 1. TRANSLATIONS
@@ -451,24 +451,23 @@ STRINGS = {
                      "Agarre un disco trasero por su borde de color o a través de una ventana."],
     },
 }
-# the other languages are in locales/color_wheel.py
-from locales.color_wheel import STRINGS as _MORE   # noqa: E402
+# the other languages are in locales/wheel.py
+from colortheory.locales.wheel import STRINGS as _MORE   # noqa: E402
 
 STRINGS.update(_MORE)
 
-_LANG = "en"
 # True while drawing the discs for the screen (desktop app and web page):
 # no page frame, windows become see-through holes.
 _VIRTUAL = False
 
 
 def T(key):
-    return STRINGS.get(_LANG, STRINGS["en"]).get(key, STRINGS["en"][key])
+    return STRINGS.get(i18n.current(), STRINGS["en"]).get(key, STRINGS["en"][key])
 
 
 def hue_names():
     """The 12 RYB hue names, clockwise from yellow (from the poster's table)."""
-    return DOC_STRINGS.get(_LANG, {}).get("hue_names", DOC_STRINGS["en"]["hue_names"])
+    return DOC_STRINGS.get(i18n.current(), {}).get("hue_names", DOC_STRINGS["en"]["hue_names"])
 
 
 def languages():
@@ -680,7 +679,7 @@ def flow(c, items, y, bounds, size, x_shift=0.0):
     rtl = i18n.rtl()                        # Arabic: words go from the right edge leftwards
     c.setFillColorRGB(*INK)
     for head, body in items:
-        colon = "：" if i18n.script(_LANG) in ("zh", "ja") else ":"
+        colon = "：" if i18n.script(i18n.current()) in ("zh", "ja") else ":"
         words = ([(s, w, BOLD) for s, w in i18n.words(head + colon)]
                  + [(" " if k == 0 else s, w, REG) for k, (s, w) in enumerate(i18n.words(body))])
         while words:
@@ -1279,17 +1278,17 @@ class ShapeRecorder:
 def record_part(build, lang, theme="light"):
     """The shapes of one disc (a build_disc* function) in language lang and
     theme "light" or "dark"."""
-    global _LANG, _VIRTUAL
-    old = _LANG, _VIRTUAL, i18n.current()
-    _LANG, _VIRTUAL = lang, True
+    global _VIRTUAL
+    old = _VIRTUAL, i18n.current()
+    _VIRTUAL = True
     i18n.use_lang(lang)
     set_theme(theme)
     try:
         rec = ShapeRecorder()
         build(rec)
     finally:
-        _LANG, _VIRTUAL = old[:2]
-        i18n.use_lang(old[2])
+        _VIRTUAL = old[0]
+        i18n.use_lang(old[1])
         set_theme("light")
     return rec.items
 
@@ -1547,7 +1546,7 @@ class WheelApp:
     def toggle_theme(self):
         self.theme = "light" if self.theme == "dark" else "dark"
         self.apply_theme()
-        self.set_lang(_LANG)
+        self.set_lang(i18n.current())
         self.canvas.focus_set()
 
     # geometry of the canvas
@@ -1575,8 +1574,7 @@ class WheelApp:
         self.canvas.focus_set()
 
     def set_lang(self, lang):
-        global _LANG
-        _LANG = lang
+        i18n.use_lang(lang)
         self.lang_box.set(LANG_NAMES[lang])
         self.root.title(T("app_title"))
         self.title.config(text=T("app_title"))
@@ -1606,7 +1604,7 @@ class WheelApp:
         rest it is redone with the smoother bicubic one."""
         from PIL import Image
         fast = part == self.moving
-        key = (_LANG, self.theme)
+        key = (i18n.current(), self.theme)
         was_key, turn, was_fast, img = self.turned[part] or (None, None, None, None)
         if (was_key, turn) == (key, self.turn[part]) and (fast or not was_fast):
             return img
@@ -1744,7 +1742,7 @@ def export_web(folder):
             "langs": {lang: {k: STRINGS[lang].get(k, STRINGS["en"][k]) for k in keys}
                       for lang in languages()}}
     with open(os.path.join(base, "data.js"), "w", encoding="utf-8") as f:
-        f.write("// Written by color_wheel.py --web: do not edit by hand.\n")
+        f.write("// Written by colortheory.wheel --web: do not edit by hand.\n")
         f.write("window.WHEEL_DATA = %s;\n" % json.dumps(data, ensure_ascii=False, indent=1))
     print("Saved", base)
 
@@ -1754,7 +1752,9 @@ def run_webview(lang, theme="auto"):
     wheels as in the browser, without one. Writes web/discs first if they
     are missing."""
     import webview
-    web = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
+    # the web page lives in the project folder, next to src/ (a source checkout is needed for it)
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    web = os.path.join(root, "web")
     if not os.path.exists(os.path.join(web, "discs", "en", "d2f-dark.svg")):
         export_web(web)
     theme = system_theme() if theme == "auto" else theme
@@ -1775,7 +1775,6 @@ PAGES = [build_page_1, build_page_2, build_disc1_back, build_disc1_front, build_
 
 
 def main():
-    global _LANG
     ap = argparse.ArgumentParser(description="Build-your-own colour wheels (A4 PDF), and the "
                                              "same wheels on screen")
     ap.add_argument("--lang", default="en", choices=languages(), help="text language")
@@ -1797,7 +1796,6 @@ def main():
     if a.web:
         export_web(a.web)
         return
-    _LANG = a.lang
     i18n.use_lang(a.lang)
     out = a.out or "colour_wheels_%s.pdf" % a.lang
     c = canvas.Canvas(out, pagesize=A4)

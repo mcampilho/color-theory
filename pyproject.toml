@@ -11,22 +11,33 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# wallpapers.py
+# colortheory.wallpapers
 wallpapers = ["numpy>=1.24", "scipy>=1.10"]
 # Arabic (right to left): joins the letters and orders each line
 rtl = ["arabic-reshaper>=3.0", "python-bidi>=0.6"]
-# color_wheel.py --webview
+# colortheory.wheel --webview
 app = ["pywebview"]
 dev = ["pytest>=8", "ruff>=0.6"]
 all = ["color-theory[wallpapers,rtl,app]"]
 
-# The programs are scripts that import each other by name: they run from this folder
-# (python3 tilings.py ...), so there is nothing to build or install.
-[tool.setuptools]
-py-modules = []
+[project.scripts]
+colortheory-poster = "colortheory.poster:main"
+colortheory-document = "colortheory.document:main"
+colortheory-wheel = "colortheory.wheel:main"
+colortheory-tilings = "colortheory.tilings:main"
+colortheory-patterns = "colortheory.patterns:main"
+colortheory-wallpapers = "colortheory.wallpapers:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 addopts = "-q"
 markers = [
     "fonts: needs the Windows/CJK/Arabic fonts of i18n.py (skipped where they are missing)",
@@ -35,6 +46,7 @@ markers = [
 [tool.ruff]
 line-length = 110
 target-version = "py310"
+src = ["src"]
 extend-exclude = [".venv", "web"]
 
 [tool.ruff.lint]
@@ -52,5 +64,5 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"locales/*.py" = ["E501"]
+"src/colortheory/locales/*.py" = ["E501"]
 "tests/*.py" = ["E402"]

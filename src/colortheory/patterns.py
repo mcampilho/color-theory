@@ -17,15 +17,15 @@ colourings, PNG / SVG / PDF output, sheets, preview window and catalogue):
     and whirling polygons whose cut-off triangles make spiral arms.
 
     pip install reportlab pillow
-    python3 patterns.py                         # catalogue -> patterns_en.pdf
-    python3 patterns.py --lang pt               # Portuguese catalogue
-    python3 patterns.py --list                  # patterns, colourings, parameters
-    python3 patterns.py --show                  # preview window
-    python3 patterns.py facets -p base=triangular --scheme triad -o stars.png
-    python3 patterns.py bands -p bands=7 -p anchor=alternate --scheme sweep -o cabin.svg
-    python3 patterns.py rubik -c rings --scheme rainbow -o rubik.pdf
-    python3 patterns.py maze -p seed=7 -c flow --scheme rainbow -o maze.png
-    python3 patterns.py spiral -p link=1 -p flat=1 -o greek_key.svg
+    python3 -m colortheory.patterns                         # catalogue -> patterns_en.pdf
+    python3 -m colortheory.patterns --lang pt               # Portuguese catalogue
+    python3 -m colortheory.patterns --list                  # patterns, colourings, parameters
+    python3 -m colortheory.patterns --show                  # preview window
+    python3 -m colortheory.patterns facets -p base=triangular --scheme triad -o stars.png
+    python3 -m colortheory.patterns bands -p bands=7 -p anchor=alternate --scheme sweep -o cabin.svg
+    python3 -m colortheory.patterns rubik -c rings --scheme rainbow -o rubik.pdf
+    python3 -m colortheory.patterns maze -p seed=7 -c flow --scheme rainbow -o maze.png
+    python3 -m colortheory.patterns spiral -p link=1 -p flat=1 -o greek_key.svg
 
 Every option of tilings.py works here too (--scheme, --hue, --colours, -c, -p,
 --vary, sheets of several patterns, --show ...).
@@ -34,8 +34,8 @@ import math
 import random
 import sys
 
-import tilings as tl
-from tilings import Patch, Tile, add, ccw, centroid, mul, sub, unit
+from colortheory import tilings as tl
+from colortheory.tilings import Patch, Tile, add, ccw, centroid, mul, sub, unit
 
 S3 = math.sqrt(3)
 
@@ -1146,7 +1146,7 @@ STRINGS = {
     },
 }
 # the other languages are in locales/patterns.py
-from locales.patterns import STRINGS as _MORE   # noqa: E402
+from colortheory.locales.patterns import STRINGS as _MORE   # noqa: E402
 
 STRINGS.update(_MORE)
 

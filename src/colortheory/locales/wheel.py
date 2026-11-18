@@ -1,6 +1,6 @@
-"""Texts of color_wheel.py in the added languages (see locales/__init__.py).
+"""Texts of wheel.py in the added languages (see locales/__init__.py).
 Same keys and the same number of items in each list as the "en" table of
-color_wheel.py."""
+wheel.py."""
 
 STRINGS = {
     # ------------------------------------------------------------------ PT-BR

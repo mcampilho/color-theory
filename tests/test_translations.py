@@ -8,12 +8,12 @@ import re
 
 import pytest
 
-import color_theory_document as doc
-import color_wheel as wheel
-import i18n
-import patterns
-import tilings
-import wallpapers
+from colortheory import document as doc
+from colortheory import wheel
+from colortheory import i18n
+from colortheory import patterns
+from colortheory import tilings
+from colortheory import wallpapers
 
 # %d, %s, %.1f, %(name)s and %%; no flags, so "100 % drucken" is not read as "% d"
 PLACEHOLDER = re.compile(r"%(?:\([^)]*\))?\d*(?:\.\d+)?[sdif]|%%")

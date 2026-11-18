@@ -1,7 +1,7 @@
 """Languages, line breaking and right-to-left text (i18n.py)."""
 import pytest
 
-import i18n
+from colortheory import i18n
 
 
 def test_fifteen_languages():

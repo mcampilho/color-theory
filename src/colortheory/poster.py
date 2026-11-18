@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-color_theory_poster.py
+poster.py
 ----------------------
 Draws a "Colour Theory" poster (page 1) as a vector PDF with ReportLab,
 including a 12-hue colour wheel built on the RYB (Red-Yellow-Blue) model.
 
     pip install reportlab
-    python color_theory_poster.py                 # -> colour_theory.pdf
-    python color_theory_poster.py my_file.pdf
+    python -m colortheory.poster                 # -> colour_theory.pdf
+    python -m colortheory.poster my_file.pdf
 
 Everything is drawn as vector graphics, so it stays sharp at any zoom.
 More pages can be added by writing another build_page_N(c) function and
@@ -525,10 +525,11 @@ def build_page_1(c):
 
 
 # --------------------------------------------------------------------------
-def main(out="colour_theory.pdf"):
+def main(out=None):
+    out = out or (sys.argv[1] if len(sys.argv) > 1 else "colour_theory.pdf")
     c = canvas.Canvas(out, pagesize=(W, H))
     c.setTitle("Colour Theory")
-    c.setAuthor("color_theory_poster.py")
+    c.setAuthor("colortheory.poster")
     build_page_1(c)
     c.showPage()
     # build_page_2(c); c.showPage()   # <- add more pages here
@@ -537,4 +538,4 @@ def main(out="colour_theory.pdf"):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "colour_theory.pdf")
+    main()

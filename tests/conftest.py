@@ -1,7 +1,6 @@
-"""Shared setup: the programs are scripts in the project folder, so put it on sys.path."""
+"""Shared setup: ROOT is the project folder. pytest finds the package through "pythonpath = src" in pyproject.toml;
+the programs run in a subprocess get the same folder in PYTHONPATH (SRC)."""
 import os
-import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if ROOT not in sys.path:
-    sys.path.insert(0, ROOT)
+SRC = os.path.join(ROOT, "src")

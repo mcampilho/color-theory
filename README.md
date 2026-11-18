@@ -14,16 +14,16 @@ Chinese, Japanese and Korean (see [Languages](#languages)).
 
 ## Poster
 
-`color_theory_document.py` draws a ten-page, landscape US Letter poster with ReportLab.
+`document.py` draws a ten-page, landscape US Letter poster with ReportLab.
 Every colour is computed: the RYB cube, HSB, the RGB cube, a simple CMY ink model, the
 values of the CSS colour keywords, the CIE 1931 colour-matching functions and CIELAB. No image
 is copied. Ready-made PDFs:
-[English](colour_theory_en.pdf), [Português (Portugal)](colour_theory_pt.pdf),
-[Português (Brasil)](colour_theory_pt-BR.pdf), [Español](colour_theory_es.pdf),
-[Français](colour_theory_fr.pdf), [Italiano](colour_theory_it.pdf), [Deutsch](colour_theory_de.pdf),
-[Nederlands](colour_theory_nl.pdf), [Polski](colour_theory_pl.pdf), [Türkçe](colour_theory_tr.pdf),
-[Русский](colour_theory_ru.pdf), [العربية](colour_theory_ar.pdf), [简体中文](colour_theory_zh.pdf), [日本語](colour_theory_ja.pdf),
-[한국어](colour_theory_ko.pdf).
+[English](output/colour_theory_en.pdf), [Português (Portugal)](output/colour_theory_pt.pdf),
+[Português (Brasil)](output/colour_theory_pt-BR.pdf), [Español](output/colour_theory_es.pdf),
+[Français](output/colour_theory_fr.pdf), [Italiano](output/colour_theory_it.pdf), [Deutsch](output/colour_theory_de.pdf),
+[Nederlands](output/colour_theory_nl.pdf), [Polski](output/colour_theory_pl.pdf), [Türkçe](output/colour_theory_tr.pdf),
+[Русский](output/colour_theory_ru.pdf), [العربية](output/colour_theory_ar.pdf), [简体中文](output/colour_theory_zh.pdf), [日本語](output/colour_theory_ja.pdf),
+[한국어](output/colour_theory_ko.pdf).
 
 The 12 colours of the RYB wheel are the ones used by
 [w3schools](https://www.w3schools.com/colors/colors_wheels.asp) and
@@ -55,11 +55,11 @@ which mixes them like paints (yellow and blue make green), not like light.
 All text is in the `STRINGS` table.
 
 ```bash
-pip install reportlab pillow
-python3 color_theory_document.py                 # all pages -> colour_theory_en.pdf
-python3 color_theory_document.py --lang pt       # Portuguese -> colour_theory_pt.pdf
-python3 color_theory_document.py --lang es -o es.pdf
-python3 color_theory_document.py --pages 3 4     # only some pages
+pip install .          # from this folder: the colortheory package, reportlab and pillow
+python3 -m colortheory.document                 # all pages -> colour_theory_en.pdf
+python3 -m colortheory.document --lang pt       # Portuguese -> colour_theory_pt.pdf
+python3 -m colortheory.document --lang es -o es.pdf
+python3 -m colortheory.document --pages 3 4     # only some pages
 ```
 
 Options:
@@ -73,15 +73,15 @@ it under a new key.
 
 ## Build-your-own colour wheels
 
-`color_wheel.py` makes a printable A4 PDF (six pages) with two paper colour wheels to cut
+`wheel.py` makes a printable A4 PDF (six pages) with two paper colour wheels to cut
 out and assemble at home. Each wheel has a back disc that turns and a front disc with
 windows, joined at the centre by a split pin. Ready-made PDFs:
-[English](colour_wheels_en.pdf), [Português (Portugal)](colour_wheels_pt.pdf),
-[Português (Brasil)](colour_wheels_pt-BR.pdf), [Español](colour_wheels_es.pdf),
-[Français](colour_wheels_fr.pdf), [Italiano](colour_wheels_it.pdf),
-[Deutsch](colour_wheels_de.pdf), [Nederlands](colour_wheels_nl.pdf),
-[Polski](colour_wheels_pl.pdf), [Türkçe](colour_wheels_tr.pdf), [Русский](colour_wheels_ru.pdf), [العربية](colour_wheels_ar.pdf),
-[简体中文](colour_wheels_zh.pdf), [日本語](colour_wheels_ja.pdf), [한국어](colour_wheels_ko.pdf).
+[English](output/colour_wheels_en.pdf), [Português (Portugal)](output/colour_wheels_pt.pdf),
+[Português (Brasil)](output/colour_wheels_pt-BR.pdf), [Español](output/colour_wheels_es.pdf),
+[Français](output/colour_wheels_fr.pdf), [Italiano](output/colour_wheels_it.pdf),
+[Deutsch](output/colour_wheels_de.pdf), [Nederlands](output/colour_wheels_nl.pdf),
+[Polski](output/colour_wheels_pl.pdf), [Türkçe](output/colour_wheels_tr.pdf), [Русский](output/colour_wheels_ru.pdf), [العربية](output/colour_wheels_ar.pdf),
+[简体中文](output/colour_wheels_zh.pdf), [日本語](output/colour_wheels_ja.pdf), [한국어](output/colour_wheels_ko.pdf).
 
 ![The four discs to cut out](images/wheels_pages.png)
 
@@ -99,15 +99,14 @@ hue with what a tab adds can be printed at that hue's angle on the back disc: it
 the window when the hue stands just beyond the tab.
 
 ```bash
-python3 color_wheel.py                 # -> colour_wheels_en.pdf
-python3 color_wheel.py --lang pt       # Portuguese
-python3 color_wheel.py --lang es -o es.pdf
-python3 color_wheel.py --lang pt-BR    # also fr, it, de, nl, pl, tr, ru, zh, ja, ko
+python3 -m colortheory.wheel                 # -> colour_wheels_en.pdf
+python3 -m colortheory.wheel --lang pt       # Portuguese
+python3 -m colortheory.wheel --lang es -o es.pdf
+python3 -m colortheory.wheel --lang pt-BR    # also fr, it, de, nl, pl, tr, ru, zh, ja, ko
 ```
 
 Print pages 3 to 6 at actual size (100 %); each page has a 100 mm bar to check the scale.
-The script imports its colours and some drawing helpers from `color_theory_document.py`,
-so keep both files in the same folder.
+The colours come from `colour.py` and some drawing helpers from `document.py` (both in the `colortheory` package).
 
 ### On screen
 
@@ -127,9 +126,9 @@ remembers the choice). The printed PDFs are always light.
 **Desktop** (Tkinter and Pillow, nothing else to install):
 
 ```bash
-python3 color_wheel.py --app            # English
-python3 color_wheel.py --app --lang pt  # starts in Portuguese; the language can be changed in the window
-python3 color_wheel.py --app --theme dark   # --theme auto (default), light or dark
+python3 -m colortheory.wheel --app            # English
+python3 -m colortheory.wheel --app --lang pt  # starts in Portuguese; the language can be changed in the window
+python3 -m colortheory.wheel --app --theme dark   # --theme auto (default), light or dark
 ```
 
 **Web**: open `web/index.html` in a browser. The language box at the top switches between
@@ -138,7 +137,7 @@ texts and disc geometry from `web/discs/data.js`, both written by (each disc in 
 and a dark version; `?theme=dark` or `?lang=pt` in the address also work):
 
 ```bash
-python3 color_wheel.py --web            # -> web/discs/  (or: --web OTHER_FOLDER)
+python3 -m colortheory.wheel --web            # -> web/discs/  (or: --web OTHER_FOLDER)
 ```
 
 Run it again after changing the discs or the texts. The page itself (`index.html`,
@@ -149,9 +148,9 @@ window without a browser. It writes `web/discs/` first if it is missing.
 
 ```bash
 pip install pywebview
-python3 color_wheel.py --webview            # English
-python3 color_wheel.py --webview --lang pt  # starts in Portuguese
-python3 color_wheel.py --webview --theme light
+python3 -m colortheory.wheel --webview            # English
+python3 -m colortheory.wheel --webview --lang pt  # starts in Portuguese
+python3 -m colortheory.wheel --webview --theme light
 ```
 
 On Windows it uses the Edge WebView2 runtime, which comes with Windows 10 and 11.
@@ -161,12 +160,12 @@ On Windows it uses the Edge WebView2 runtime, which comes with Windows 10 and 11
 `tilings.py` draws the tilings of the Wikipedia articles listed in `tiles.md`, each with
 several colourings and with colours from the colour schemes above. Ready-made catalogues
 (A4, 22 pages):
-[English](tilings_en.pdf), [Português (Portugal)](tilings_pt.pdf),
-[Português (Brasil)](tilings_pt-BR.pdf), [Español](tilings_es.pdf),
-[Français](tilings_fr.pdf), [Italiano](tilings_it.pdf), [Deutsch](tilings_de.pdf),
-[Nederlands](tilings_nl.pdf), [Polski](tilings_pl.pdf), [Türkçe](tilings_tr.pdf),
-[Русский](tilings_ru.pdf), [العربية](tilings_ar.pdf), [简体中文](tilings_zh.pdf), [日本語](tilings_ja.pdf),
-[한국어](tilings_ko.pdf).
+[English](output/tilings_en.pdf), [Português (Portugal)](output/tilings_pt.pdf),
+[Português (Brasil)](output/tilings_pt-BR.pdf), [Español](output/tilings_es.pdf),
+[Français](output/tilings_fr.pdf), [Italiano](output/tilings_it.pdf), [Deutsch](output/tilings_de.pdf),
+[Nederlands](output/tilings_nl.pdf), [Polski](output/tilings_pl.pdf), [Türkçe](output/tilings_tr.pdf),
+[Русский](output/tilings_ru.pdf), [العربية](output/tilings_ar.pdf), [简体中文](output/tilings_zh.pdf), [日本語](output/tilings_ja.pdf),
+[한국어](output/tilings_ko.pdf).
 
 ![Six tilings: hat, zellij, Penrose, stars and crosses, rhombille, seven-colour hexagons](images/tilings.png)
 
@@ -190,14 +189,14 @@ tiling, 2/3/4/7 colours of the hexagonal one), and colourings that work on any t
 palettes `zellij`, `azulejo`, `girih`, `earth`, `grey`, or your own colours.
 
 ```bash
-python3 tilings.py                       # catalogue -> tilings_en.pdf  (--lang pt, fr, de, zh ...)
-python3 tilings.py --list                # tilings, their colourings and parameters
-python3 tilings.py hexagonal -c 7 --scheme rainbow -o hex.svg
-python3 tilings.py penrose_p2 -c orientation --scheme analogous --hue blue -o p2.png
-python3 tilings.py herringbone -p ratio=3 -p angle=45 --colours "#b5532f,#e2b77a" -o floor.pdf
-python3 tilings.py hankin -p base=truncated_trihexagonal -p theta=60 --scheme zellij -o stars.png
-python3 tilings.py trihexagonal --overlay dual     # also: circles, incircles, edges
-python3 tilings.py girih --girih 54                # girih lines over the tiles
+python3 -m colortheory.tilings                       # catalogue -> tilings_en.pdf  (--lang pt, fr, de, zh ...)
+python3 -m colortheory.tilings --list                # tilings, their colourings and parameters
+python3 -m colortheory.tilings hexagonal -c 7 --scheme rainbow -o hex.svg
+python3 -m colortheory.tilings penrose_p2 -c orientation --scheme analogous --hue blue -o p2.png
+python3 -m colortheory.tilings herringbone -p ratio=3 -p angle=45 --colours "#b5532f,#e2b77a" -o floor.pdf
+python3 -m colortheory.tilings hankin -p base=truncated_trihexagonal -p theta=60 --scheme zellij -o stars.png
+python3 -m colortheory.tilings trihexagonal --overlay dual     # also: circles, incircles, edges
+python3 -m colortheory.tilings girih --girih 54                # girih lines over the tiles
 ```
 
 The output format follows the file name (`.png`, `.svg` or `.pdf`); `--size` sets how
@@ -209,8 +208,8 @@ the tiling, colouring, scheme, base hue, width and parameters; every change redr
 once, and *Save…* writes PNG, SVG or PDF. With `-o` the file is written as well.
 
 ```bash
-python3 tilings.py --show                          # starts with the hexagonal tiling
-python3 tilings.py cairo -c orientation --scheme triad --show --lang pt
+python3 -m colortheory.tilings --show                          # starts with the hexagonal tiling
+python3 -m colortheory.tilings cairo -c orientation --scheme triad --show --lang pt
 ```
 
 **Sheets of several tilings.** Give several tilings, each followed by its own options
@@ -219,10 +218,10 @@ parameter), or let `--vary` make the variations of one tiling. `--cols` sets the
 `--no-labels` drops the captions; `--show` shows the sheet in the window.
 
 ```bash
-python3 tilings.py cairo --vary scheme --cols 4 -o cairo_schemes.png    # every scheme
-python3 tilings.py penrose_p3 --vary hue -o penrose_hues.png            # every base hue
-python3 tilings.py hexagonal --vary colouring                           # every colouring
-python3 tilings.py "hexagonal:c=7:scheme=rainbow" "penrose_p2:c=orientation:hue=blue" \
+python3 -m colortheory.tilings cairo --vary scheme --cols 4 -o cairo_schemes.png    # every scheme
+python3 -m colortheory.tilings penrose_p3 --vary hue -o penrose_hues.png            # every base hue
+python3 -m colortheory.tilings hexagonal --vary colouring                           # every colouring
+python3 -m colortheory.tilings "hexagonal:c=7:scheme=rainbow" "penrose_p2:c=orientation:hue=blue" \
     "herringbone:ratio=3:angle=45:colours=#b5532f/#e2b77a" "hankin:base=hexagonal:theta=60:scheme=azulejo" \
     --cols 2 --aspect 0.6 --width 2400 -o sheet.pdf
 ```
@@ -239,12 +238,12 @@ Kaplan and Goodman-Strauss.
 `patterns.py` makes mosaics whose basic shape is more elaborate, on the engine of
 `tilings.py` (same palettes, colourings, outputs, sheets, `--vary` and `--show`).
 Ready-made catalogues:
-[English](patterns_en.pdf), [Português (Portugal)](patterns_pt.pdf),
-[Português (Brasil)](patterns_pt-BR.pdf), [Español](patterns_es.pdf),
-[Français](patterns_fr.pdf), [Italiano](patterns_it.pdf), [Deutsch](patterns_de.pdf),
-[Nederlands](patterns_nl.pdf), [Polski](patterns_pl.pdf), [Türkçe](patterns_tr.pdf),
-[Русский](patterns_ru.pdf), [العربية](patterns_ar.pdf), [简体中文](patterns_zh.pdf), [日本語](patterns_ja.pdf),
-[한국어](patterns_ko.pdf).
+[English](output/patterns_en.pdf), [Português (Portugal)](output/patterns_pt.pdf),
+[Português (Brasil)](output/patterns_pt-BR.pdf), [Español](output/patterns_es.pdf),
+[Français](output/patterns_fr.pdf), [Italiano](output/patterns_it.pdf), [Deutsch](output/patterns_de.pdf),
+[Nederlands](output/patterns_nl.pdf), [Polski](output/patterns_pl.pdf), [Türkçe](output/patterns_tr.pdf),
+[Русский](output/patterns_ru.pdf), [العربية](output/patterns_ar.pdf), [简体中文](output/patterns_zh.pdf), [日本語](output/patterns_ja.pdf),
+[한국어](output/patterns_ko.pdf).
 
 ![Six decorated mosaics: 3D stars, courthouse steps, log cabin, Rubik cubes, tripods, weave](images/patterns.png)
 
@@ -268,19 +267,19 @@ from dark to light) and `sweep` (half the wheel from the base hue), and the colo
 `gradient` (bands of colour across the picture).
 
 ```bash
-python3 patterns.py                      # catalogue -> patterns_en.pdf  (--lang pt, fr, de, zh ...)
-python3 patterns.py --list               # patterns, colourings, parameters, quilt layouts
-python3 patterns.py --show               # preview window
-python3 patterns.py facets -p base=triangular -c tile --scheme complementary --hue blue -o stars.png
-python3 patterns.py bands -p bands=7 -p anchor=alternate -p gap=2.5 -p gap_colour=2ED3C6 --scheme rainbow -o cabin.png
-python3 patterns.py bands -p base=hexagonal -p bands=5 --scheme ramp --hue blue -o rings.svg
-python3 patterns.py rubik -c rings --scheme rainbow --size 7 -o rubik.pdf
-python3 patterns.py tripods --vary scheme --cols 4 -o tripods.png
-python3 patterns.py quilt -p layout=storm --scheme triad --hue blue-violet -o storm.png
-python3 patterns.py maze -p seed=7 -c flow --scheme rainbow -o maze.png
-python3 patterns.py maze -p flat=1 -p wide=1 -p n=12 -c path --scheme complementary -o maze_flat.svg
-python3 patterns.py spiral -p link=1 -p flat=1 -p wide=1 -c walls --size 20 --scheme mono --hue blue -o greek_key.png
-python3 patterns.py whirl -p base=hexagonal -p mirror=0 -c twist --scheme rainbow -o whirl.pdf
+python3 -m colortheory.patterns                      # catalogue -> patterns_en.pdf  (--lang pt, fr, de, zh ...)
+python3 -m colortheory.patterns --list               # patterns, colourings, parameters, quilt layouts
+python3 -m colortheory.patterns --show               # preview window
+python3 -m colortheory.patterns facets -p base=triangular -c tile --scheme complementary --hue blue -o stars.png
+python3 -m colortheory.patterns bands -p bands=7 -p anchor=alternate -p gap=2.5 -p gap_colour=2ED3C6 --scheme rainbow -o cabin.png
+python3 -m colortheory.patterns bands -p base=hexagonal -p bands=5 --scheme ramp --hue blue -o rings.svg
+python3 -m colortheory.patterns rubik -c rings --scheme rainbow --size 7 -o rubik.pdf
+python3 -m colortheory.patterns tripods --vary scheme --cols 4 -o tripods.png
+python3 -m colortheory.patterns quilt -p layout=storm --scheme triad --hue blue-violet -o storm.png
+python3 -m colortheory.patterns maze -p seed=7 -c flow --scheme rainbow -o maze.png
+python3 -m colortheory.patterns maze -p flat=1 -p wide=1 -p n=12 -c path --scheme complementary -o maze_flat.svg
+python3 -m colortheory.patterns spiral -p link=1 -p flat=1 -p wide=1 -c walls --size 20 --scheme mono --hue blue -o greek_key.png
+python3 -m colortheory.patterns whirl -p base=hexagonal -p mirror=0 -c twist --scheme rainbow -o whirl.pdf
 ```
 
 ## Abstract wallpapers
@@ -308,16 +307,16 @@ Sizes: `hd`, `hd+`, `fhd` (default), `wuxga`, `qhd`, `wqxga`, `4k`, `5k`, `ultra
 `ipad-pro`, `tablet`; or any `WxH`. `--orientation` turns a size when needed.
 
 ```bash
-pip install numpy scipy pillow
-python3 wallpapers.py --show                          # preview window: change it there, then save
-python3 wallpapers.py --list                          # styles, parameters and sizes
-python3 wallpapers.py ribbons                         # -> wallpaper_ribbons_fhd_1.png
-python3 wallpapers.py fluid --size 4k --scheme triad --hue blue -o fluid.png
-python3 wallpapers.py waves --size iphone --seed 7 -o waves.jpg
-python3 wallpapers.py silk --scheme mono --hue red -p folds=4 -o silk.webp
-python3 wallpapers.py orbs --size ultrawide --colours "#ff6b6b,#4ecdc4,#ffe66d"
-python3 wallpapers.py mesh --count 5                  # seeds 1 .. 5
-python3 wallpapers.py --gallery --size iphone --cols 8    # every style side by side
+pip install ".[wallpapers]"      # adds numpy and scipy
+python3 -m colortheory.wallpapers --show                          # preview window: change it there, then save
+python3 -m colortheory.wallpapers --list                          # styles, parameters and sizes
+python3 -m colortheory.wallpapers ribbons                         # -> wallpaper_ribbons_fhd_1.png
+python3 -m colortheory.wallpapers fluid --size 4k --scheme triad --hue blue -o fluid.png
+python3 -m colortheory.wallpapers waves --size iphone --seed 7 -o waves.jpg
+python3 -m colortheory.wallpapers silk --scheme mono --hue red -p folds=4 -o silk.webp
+python3 -m colortheory.wallpapers orbs --size ultrawide --colours "#ff6b6b,#4ecdc4,#ffe66d"
+python3 -m colortheory.wallpapers mesh --count 5                  # seeds 1 .. 5
+python3 -m colortheory.wallpapers --gallery --size iphone --cols 8    # every style side by side
 ```
 
 Other options: `--background dark|black|light|white|<hex>`, `--grain` (film grain),
@@ -339,11 +338,11 @@ its hue and/or its size:
 - `-p saturation=1.2 -p brightness=0.9` adjust saturation and brightness.
 
 ```bash
-python3 wallpapers.py --input blue_wave.avif --hue orange --size 1980x1080 -o orange_wave.png
-python3 wallpapers.py --input blue_wave.avif --hue orange --mode tint --size fhd
-python3 wallpapers.py --input blue_wave.avif --mode map --scheme ramp --hue blue-green
-python3 wallpapers.py --input blue_wave.avif --hue green --size iphone --fit contain
-python3 wallpapers.py --input blue_wave.avif --show          # try it in the preview window
+python3 -m colortheory.wallpapers --input blue_wave.avif --hue orange --size 1980x1080 -o orange_wave.png
+python3 -m colortheory.wallpapers --input blue_wave.avif --hue orange --mode tint --size fhd
+python3 -m colortheory.wallpapers --input blue_wave.avif --mode map --scheme ramp --hue blue-green
+python3 -m colortheory.wallpapers --input blue_wave.avif --hue green --size iphone --fit contain
+python3 -m colortheory.wallpapers --input blue_wave.avif --show          # try it in the preview window
 ```
 
 In the window, "Open picture..." chooses the picture and the hue "(keep)" leaves the original
@@ -369,20 +368,25 @@ Arabic is written right to left and its letters change shape with their neighbou
 a PDF does not do by itself: `i18n.visual()` joins the letters (`arabic-reshaper`) and puts
 each line in display order (`python-bidi`), and paragraphs, catalogue pages and the web page
 are mirrored. It needs `pip install arabic-reshaper python-bidi`. The texts of the added
-languages are in `locales/` (one file per program); a missing text falls back to English.
+languages are in `src/colortheory/locales/` (one file per program); a missing text falls back to English.
 The translations were made by machine and would benefit from a review by native speakers.
 
 ## Development
 
 Dependencies are declared in `pyproject.toml`: `reportlab` and `pillow` for everything, plus
-the extras `wallpapers` (numpy, scipy), `rtl` (Arabic) and `app` (pywebview). The programs are
-scripts that run from this folder, so there is nothing to install:
+the extras `wallpapers` (numpy, scipy), `rtl` (Arabic) and `app` (pywebview). The code is the
+`colortheory` package in `src/`: `i18n` (languages, fonts, right-to-left text), `colour` (colour maths),
+`document`, `poster`, `wheel`, `tilings`, `patterns` and `wallpapers` (the programs) and `locales/`.
+Installing it adds one command per program (`colortheory-document`, `colortheory-wheel`,
+`colortheory-tilings`, `colortheory-patterns`, `colortheory-wallpapers`, `colortheory-poster`), the same as
+`python3 -m colortheory.<program>`; from a checkout, `PYTHONPATH=src` is enough to run the latter:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install ".[dev,wallpapers,rtl]"      # Windows: .venv\Scripts\pip
 .venv/bin/pytest                                   # translations, colours, i18n, smoke tests
 ruff check .
+.venv/bin/colortheory-tilings hexagonal -o hex.svg   # the installed commands
 ```
 
 The tests check that every language has the same keys, list lengths and `%` placeholders as
@@ -416,7 +420,7 @@ green), so the same pair can give quite different results.
 
 - `Claude - The Complete Guide to Color Theory.md`: the full reference guide, from the physics
   of light to colour spaces (also as `.docx` and `.pdf`).
-- `color_theory_poster.py`: the earlier single-page poster, English only.
+- `poster.py`: the earlier single-page poster, English only.
 - `images/`: the pictures in this README.
 
 ## Licence

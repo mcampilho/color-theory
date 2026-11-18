@@ -6,18 +6,18 @@ Tilings and mosaics: the tilings of the Wikipedia articles listed in tiles.md
 (regular, uniform and dual tilings, Pythagorean, herringbone, pentagonal,
 Cairo, Penrose, the "hat" monotile, Robinson, Wang, girih, zellij and Islamic
 star patterns), each with several ways of colouring it, and the colours taken
-from the colour schemes of colour theory (RYB wheel of color_theory_document.py).
+from the colour schemes of colour theory (RYB wheel of document.py).
 
     pip install reportlab pillow
-    python3 tilings.py                          # catalogue -> tilings_en.pdf
-    python3 tilings.py --lang pt                # Portuguese catalogue
-    python3 tilings.py --list                   # tiling names and colourings
-    python3 tilings.py hexagonal -c 7 --scheme rainbow -o hex.svg
-    python3 tilings.py penrose_p3 --scheme complementary --hue blue -o p3.png
-    python3 tilings.py herringbone -p ratio=3 -p angle=45 -o h.pdf
-    python3 tilings.py cairo --show             # preview window: change it there, then Save
-    python3 tilings.py cairo --vary scheme      # sheet: one tiling in every scheme
-    python3 tilings.py "hexagonal:c=7:scheme=rainbow" "cairo:hue=blue" --cols 2 -o sheet.pdf
+    python3 -m colortheory.tilings                          # catalogue -> tilings_en.pdf
+    python3 -m colortheory.tilings --lang pt                # Portuguese catalogue
+    python3 -m colortheory.tilings --list                   # tiling names and colourings
+    python3 -m colortheory.tilings hexagonal -c 7 --scheme rainbow -o hex.svg
+    python3 -m colortheory.tilings penrose_p3 --scheme complementary --hue blue -o p3.png
+    python3 -m colortheory.tilings herringbone -p ratio=3 -p angle=45 -o h.pdf
+    python3 -m colortheory.tilings cairo --show             # preview window: change it there, then Save
+    python3 -m colortheory.tilings cairo --vary scheme      # sheet: one tiling in every scheme
+    python3 -m colortheory.tilings "hexagonal:c=7:scheme=rainbow" "cairo:hue=blue" --cols 2 -o sheet.pdf
 
 All geometry is computed. Periodic tilings are a motif of polygons repeated
 over a lattice (Periodic); gaps between placed polygons are found as the
@@ -33,10 +33,10 @@ import math
 import random
 from collections import defaultdict
 
-from color_theory_document import STRINGS as CTD_STRINGS
-from color_theory_document import hue_ryb, mix, ryb_to_rgb
-import i18n
-from i18n import BOLD, REG
+from colortheory.document import STRINGS as CTD_STRINGS
+from colortheory.colour import hue_ryb, mix, ryb_to_rgb
+from colortheory import i18n
+from colortheory.i18n import BOLD, REG
 
 S3 = math.sqrt(3)
 H3 = S3 / 2
@@ -49,11 +49,10 @@ STROKE = (0.13, 0.13, 0.13)
 # 1. TRANSLATIONS
 # ==========================================================================
 # The STRINGS table (en, pt, es) is at the end of the file, because it is long.
-_LANG = "en"
 
 
 def T(key):
-    table = STRINGS.get(_LANG, STRINGS["en"])
+    table = STRINGS.get(i18n.current(), STRINGS["en"])
     return table.get(key, STRINGS["en"].get(key, key))
 
 
@@ -1776,7 +1775,7 @@ def write_file(spec, path, width=1200):
 def scheme_name(s):
     name = T("s_" + s["scheme"])
     if s["scheme"] in SCHEME_OFFSETS or s["scheme"] in ("mono", "rainbow", "ramp", "sweep"):
-        name += " (%s)" % CTD_STRINGS.get(_LANG, CTD_STRINGS["en"])["hue_names"][s["hue"] % 12].lower()
+        name += " (%s)" % CTD_STRINGS.get(i18n.current(), CTD_STRINGS["en"])["hue_names"][s["hue"] % 12].lower()
     return name
 
 
@@ -2034,7 +2033,7 @@ def sheet_layout(n, cols, width, aspect, labels):
 
 def _font(px):
     from PIL import ImageFont
-    for name in (i18n.font_file(_LANG), "arial.ttf", "LiberationSans-Regular.ttf", "DejaVuSans.ttf"):
+    for name in (i18n.font_file(i18n.current()), "arial.ttf", "LiberationSans-Regular.ttf", "DejaVuSans.ttf"):
         try:
             return i18n.pil_font(name, int(px))
         except (OSError, TypeError, AttributeError):
@@ -2091,7 +2090,7 @@ def write_sheet(specs, path, cols=3, width=1800, labels=True):
                 out.append('<text x="%.2f" y="%.2f" font-family="%s" '
                            'font-size="%.1f" fill="#3c3c3c"%s%s>%s</text>'
                            % (x + pw if rtl else x, y + ph + lab * .8,
-                              i18n.css_family(_LANG).replace('"', "'"), label_size(text, lab, pw),
+                              i18n.css_family(i18n.current()).replace('"', "'"), label_size(text, lab, pw),
                               ' text-anchor="end"' if rtl else "", i18n.svg_bidi(),
                               i18n.visual(text).replace("&", "&amp;").replace("<", "&lt;")))
         out.append("</svg>")
@@ -2135,7 +2134,7 @@ class PreviewApp:
         self.vars = {}
         if sheet is None:
             s = spec_defaults(self.spec)
-            hue_names = [n.lower() for n in CTD_STRINGS.get(_LANG, CTD_STRINGS["en"])["hue_names"]]
+            hue_names = [n.lower() for n in CTD_STRINGS.get(i18n.current(), CTD_STRINGS["en"])["hue_names"]]
             self.hue_names = hue_names
             self._combo(bar, "tiling", T("app_tiling"), program_keys(), s["key"], 24)
             self._combo(bar, "colouring", T("colouring"), colourings_of(s["key"]), s["colouring"], 13)
@@ -2269,7 +2268,6 @@ def run_preview(spec=None, sheet=None, cols=3, labels=True):
 
 
 def main():
-    global _LANG
     ap = argparse.ArgumentParser(description="Tilings and mosaics with colour schemes.")
     ap.add_argument("tilings", nargs="*", metavar="TILING",
                     help="tiling(s) to draw (see --list), each optionally with its own options, e.g. "
@@ -2299,7 +2297,6 @@ def main():
     ap.add_argument("--lang", default="en", choices=catalogue_langs(), help="language of the catalogue")
     ap.add_argument("-o", "--out", help="output file: .png, .svg or .pdf")
     a = ap.parse_args()
-    _LANG = a.lang
     i18n.use_lang(a.lang)
     if a.list:
         for key in program_keys():
@@ -2905,7 +2902,7 @@ STRINGS = {
 
 # the added languages (locales/): for now only the names of the colour schemes, so they
 # are not offered for the catalogue until it is translated
-from locales.tilings import STRINGS as _MORE   # noqa: E402
+from colortheory.locales.tilings import STRINGS as _MORE   # noqa: E402
 
 for _lang, _table in _MORE.items():
     STRINGS.setdefault(_lang, {}).update(_table)
@@ -2913,7 +2910,7 @@ for _lang, _table in _MORE.items():
 
 def catalogue_langs():
     """The languages with every text of the catalogue (of tilings.py or of patterns.py)."""
-    import i18n
+    from colortheory import i18n
     return [k for k, _ in i18n.LANGS if k in STRINGS and len(STRINGS[k]) >= len(STRINGS["en"])]
 
 

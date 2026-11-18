@@ -1,6 +1,6 @@
-"""Texts of color_theory_document.py in the added languages (see locales/__init__.py).
+"""Texts of document.py in the added languages (see locales/__init__.py).
 Same keys and the same number of items in each list as the "en" table of
-color_theory_document.py."""
+document.py."""
 
 STRINGS = {}
 

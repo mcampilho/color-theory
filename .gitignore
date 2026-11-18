@@ -4,11 +4,13 @@
 /Color_Theory_Guide.pdf
 /color_wheel_instructions.md
 /*.url
+/output/colour_theory.pdf
+/output/claude_colour_theory.pdf
 
 # Local test files and tooling (not part of the project)
 /.claude/
-/cairo*.png
-/folha.pdf
+cairo*.png
+folha.pdf
 
 # Python
 __pycache__/

@@ -18,14 +18,14 @@ of tilings.py):
 Every picture is drawn from a seed, so the same options give the same picture.
 
     pip install numpy scipy pillow
-    python3 wallpapers.py ribbons                         # -> wallpaper_ribbons_fhd_1.png
-    python3 wallpapers.py fluid --size 4k --scheme triad --hue blue -o fluid.png
-    python3 wallpapers.py waves --size iphone --seed 7 -o waves.jpg
-    python3 wallpapers.py orbs --size 2560x1080 --background black
-    python3 wallpapers.py mesh --count 5                  # five pictures, seeds 1 .. 5
-    python3 wallpapers.py --gallery                       # every style side by side
-    python3 wallpapers.py --show                          # preview window
-    python3 wallpapers.py --list                          # styles, sizes and parameters
+    python3 -m colortheory.wallpapers ribbons                         # -> wallpaper_ribbons_fhd_1.png
+    python3 -m colortheory.wallpapers fluid --size 4k --scheme triad --hue blue -o fluid.png
+    python3 -m colortheory.wallpapers waves --size iphone --seed 7 -o waves.jpg
+    python3 -m colortheory.wallpapers orbs --size 2560x1080 --background black
+    python3 -m colortheory.wallpapers mesh --count 5                  # five pictures, seeds 1 .. 5
+    python3 -m colortheory.wallpapers --gallery                       # every style side by side
+    python3 -m colortheory.wallpapers --show                          # preview window
+    python3 -m colortheory.wallpapers --list                          # styles, sizes and parameters
 """
 import argparse
 import math
@@ -35,8 +35,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from scipy import ndimage
 
-import i18n
-import tilings as tl
+from colortheory import i18n
+from colortheory import tilings as tl
 
 WHITE, BLACK = (1.0, 1.0, 1.0), (0.0, 0.0, 0.0)
 
@@ -645,12 +645,12 @@ def scheme_label(s):
 
 
 def hue_names():
-    return tl.CTD_STRINGS.get(tl._LANG, tl.CTD_STRINGS["en"])["hue_names"]
+    return tl.CTD_STRINGS.get(i18n.current(), tl.CTD_STRINGS["en"])["hue_names"]
 
 
 def _font(size):
     """A font for the captions, with the letters of the language in use."""
-    for name in (i18n.font_file(tl._LANG), "arial.ttf", "DejaVuSans.ttf", "Helvetica.ttc"):
+    for name in (i18n.font_file(i18n.current()), "arial.ttf", "DejaVuSans.ttf", "Helvetica.ttc"):
         try:
             return i18n.pil_font(name, size)
         except (OSError, TypeError, AttributeError):
@@ -885,13 +885,13 @@ STRINGS = {
     },
 }
 # the other languages are in locales/wallpapers.py
-from locales.wallpapers import STRINGS as _MORE   # noqa: E402
+from colortheory.locales.wallpapers import STRINGS as _MORE   # noqa: E402
 
 STRINGS.update(_MORE)
 
 
 def T(key):
-    return STRINGS.get(tl._LANG, STRINGS["en"]).get(key, STRINGS["en"].get(key, key))
+    return STRINGS.get(i18n.current(), STRINGS["en"]).get(key, STRINGS["en"].get(key, key))
 
 
 # ==========================================================================
@@ -922,7 +922,6 @@ def main():
     ap.add_argument("--list", action="store_true", help="styles, parameters and sizes")
     ap.add_argument("--lang", choices=[k for k, _ in i18n.LANGS if k in STRINGS], default="en")
     a = ap.parse_args()
-    tl._LANG = a.lang
     i18n.use_lang(a.lang)
 
     if a.list:

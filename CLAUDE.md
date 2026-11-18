@@ -13,7 +13,7 @@ repositório, para se poderem usar sem Python. Contém:
   `visual(text)` liga as letras (`arabic-reshaper`) e põe a linha na ordem de leitura
   (`python-bidi`). O `i18n` remenda `Canvas.drawString/drawCentredString/drawRightString` e
   `PDFTextObject.textOut/textLine` para chamarem `visual()` uma só vez (por isso os programas
-  passam sempre o texto lógico); o `ShapeRecorder` do `color_wheel.py` faz o mesmo. Texto letra
+  passam sempre o texto lógico); o `ShapeRecorder` do `wheel.py` faz o mesmo. Texto letra
   a letra (em arco) percorre `visual(text)`. Para o Pillow usar `visual()` + `pil_font()` (layout
   BASIC); no SVG `svg_bidi()`; o Tk 9 molda sozinho, por isso as janelas recebem o texto lógico.
   Linhas de parágrafo com `draw_line(c, x, y, texto, largura)` (alinha à direita em árabe);
@@ -23,7 +23,7 @@ repositório, para se poderem usar sem Python. Contém:
   (latim ocidental, sem embutir) ou para uma TTF (Arial, YaHei, Yu Gothic, Malgun). Atenção:
   o `registerFont` do ReportLab não substitui uma TTF já registada, por isso `use_lang` tira
   o nome de `pdfmetrics._fonts` antes. `words`/`wrap` quebram linhas em chinês e japonês
-  (o `simpleSplit` só quebra em espaços). Os textos das línguas novas estão em `locales/<programa>.py`
+  (o `simpleSplit` só quebra em espaços). Os textos das línguas novas estão em `src/colortheory/locales/<programa>.py`
   e cada programa junta-os à sua `STRINGS`; uma chave em falta usa o inglês. O documento só
   oferece no `--lang` as línguas completas (`POSTER_LANGS`); o `tilings.py`/`patterns.py` também
   (`catalogue_langs()`). Os textos com número embutido (`page` = "第 %d 页") aceitam `%d`.
@@ -31,7 +31,7 @@ repositório, para se poderem usar sem Python. Contém:
 - `Claude - The Complete Guide to Color Theory.md` — guia de referência completo (da física da luz
   aos espaços de cor e sistemas de correspondência), em inglês. As versões `.docx` e `.pdf`
   com o mesmo nome são exportações deste texto; se o `.md` mudar, ficam desatualizadas.
-- `color_theory_document.py` — póster de 10 páginas em PDF vetorial (ReportLab + Pillow):
+- `document.py` — póster de 10 páginas em PDF vetorial (ReportLab + Pillow):
   1. roda RYB, esquemas e significados;
   2. modelos de cor, disco de matiz/saturação e harmonias;
   3. matiz e luminosidade: cruz matiz × tinta/sombra, rodas de tintas, tons e sombras,
@@ -55,15 +55,15 @@ repositório, para se poderem usar sem Python. Contém:
   Os vértices coloridos de `RYB_CORNERS` são os primários e secundários da roda da w3schools/
   Canva; os terciários (a meio das arestas) dão exatamente os terciários dessa roda, porque são
   as médias dos vizinhos. Mudar estes vértices muda as cores de todo o projeto (documento, rodas,
-  pavimentações, mosaicos e wallpapers). O `color_theory_poster.py` (antigo) tem a sua cópia.
-- `color_wheel.py` — rodas de cores para construir em casa: PDF A4 de 6 páginas (instruções de
+  pavimentações, mosaicos e wallpapers). O `poster.py` (antigo) tem a sua cópia.
+- `wheel.py` — rodas de cores para construir em casa: PDF A4 de 6 páginas (instruções de
   montagem, como usar e glossário; depois os 4 discos para recortar, cada um numa página com
   barra de escala de 100 mm). Disco 1 (misturas): o disco da frente tem 5 patilhas e 5 janelas a
   raios diferentes (`D1_BANDS`, `D1_TAB_ANGLES`); no disco de trás a mistura do matiz i com a
   patilha k está no ângulo do matiz i e na banda k, por isso só aparece na janela k quando o
   matiz está junto à patilha. Disco 2 (relações): janelas fixas na frente (`D2_FANS`, sentido
   horário a partir do topo) e tinta/tom/sombra no disco de trás. Importa cores e funções de
-  desenho do `color_theory_document.py` (incluindo os nomes `hue_names` da tabela `STRINGS`);
+  desenho do `document.py` (incluindo os nomes `hue_names` da tabela `STRINGS`);
   os textos próprios estão na sua `STRINGS` (en, pt, es).
   Versões no ecrã, com as 4 partes a rodar (rato, roda do rato, setas): `--app` abre uma janela
   Tkinter e `--web` escreve `web/discs/<lang>/*.svg` e `web/discs/data.js` para a página
@@ -86,7 +86,7 @@ repositório, para se poderem usar sem Python. Contém:
   estão em `UI_COLOURS` (iguais às do `style.css`); `--theme auto` usa `system_theme()`.
 - `tilings.py` — pavimentações e mosaicos dos artigos da Wikipedia listados em `tiles.md`, com
   várias colorações e as cores dos esquemas RYB (importa `ryb_to_rgb`, `hue_ryb`, `mix` e os
-  `hue_names` do `color_theory_document.py`). Sem argumentos escreve o catálogo A4
+  `hue_names` do `document.py`). Sem argumentos escreve o catálogo A4
   `tilings_<lang>.pdf` (`CATALOGUE`: uma família por artigo, 6 painéis por página); com o
   nome de uma pavimentação escreve uma imagem `.png`/`.svg`/`.pdf`. Estrutura:
   - `Periodic`: motivo de polígonos numa rede (a1, a2).
@@ -150,36 +150,36 @@ repositório, para se poderem usar sem Python. Contém:
     matizes pela diferença entre o `--hue` e o `dominant_hue`; `tint` põe um só matiz; `map`
     é um mapa de degradê da luminosidade pela paleta). `hue=None` mantém as cores; o tamanho
     `source` é o da imagem original (`size_of`).
-- `color_theory_poster.py` — versão anterior, só a página 1, sem traduções (ReportLab).
+- `poster.py` — versão anterior, só a página 1, sem traduções (ReportLab).
 - PDFs gerados: `colour_theory_en.pdf`, `colour_theory_pt.pdf`, `colour_theory_es.pdf`
-  (do `color_theory_document.py`), `colour_wheels_en.pdf`, `colour_wheels_pt.pdf`,
-  `colour_wheels_es.pdf` (do `color_wheel.py`), `colour_theory.pdf` (do poster). `Color_Theory_Guide.pdf` e
+  (do `document.py`), `colour_wheels_en.pdf`, `colour_wheels_pt.pdf`,
+  `colour_wheels_es.pdf` (do `wheel.py`), `colour_theory.pdf` (do poster). `Color_Theory_Guide.pdf` e
   `claude_colour_theory.pdf` são versões antigas.
 
 ## Comandos
 
 ```bash
 pip install reportlab pillow
-python3 color_theory_document.py                      # -> colour_theory_en.pdf (10 páginas)
-python3 color_theory_document.py --lang pt            # -> colour_theory_pt.pdf
-python3 color_theory_document.py --lang es -o es.pdf
-python3 color_theory_document.py --pages 3 4          # só as páginas 3 e 4
-python3 color_theory_poster.py [saida.pdf]            # -> colour_theory.pdf
-python3 color_wheel.py [--lang pt]                    # -> colour_wheels_<lang>.pdf (A4, 6 páginas)
-python3 color_wheel.py --app [--lang pt]              # rodas numa janela (Tkinter)
-python3 color_wheel.py --web                          # -> web/discs/ para web/index.html
-python3 color_wheel.py --webview [--lang pt]          # a página web numa janela (pywebview)
-python3 color_wheel.py --app --theme dark             # --theme auto|light|dark (--app, --webview)
-python3 tilings.py [--lang pt]                        # -> tilings_<lang>.pdf (catálogo, 22 páginas)
-python3 tilings.py --list                             # pavimentações, colorações, esquemas
-python3 tilings.py hexagonal -c 7 --scheme rainbow -o hex.svg
-python3 tilings.py cairo --show                       # janela de pré-visualização
-python3 tilings.py cairo --vary scheme --cols 4 -o folha.png   # folha de variações
-python3 patterns.py [--lang pt]                       # -> patterns_<lang>.pdf (mosaicos decorados)
-python3 patterns.py tripods --show                    # qualquer opção do tilings.py serve
-python3 wallpapers.py ribbons --size 4k -o r.png      # wallpapers (pip install numpy scipy)
-python3 wallpapers.py --show [--lang pt]              # janela de pré-visualização
-python3 wallpapers.py --gallery --size iphone         # todos os estilos numa folha
+python3 -m colortheory.document                      # -> colour_theory_en.pdf (10 páginas)
+python3 -m colortheory.document --lang pt            # -> colour_theory_pt.pdf
+python3 -m colortheory.document --lang es -o es.pdf
+python3 -m colortheory.document --pages 3 4          # só as páginas 3 e 4
+python3 -m colortheory.poster [saida.pdf]            # -> colour_theory.pdf
+python3 -m colortheory.wheel [--lang pt]                    # -> colour_wheels_<lang>.pdf (A4, 6 páginas)
+python3 -m colortheory.wheel --app [--lang pt]              # rodas numa janela (Tkinter)
+python3 -m colortheory.wheel --web                          # -> web/discs/ para web/index.html
+python3 -m colortheory.wheel --webview [--lang pt]          # a página web numa janela (pywebview)
+python3 -m colortheory.wheel --app --theme dark             # --theme auto|light|dark (--app, --webview)
+python3 -m colortheory.tilings [--lang pt]                        # -> tilings_<lang>.pdf (catálogo, 22 páginas)
+python3 -m colortheory.tilings --list                             # pavimentações, colorações, esquemas
+python3 -m colortheory.tilings hexagonal -c 7 --scheme rainbow -o hex.svg
+python3 -m colortheory.tilings cairo --show                       # janela de pré-visualização
+python3 -m colortheory.tilings cairo --vary scheme --cols 4 -o folha.png   # folha de variações
+python3 -m colortheory.patterns [--lang pt]                       # -> patterns_<lang>.pdf (mosaicos decorados)
+python3 -m colortheory.patterns tripods --show                    # qualquer opção do tilings.py serve
+python3 -m colortheory.wallpapers ribbons --size 4k -o r.png      # wallpapers (pip install numpy scipy)
+python3 -m colortheory.wallpapers --show [--lang pt]              # janela de pré-visualização
+python3 -m colortheory.wallpapers --gallery --size iphone         # todos os estilos numa folha
 ```
 
 Para ver uma página como imagem:
@@ -196,16 +196,21 @@ Para ver uma página como imagem:
 - CI em `.github/workflows/ci.yml`: `ruff check .` e `pytest` em Linux e Windows (Python 3.10 e 3.13).
 - Ambiente local: `.venv` na pasta (ignorada pelo Git). O `python3` do PATH pode apontar para o
   atalho da Microsoft Store; usar `.venv\Scripts\python.exe`.
-- Ainda por fazer: PDFs reprodutíveis (`invariant=1` no ReportLab) e decidir onde guardar os 61 PDFs.
+- Estrutura: pacote `colortheory` em `src/` (`i18n`, `colour`, `document`, `poster`, `wheel`,
+  `tilings`, `patterns`, `wallpapers`, `locales/`); comandos `colortheory-<programa>` ou
+  `python3 -m colortheory.<programa>` (com `PYTHONPATH=src` numa cópia sem instalar). O `pytest` já
+  encontra o pacote (`pythonpath = ["src"]`). A língua ativa é só uma: `i18n.current()` (`use_lang`).
+  As cores (RYB, CMY, HSB, CIE) estão em `colour.py`, sem desenho.
+- Os PDFs publicados (ligados no README) ficam em `output/`; os programas escrevem na pasta atual, por omissão. Falta ainda torná-los reprodutíveis (`invariant=1` no ReportLab).
 
 ## Regras
 
 - Desenho 100% vetorial em ReportLab (página carta em paisagem, 792×612 pt). A página 1 usa a
   grelha 750×570 (`X()`/`Y()`); as páginas 2–6 usam pontos com origem em baixo à esquerda.
-- Texto novo vai para `STRINGS` (en, pt, es) e para `locales/<programa>.py` nas outras 12
+- Texto novo vai para `STRINGS` (en, pt, es) e para `src/colortheory/locales/<programa>.py` nas outras 12
   línguas, nunca diretamente no código de desenho. Os nomes das cores CSS (`CSS_COLOURS`) são
   palavras-chave e não se traduzem.
 - Cada página nova é uma função `build_page_N(c)` registada em `PAGES`.
-- O script principal é `color_theory_document.py`; o `color_theory_poster.py` fica como referência.
+- O script principal é `document.py`; o `poster.py` fica como referência.
 - Depois de mudar o desenho, verificar as páginas visualmente nas várias línguas: as mais
   compridas (pl, ru, pt), o chinês/japonês/coreano e o árabe (direita para a esquerda).
