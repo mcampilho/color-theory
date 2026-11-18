@@ -5,6 +5,16 @@
 /color_wheel_instructions.md
 /*.url
 
+# Local test files and tooling (not part of the project)
+/.claude/
+/cairo*.png
+/folha.pdf
+
 # Python
 __pycache__/
 *.pyc
+/.venv/
+.pytest_cache/
+.ruff_cache/
+/build/
+*.egg-info/

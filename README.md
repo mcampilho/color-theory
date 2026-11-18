@@ -372,6 +372,25 @@ are mirrored. It needs `pip install arabic-reshaper python-bidi`. The texts of t
 languages are in `locales/` (one file per program); a missing text falls back to English.
 The translations were made by machine and would benefit from a review by native speakers.
 
+## Development
+
+Dependencies are declared in `pyproject.toml`: `reportlab` and `pillow` for everything, plus
+the extras `wallpapers` (numpy, scipy), `rtl` (Arabic) and `app` (pywebview). The programs are
+scripts that run from this folder, so there is nothing to install:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install ".[dev,wallpapers,rtl]"      # Windows: .venv\Scripts\pip
+.venv/bin/pytest                                   # translations, colours, i18n, smoke tests
+ruff check .
+```
+
+The tests check that every language has the same keys, list lengths and `%` placeholders as
+English, that the RYB colours match the 12-colour wheel, the line breaking and the Arabic
+shaping, and that each program writes a file. Cases that need a CJK or Arabic font are skipped
+where the font is missing. GitHub Actions (`.github/workflows/ci.yml`) runs `ruff` and the tests
+on Linux and Windows.
+
 ## Links
 
 The RYB colour wheel (the 12 colours used here):

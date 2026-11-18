@@ -776,7 +776,7 @@ def text_column(c, x, y, width, blocks, size=9.2):
 
 def draw_assembly(c, x, y, w):
     """Exploded view: back disc, front disc above it, split pin through both."""
-    rx, ry = w / 2, w / 2 * .32
+    rx = w / 2
     # back disc: ring of hues seen at a slant
     c.saveState()
     c.translate(x, y)

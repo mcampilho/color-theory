@@ -381,6 +381,25 @@ catálogos e a página web ficam espelhados. É preciso `pip install arabic-resh
 línguas novas estão em `locales/` (um ficheiro por programa); um texto em falta usa o inglês.
 As traduções foram feitas por máquina e convém que sejam revistas por falantes nativos.
 
+## Desenvolvimento
+
+As dependências estão declaradas no `pyproject.toml`: `reportlab` e `pillow` para tudo, mais
+os extras `wallpapers` (numpy, scipy), `rtl` (árabe) e `app` (pywebview). Os programas são
+scripts que correm a partir desta pasta, por isso não há nada para instalar:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install ".[dev,wallpapers,rtl]"      # Windows: .venv\Scripts\pip
+.venv/bin/pytest                                   # traduções, cores, i18n e testes de fumo
+ruff check .
+```
+
+Os testes verificam que todas as línguas têm as mesmas chaves, o mesmo número de itens nas
+listas e os mesmos marcadores `%` que o inglês, que as cores RYB batem com a roda de 12 cores,
+a quebra de linha e a ligação das letras árabes, e que cada programa escreve um ficheiro. Os
+casos que precisam de uma fonte CJK ou árabe são saltados onde a fonte não existe. O GitHub
+Actions (`.github/workflows/ci.yml`) corre o `ruff` e os testes em Linux e Windows.
+
 ## Ligações
 
 A roda de cores RYB (as 12 cores usadas aqui):

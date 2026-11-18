@@ -187,7 +187,8 @@ def voxel_patch(box, voxels, shades=(.38, 0.0, -.38), grid=1, gap=0.0, gap_colou
             for u in range(grid):
                 for w in range(grid):
                     def at(a, b):         # bilinear point of the face, a along A->B, b along A->D
-                        return add(add(A, mul(sub(B, A), a)), mul(sub(D, A), b))
+                        # used only inside this iteration, so A, B and D are the current ones
+                        return add(add(A, mul(sub(B, A), a)), mul(sub(D, A), b))  # noqa: B023
                     g = gap / 2
                     q = [at((u + g) / grid, (w + g) / grid), at((u + 1 - g) / grid, (w + g) / grid),
                          at((u + 1 - g) / grid, (w + 1 - g) / grid), at((u + g) / grid, (w + 1 - g) / grid)]

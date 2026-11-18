@@ -1,0 +1,56 @@
+[project]
+name = "color-theory"
+version = "0.1.0"
+description = "Colour theory poster, build-your-own colour wheels, tilings, patterns and wallpapers, in 15 languages"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "reportlab>=4.0",
+    "pillow>=10.0",
+]
+
+[project.optional-dependencies]
+# wallpapers.py
+wallpapers = ["numpy>=1.24", "scipy>=1.10"]
+# Arabic (right to left): joins the letters and orders each line
+rtl = ["arabic-reshaper>=3.0", "python-bidi>=0.6"]
+# color_wheel.py --webview
+app = ["pywebview"]
+dev = ["pytest>=8", "ruff>=0.6"]
+all = ["color-theory[wallpapers,rtl,app]"]
+
+# The programs are scripts that import each other by name: they run from this folder
+# (python3 tilings.py ...), so there is nothing to build or install.
+[tool.setuptools]
+py-modules = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "fonts: needs the Windows/CJK/Arabic fonts of i18n.py (skipped where they are missing)",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+extend-exclude = [".venv", "web"]
+
+[tool.ruff.lint]
+# no "I" (isort): some imports come after code on purpose (sys.path, merged translation tables)
+select = ["E", "F", "B", "UP", "SIM"]
+ignore = [
+    "UP031",   # '%' formatting is deliberate: the translations hold %d / %s placeholders
+    "B905",    # zip() without strict=
+    "E501",    # the code is long-lined by design (see line-length); the formatter is not enforced
+    "E741",    # ambiguous names (l, O, I) are used in colour and geometry maths
+    "E731",    # short lambdas assigned to names
+    "SIM108",  # ternaries that would hurt readability
+    "SIM102",
+    "SIM117",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"locales/*.py" = ["E501"]
+"tests/*.py" = ["E402"]

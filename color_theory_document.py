@@ -1669,7 +1669,7 @@ def draw_web_safe(c, x0, top, cell):
 def build_page_4(c):
     page_start(c, "title4")
 
-    red, yel, blu = hue_rgb(4), hue_rgb(0), hue_rgb(8)
+    red, blu = hue_rgb(4), hue_rgb(8)
     draw_mix_system(c, 100, 478, "mix_ryb", [(1, 0, 0), (0, 1, 0), (0, 0, 1)], "ryb",
                     [("R", red), ("Y", (.95, .80, 0)), ("B", blu)], (red, hue_rgb(10)))
     draw_mix_system(c, 272, 478, "mix_rgb", [(1, 0, 0), (0, .85, 0), (0, .2, 1)], "add",

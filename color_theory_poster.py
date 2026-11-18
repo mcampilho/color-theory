@@ -319,7 +319,6 @@ def draw_ryb_wheel(c, cx, cy, R, segments=12):
 
     # --- warm / cold indicators around the wheel ------------------------------
     rr = R + 13
-    tick_a, tick_b = pol(cx, cy, R + 6, 90), pol(cx, cy, R + 21, 90)
     for ang in (90, 270):
         a = pol(cx, cy, R + 6, ang)
         b = pol(cx, cy, R + 21, ang)

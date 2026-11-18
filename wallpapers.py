@@ -30,7 +30,6 @@ Every picture is drawn from a seed, so the same options give the same picture.
 import argparse
 import math
 import os
-import sys
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
@@ -74,7 +73,7 @@ def parse_size(text, orientation=None):
         try:
             w, h = (int(x) for x in t.split("x"))
         except ValueError:
-            raise SystemExit("unknown size %r (see --list)" % text)
+            raise SystemExit("unknown size %r (see --list)" % text) from None
     if (orientation == "landscape" and h > w) or (orientation == "portrait" and w > h):
         w, h = h, w
     return w, h
@@ -320,7 +319,7 @@ def ribbons(spec, W, H, rng, noise, cols, p):
     A = W / H
     u, v = grid(W, H, 400_000)
     img = to_image(gradient_bg(spec, u, v, rng)).resize((W * ss, H * ss), Image.BICUBIC)
-    for r in range(int(p["ribbons"])):
+    for _ in range(int(p["ribbons"])):
         _ribbon(img, rng, cols, A, H, ss, p, float(p["width"]) * min(A, 1) * rng.uniform(.7, 1.3),
                 float(p["twist"]) * rng.uniform(.6, 1.4))
     return from_image(img.resize((W, H), Image.LANCZOS))
@@ -808,7 +807,7 @@ def run_preview(spec):
     ttk.Button(bar2, text=T("app_save"), command=save_full).pack(side="left", padx=6)
     if s["style"] == "image" and not spec.get("params"):
         vars_["params"].set(" ".join("%s=%s" % kv for kv in s["params"].items()))
-    for key, var in vars_.items():
+    for var in vars_.values():
         var.trace_add("write", changed)
     redraw()
     root.mainloop()
@@ -928,7 +927,7 @@ def main():
 
     if a.list:
         print(T("styles") + ":")
-        for k, (fn, params, d) in STYLES.items():
+        for k, (_fn, params, d) in STYLES.items():
             print("  %-8s %s" % (k, T("d_" + k)))
             print("           %s | scheme=%s hue=%s background=%s" % (
                 ", ".join("%s=%s" % kv for kv in params.items()), d["scheme"], d["hue"], d["background"]))

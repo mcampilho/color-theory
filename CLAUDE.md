@@ -185,6 +185,19 @@ python3 wallpapers.py --gallery --size iphone         # todos os estilos numa fo
 Para ver uma página como imagem:
 `inkscape --pages=3 --export-type=png --export-dpi=130 --export-filename=p3.png colour_theory_en.pdf`.
 
+## Desenvolvimento
+
+- `pyproject.toml` declara dependências (extras `wallpapers`, `rtl`, `app`, `dev`), o `ruff`
+  (linha de 110, sem `I`, `UP031` ignorado porque as traduções usam `%d`/`%s`) e o `pytest`.
+- Testes em `tests/`: paridade das traduções com o inglês (chaves, tamanhos de listas,
+  marcadores `%`; o `page` das línguas CJK pode ter um `%d` a mais), cores RYB, `i18n` e testes
+  de fumo (`subprocess`; saltam se faltar a fonte). Texto novo em `en` obriga a acrescentá-lo
+  nas outras 14 línguas, senão `pytest` falha.
+- CI em `.github/workflows/ci.yml`: `ruff check .` e `pytest` em Linux e Windows (Python 3.10 e 3.13).
+- Ambiente local: `.venv` na pasta (ignorada pelo Git). O `python3` do PATH pode apontar para o
+  atalho da Microsoft Store; usar `.venv\Scripts\python.exe`.
+- Ainda por fazer: PDFs reprodutíveis (`invariant=1` no ReportLab) e decidir onde guardar os 61 PDFs.
+
 ## Regras
 
 - Desenho 100% vetorial em ReportLab (página carta em paisagem, 792×612 pt). A página 1 usa a

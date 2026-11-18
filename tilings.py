@@ -28,13 +28,13 @@ triangle deflation, the hat from Smith, Myers, Kaplan and Goodman-Strauss'
 metatile substitution, and the Wang tiling from a backtracking search.
 """
 import argparse
+import contextlib
 import math
 import random
-import sys
 from collections import defaultdict
 
 from color_theory_document import STRINGS as CTD_STRINGS
-from color_theory_document import hue_ryb, luma, mix, ryb_to_rgb
+from color_theory_document import hue_ryb, mix, ryb_to_rgb
 import i18n
 from i18n import BOLD, REG
 
@@ -1880,7 +1880,7 @@ def build_catalogue(path):
     c.setFillColorRGB(.12, .12, .12)
     line(T("contents"), y)
     y -= 18
-    for fam, art, vs in PROGRAM["catalogue"]:
+    for fam, art, _ in PROGRAM["catalogue"]:
         c.setFont(REG, 9.5)
         c.setFillColorRGB(.2, .2, .2)
         if rtl:
@@ -2199,10 +2199,8 @@ class PreviewApp:
         spec = dict(self.spec)
         spec.update(key=self.vars["tiling"].get(), colouring=self.vars["colouring"].get(),
                     scheme=self.vars["scheme"].get(), hue=self.hue_names.index(self.vars["hue"].get()))
-        try:
+        with contextlib.suppress(ValueError):          # keep the old size if the box is not a number
             spec["size"] = max(1.0, float(self.vars["size"].get().replace(",", ".")))
-        except ValueError:
-            pass
         spec["colours"] = self.custom
         spec["params"] = dict(kv.split("=", 1) for kv in self.vars["params"].get().split() if "=" in kv)
         spec["params"] = {k: parse_value(v) for k, v in spec["params"].items()}
