@@ -1798,7 +1798,7 @@ def main():
         return
     i18n.use_lang(a.lang)
     out = a.out or "colour_wheels_%s.pdf" % a.lang
-    c = canvas.Canvas(out, pagesize=A4)
+    c = canvas.Canvas(out, pagesize=A4, invariant=1)
     c.setTitle(T("doc_title"))
     for build in PAGES:
         build(c)

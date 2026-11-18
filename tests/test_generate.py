@@ -88,3 +88,10 @@ def test_unknown_language_is_refused():
     done = subprocess.run([sys.executable, "-m", "colortheory.tilings", "--lang", "xx"], cwd=ROOT, env=ENV,
                           capture_output=True, text=True, timeout=60)
     assert done.returncode != 0
+
+def test_pdfs_are_reproducible(tmp_path):
+    """The same command writes the same bytes (no dates or random ids in the file)."""
+    a, b = tmp_path / "a.pdf", tmp_path / "b.pdf"
+    run("document", "--pages", "1", "-o", str(a))
+    run("document", "--pages", "1", "-o", str(b))
+    assert a.read_bytes() == b.read_bytes()

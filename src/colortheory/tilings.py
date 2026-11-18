@@ -1764,7 +1764,7 @@ def write_file(spec, path, width=1200):
         from reportlab.pdfgen import canvas
         w = 600.0
         h = w * (box[3] - box[1]) / (box[2] - box[0])
-        c = canvas.Canvas(path, pagesize=(w, h))
+        c = canvas.Canvas(path, pagesize=(w, h), invariant=1)
         draw_ops_pdf(c, ops, box, 0, 0, w, h)
         c.showPage()
         c.save()
@@ -1816,7 +1816,7 @@ def build_catalogue(path):
     def line(text, y, x=M, width=None):   # a line that starts at the margin of its side
         i18n.draw_line(c, x, y, text, W - M - x if width is None else width)
 
-    c = canvas.Canvas(path, pagesize=A4)
+    c = canvas.Canvas(path, pagesize=A4, invariant=1)
     c.setTitle(T("title").title())
     page = [1]
 
@@ -2098,7 +2098,7 @@ def write_sheet(specs, path, cols=3, width=1800, labels=True):
             f.write("\n".join(out))
         return
     from reportlab.pdfgen import canvas
-    c = canvas.Canvas(path, pagesize=(width, H))
+    c = canvas.Canvas(path, pagesize=(width, H), invariant=1)
     for (x, y), spec in zip(cells, specs):
         ops, box = build_scene(dict(spec, aspect=aspect))
         draw_ops_pdf(c, ops, box, x, H - y - ph, pw, ph)

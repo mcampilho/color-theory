@@ -201,7 +201,7 @@ Para ver uma página como imagem:
   `python3 -m colortheory.<programa>` (com `PYTHONPATH=src` numa cópia sem instalar). O `pytest` já
   encontra o pacote (`pythonpath = ["src"]`). A língua ativa é só uma: `i18n.current()` (`use_lang`).
   As cores (RYB, CMY, HSB, CIE) estão em `colour.py`, sem desenho.
-- Os PDFs publicados (ligados no README) ficam em `output/`; os programas escrevem na pasta atual, por omissão. Falta ainda torná-los reprodutíveis (`invariant=1` no ReportLab).
+- Os PDFs publicados (ligados no README) ficam em `output/`; os programas escrevem na pasta atual, por omissão. Os PDFs são reprodutíveis byte a byte (`invariant=1` no ReportLab, testado em `test_generate.py`): regenerar só altera o ficheiro se o desenho ou os textos mudarem.
 
 ## Regras
 

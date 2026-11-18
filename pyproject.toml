@@ -1,6 +1,6 @@
 [project]
 name = "color-theory"
-version = "0.1.0"
+version = "1.0.0"
 description = "Colour theory poster, build-your-own colour wheels, tilings, patterns and wallpapers, in 15 languages"
 readme = "README.md"
 license = { file = "LICENSE" }

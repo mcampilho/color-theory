@@ -527,7 +527,7 @@ def build_page_1(c):
 # --------------------------------------------------------------------------
 def main(out=None):
     out = out or (sys.argv[1] if len(sys.argv) > 1 else "colour_theory.pdf")
-    c = canvas.Canvas(out, pagesize=(W, H))
+    c = canvas.Canvas(out, pagesize=(W, H), invariant=1)
     c.setTitle("Colour Theory")
     c.setAuthor("colortheory.poster")
     build_page_1(c)

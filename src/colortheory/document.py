@@ -2309,7 +2309,7 @@ def main():
     a = ap.parse_args()
     set_lang(a.lang)
     out = a.out or "colour_theory_%s.pdf" % a.lang
-    c = canvas.Canvas(out, pagesize=(W, H))
+    c = canvas.Canvas(out, pagesize=(W, H), invariant=1)
     c.setTitle(T("title1").title())
     for n in a.pages:
         PAGES[n](c)
