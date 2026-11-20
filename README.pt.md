@@ -10,7 +10,7 @@ polaco, turco, russo, árabe, chinês, japonês e coreano (ver [Línguas](#líng
 
 **Experimente as rodas online: https://mcampilho.github.io/color-theory/web/?lang=pt**
 
-![As duas rodas de cores no ecrã](images/on_screen.jpg)
+![As duas rodas de cores no ecrã](docs/images/on_screen.jpg)
 
 ## Póster
 
@@ -49,9 +49,9 @@ como luz.
 
 | | |
 |---|---|
-| ![Página 1](images/poster_p1.png) | ![Página 3](images/poster_p3.png) |
-| ![Página 7](images/poster_p7.png) | ![Página 8](images/poster_p8.png) |
-| ![Página 9](images/poster_p9.png) | ![Página 10](images/poster_p10.png) |
+| ![Página 1](docs/images/poster_p1.png) | ![Página 3](docs/images/poster_p3.png) |
+| ![Página 7](docs/images/poster_p7.png) | ![Página 8](docs/images/poster_p8.png) |
+| ![Página 9](docs/images/poster_p9.png) | ![Página 10](docs/images/poster_p10.png) |
 
 Todo o texto está na tabela `STRINGS`.
 
@@ -84,7 +84,7 @@ um disco da frente com janelas, unidos no centro por um atache. PDFs prontos:
 [Polski](output/colour_wheels_pl.pdf), [Türkçe](output/colour_wheels_tr.pdf), [Русский](output/colour_wheels_ru.pdf), [العربية](output/colour_wheels_ar.pdf),
 [简体中文](output/colour_wheels_zh.pdf), [日本語](output/colour_wheels_ja.pdf), [한국어](output/colour_wheels_ko.pdf).
 
-![Os quatro discos para recortar](images/wheels_pages.png)
+![Os quatro discos para recortar](docs/images/wheels_pages.png)
 
 | Página | Conteúdo |
 |--------|----------|
@@ -123,7 +123,7 @@ Todas as versões no ecrã têm **modo escuro**. Ao abrir, seguem o tema do sist
 operativo, e um botão ao lado da caixa de idioma alterna entre claro e escuro (a página
 web lembra-se da escolha). Os PDFs para imprimir são sempre claros.
 
-![As duas rodas de cores em modo escuro](images/on_screen_dark.jpg)
+![As duas rodas de cores em modo escuro](docs/images/on_screen_dark.jpg)
 
 **Computador** (Tkinter e Pillow, nada mais para instalar):
 
@@ -159,7 +159,7 @@ No Windows usa o Edge WebView2, que já vem com o Windows 10 e 11.
 
 ## Pavimentações e mosaicos
 
-O `tilings.py` desenha as pavimentações dos artigos da Wikipedia listados no `tiles.md`,
+O `tilings.py` desenha as pavimentações dos artigos da Wikipedia listados no [`docs/tiles.md`](docs/tiles.md),
 cada uma com várias colorações e com as cores dos esquemas de cores acima. Catálogos
 prontos (A4, 22 páginas):
 [English](output/tilings_en.pdf), [Português (Portugal)](output/tilings_pt.pdf),
@@ -169,7 +169,7 @@ prontos (A4, 22 páginas):
 [Русский](output/tilings_ru.pdf), [العربية](output/tilings_ar.pdf), [简体中文](output/tilings_zh.pdf), [日本語](output/tilings_ja.pdf),
 [한국어](output/tilings_ko.pdf).
 
-![Seis pavimentações: chapéu, zellij, Penrose, estrelas e cruzes, losangos, hexágonos em sete cores](images/tilings.png)
+![Seis pavimentações: chapéu, zellij, Penrose, estrelas e cruzes, losangos, hexágonos em sete cores](docs/images/tilings.png)
 
 - **Regulares e uniformes**: as pavimentações triangular, quadrada e hexagonal, e as oito
   semirregulares (3.6.3.6, 3.12.12, 4.8.8, 4.6.12, 3.4.6.4, 3.3.3.3.6, 3.3.3.4.4, 3.3.4.3.4).
@@ -253,7 +253,7 @@ prontos:
 [Русский](output/patterns_ru.pdf), [العربية](output/patterns_ar.pdf), [简体中文](output/patterns_zh.pdf), [日本語](output/patterns_ja.pdf),
 [한국어](output/patterns_ko.pdf).
 
-![Seis mosaicos decorados: estrelas em relevo, degraus do tribunal, cabana de troncos, cubos de Rubik, tripés, tecelagem](images/patterns.png)
+![Seis mosaicos decorados: estrelas em relevo, degraus do tribunal, cabana de troncos, cubos de Rubik, tripés, tecelagem](docs/images/patterns.png)
 
 | Padrão | O que faz | Parâmetros principais |
 |--------|-----------|-----------------------|
@@ -296,7 +296,7 @@ O `wallpapers.py` pinta wallpapers abstratos para computador (horizontal) e para
 ou tablet (vertical), nos tamanhos de ecrã mais comuns, com os mesmos esquemas de cor RYB.
 Cada imagem nasce de uma semente, por isso as mesmas opções dão sempre a mesma imagem.
 
-![Oito estilos de wallpaper: gradiente difuso, aurora, ondas em camadas, fitas de seda, tinta líquida, cetim, esferas, rastos de luz](images/wallpapers.png)
+![Oito estilos de wallpaper: gradiente difuso, aurora, ondas em camadas, fitas de seda, tinta líquida, cetim, esferas, rastos de luz](docs/images/wallpapers.png)
 
 | Estilo | O que pinta | Parâmetros principais |
 |--------|-------------|-----------------------|
@@ -428,10 +428,10 @@ por isso o mesmo par pode dar resultados bem diferentes.
 
 ## Outros ficheiros
 
-- [`docs/The Complete Guide to Color Theory.md`](<docs/The Complete Guide to Color Theory.md>): o guia de referência completo, da física
-  da luz aos espaços de cor, em inglês (também em [`.docx`](<docs/The Complete Guide to Color Theory.docx>) e [`.pdf`](<docs/The Complete Guide to Color Theory.pdf>)).
+- [`docs/reference/The Complete Guide to Color Theory.md`](<docs/reference/The Complete Guide to Color Theory.md>): o guia de referência completo, da física
+  da luz aos espaços de cor, em inglês (também em [`.docx`](<docs/reference/The Complete Guide to Color Theory.docx>) e [`.pdf`](<docs/reference/The Complete Guide to Color Theory.pdf>)).
 - `poster.py`: o póster anterior, de uma página, só em inglês.
-- `images/`: as imagens deste README.
+- `docs/images/`: as imagens deste README.
 
 ## Licença
 

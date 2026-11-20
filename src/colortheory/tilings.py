@@ -2,7 +2,7 @@
 """
 tilings.py
 ----------
-Tilings and mosaics: the tilings of the Wikipedia articles listed in tiles.md
+Tilings and mosaics: the tilings of the Wikipedia articles listed in docs/tiles.md
 (regular, uniform and dual tilings, Pythagorean, herringbone, pentagonal,
 Cairo, Penrose, the "hat" monotile, Robinson, Wang, girih, zellij and Islamic
 star patterns), each with several ways of colouring it, and the colours taken

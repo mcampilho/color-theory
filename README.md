@@ -10,7 +10,7 @@ Chinese, Japanese and Korean (see [Languages](#languages)).
 
 **Try the wheels online: https://mcampilho.github.io/color-theory/web/**
 
-![The two colour wheels on screen](images/on_screen.jpg)
+![The two colour wheels on screen](docs/images/on_screen.jpg)
 
 ## Poster
 
@@ -48,9 +48,9 @@ which mixes them like paints (yellow and blue make green), not like light.
 
 | | |
 |---|---|
-| ![Page 1](images/poster_p1.png) | ![Page 3](images/poster_p3.png) |
-| ![Page 7](images/poster_p7.png) | ![Page 8](images/poster_p8.png) |
-| ![Page 9](images/poster_p9.png) | ![Page 10](images/poster_p10.png) |
+| ![Page 1](docs/images/poster_p1.png) | ![Page 3](docs/images/poster_p3.png) |
+| ![Page 7](docs/images/poster_p7.png) | ![Page 8](docs/images/poster_p8.png) |
+| ![Page 9](docs/images/poster_p9.png) | ![Page 10](docs/images/poster_p10.png) |
 
 All text is in the `STRINGS` table.
 
@@ -83,7 +83,7 @@ windows, joined at the centre by a split pin. Ready-made PDFs:
 [Polski](output/colour_wheels_pl.pdf), [Türkçe](output/colour_wheels_tr.pdf), [Русский](output/colour_wheels_ru.pdf), [العربية](output/colour_wheels_ar.pdf),
 [简体中文](output/colour_wheels_zh.pdf), [日本語](output/colour_wheels_ja.pdf), [한국어](output/colour_wheels_ko.pdf).
 
-![The four discs to cut out](images/wheels_pages.png)
+![The four discs to cut out](docs/images/wheels_pages.png)
 
 | Page | Content |
 |------|---------|
@@ -121,7 +121,7 @@ Every on-screen version has a **dark mode**. It follows the operating system at 
 and a button next to the language box switches between light and dark (the web page
 remembers the choice). The printed PDFs are always light.
 
-![The two colour wheels in dark mode](images/on_screen_dark.jpg)
+![The two colour wheels in dark mode](docs/images/on_screen_dark.jpg)
 
 **Desktop** (Tkinter and Pillow, nothing else to install):
 
@@ -157,7 +157,7 @@ On Windows it uses the Edge WebView2 runtime, which comes with Windows 10 and 11
 
 ## Tilings and mosaics
 
-`tilings.py` draws the tilings of the Wikipedia articles listed in `tiles.md`, each with
+`tilings.py` draws the tilings of the Wikipedia articles listed in [`docs/tiles.md`](docs/tiles.md), each with
 several colourings and with colours from the colour schemes above. Ready-made catalogues
 (A4, 22 pages):
 [English](output/tilings_en.pdf), [Português (Portugal)](output/tilings_pt.pdf),
@@ -167,7 +167,7 @@ several colourings and with colours from the colour schemes above. Ready-made ca
 [Русский](output/tilings_ru.pdf), [العربية](output/tilings_ar.pdf), [简体中文](output/tilings_zh.pdf), [日本語](output/tilings_ja.pdf),
 [한국어](output/tilings_ko.pdf).
 
-![Six tilings: hat, zellij, Penrose, stars and crosses, rhombille, seven-colour hexagons](images/tilings.png)
+![Six tilings: hat, zellij, Penrose, stars and crosses, rhombille, seven-colour hexagons](docs/images/tilings.png)
 
 - **Regular and uniform**: triangular, square and hexagonal tilings, and the eight
   semiregular ones (3.6.3.6, 3.12.12, 4.8.8, 4.6.12, 3.4.6.4, 3.3.3.3.6, 3.3.3.4.4, 3.3.4.3.4).
@@ -245,7 +245,7 @@ Ready-made catalogues:
 [Русский](output/patterns_ru.pdf), [العربية](output/patterns_ar.pdf), [简体中文](output/patterns_zh.pdf), [日本語](output/patterns_ja.pdf),
 [한국어](output/patterns_ko.pdf).
 
-![Six decorated mosaics: 3D stars, courthouse steps, log cabin, Rubik cubes, tripods, weave](images/patterns.png)
+![Six decorated mosaics: 3D stars, courthouse steps, log cabin, Rubik cubes, tripods, weave](docs/images/patterns.png)
 
 | Pattern | What it does | Main parameters |
 |---------|--------------|-----------------|
@@ -288,7 +288,7 @@ python3 -m colortheory.patterns whirl -p base=hexagonal -p mirror=0 -c twist --s
 (portrait) in the common screen sizes, with the same RYB colour schemes. Every picture
 comes from a seed, so the same options always give the same picture.
 
-![Eight wallpaper styles: mesh gradient, aurora, layered waves, silk ribbons, liquid paint, satin, orbs, light trails](images/wallpapers.png)
+![Eight wallpaper styles: mesh gradient, aurora, layered waves, silk ribbons, liquid paint, satin, orbs, light trails](docs/images/wallpapers.png)
 
 | Style | What it paints | Main parameters |
 |-------|----------------|-----------------|
@@ -418,10 +418,10 @@ green), so the same pair can give quite different results.
 
 ## Other files
 
-- [`docs/The Complete Guide to Color Theory.md`](<docs/The Complete Guide to Color Theory.md>): the full reference guide, from the physics
-  of light to colour spaces (also as [`.docx`](<docs/The Complete Guide to Color Theory.docx>) and [`.pdf`](<docs/The Complete Guide to Color Theory.pdf>)).
+- [`docs/reference/The Complete Guide to Color Theory.md`](<docs/reference/The Complete Guide to Color Theory.md>): the full reference guide, from the physics
+  of light to colour spaces (also as [`.docx`](<docs/reference/The Complete Guide to Color Theory.docx>) and [`.pdf`](<docs/reference/The Complete Guide to Color Theory.pdf>)).
 - `poster.py`: the earlier single-page poster, English only.
-- `images/`: the pictures in this README.
+- `docs/images/`: the pictures in this README.
 
 ## Licence
 

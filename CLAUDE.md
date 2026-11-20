@@ -4,7 +4,7 @@ Pasta de documentos sobre teoria da cor, publicada em https://github.com/mcampil
 (público, licença MIT, ramo `master`), com GitHub Pages a servir o ramo: a página das rodas
 fica em https://mcampilho.github.io/color-theory/web/ (`?lang=pt` escolhe o idioma), por isso
 `web/discs/` tem de ser regenerado e enviado quando os discos mudam. O `README.md` está em inglês e o `README.pt.md` em
-português europeu: mudar os dois em conjunto. As imagens dos READMEs estão em `images/`; os
+português europeu: mudar os dois em conjunto. As imagens dos READMEs estão em `docs/images/`; os
 PDFs atuais (`colour_theory_*.pdf`, `colour_wheels_*.pdf`) e `web/discs/` vão para o
 repositório, para se poderem usar sem Python. Contém:
 
@@ -28,7 +28,7 @@ repositório, para se poderem usar sem Python. Contém:
   oferece no `--lang` as línguas completas (`POSTER_LANGS`); o `tilings.py`/`patterns.py` também
   (`catalogue_langs()`). Os textos com número embutido (`page` = "第 %d 页") aceitam `%d`.
 
-- `docs/The Complete Guide to Color Theory.md` — guia de referência completo (da física da luz
+- `docs/reference/The Complete Guide to Color Theory.md` — guia de referência completo (da física da luz
   aos espaços de cor e sistemas de correspondência), em inglês. As versões `.docx` e `.pdf`
   da mesma pasta são exportações deste texto; se o `.md` mudar, ficam desatualizadas.
 - `document.py` — póster de 10 páginas em PDF vetorial (ReportLab + Pillow):
@@ -84,7 +84,7 @@ repositório, para se poderem usar sem Python. Contém:
   cinzentos). O `--web` escreve `<part>-dark.svg`; a página escolhe o tema no `<head>`
   (`?theme=`, `localStorage`, sistema) e o `app.js` troca os SVG. Na janela Tkinter, as cores
   estão em `UI_COLOURS` (iguais às do `style.css`); `--theme auto` usa `system_theme()`.
-- `tilings.py` — pavimentações e mosaicos dos artigos da Wikipedia listados em `tiles.md`, com
+- `tilings.py` — pavimentações e mosaicos dos artigos da Wikipedia listados em [`docs/tiles.md`](docs/tiles.md), com
   várias colorações e as cores dos esquemas RYB (importa `ryb_to_rgb`, `hue_ryb`, `mix` e os
   `hue_names` do `document.py`). Sem argumentos escreve o catálogo A4
   `tilings_<lang>.pdf` (`CATALOGUE`: uma família por artigo, 6 painéis por página); com o
