@@ -5,7 +5,7 @@ import xml.dom.minidom
 import pytest
 
 from colortheory import illusion_figures as F
-from colortheory import illusions
+from colortheory import i18n, illusions
 from colortheory.illusion_links import LINKS
 from test_generate import pdf_pages, run
 
@@ -13,10 +13,10 @@ KEYS = [entry[1] for entry in illusions.ILLUSIONS]
 
 
 def test_languages():
-    assert illusions.LANGS == ["en", "pt", "es"]
+    assert [code for code, _ in i18n.LANGS] == illusions.LANGS
 
 
-@pytest.mark.parametrize("lang", ["en", "pt", "es"])
+@pytest.mark.parametrize("lang", illusions.LANGS)
 def test_texts_are_complete(lang):
     table = illusions.STRINGS[lang]
     assert set(table) == set(illusions.STRINGS["en"])
@@ -57,7 +57,7 @@ def test_compared_patches_share_one_colour():
     assert fills(F.white_illusion()).count(F.WHITE_GREY) == 8
 
 
-@pytest.mark.parametrize("lang", ["en", "pt", "es"])
+@pytest.mark.parametrize("lang", ["en", "pt", "es", "ru", "ar", "zh"])
 def test_document_is_written(tmp_path, lang):
     out, md = tmp_path / "doc.pdf", tmp_path / "doc.md"
     run("illusions", "--lang", lang, "-o", str(out))

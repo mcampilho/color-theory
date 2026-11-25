@@ -8,7 +8,7 @@ português europeu: mudar os dois em conjunto. As imagens dos READMEs estão em 
 PDFs atuais (`colour_theory_*.pdf`, `colour_wheels_*.pdf`) e `web/discs/` vão para o
 repositório, para se poderem usar sem Python. Contém:
 
-- `i18n.py` — línguas e fontes partilhadas. Todos os programas (menos os das ilusões) estão nas 15 línguas (en, pt,
+- `i18n.py` — línguas e fontes partilhadas. Todos os programas estão nas 15 línguas (en, pt,
   pt-BR, es, fr, it, de, nl, pl, tr, ru, ar, zh, ja, ko). Árabe (direita para a esquerda):
   `visual(text)` liga as letras (`arabic-reshaper`) e põe a linha na ordem de leitura
   (`python-bidi`). O `i18n` remenda `Canvas.drawString/drawCentredString/drawRightString` e
@@ -152,8 +152,8 @@ repositório, para se poderem usar sem Python. Contém:
     `source` é o da imagem original (`size_of`).
 - `illusions.py` — documento sobre ilusões de cor e contraste, em PDF (A4) e Markdown: lista
   `ILLUSIONS` (grupo, chave, artigo, figura, figura de prova), textos `(nome, o que se vê,
-  porquê, experimente)` na `STRINGS`. **Só en, pt e es** por agora (`LANGS`); as outras 12
-  línguas estão por fazer. As figuras (`illusion_figures.py`) são listas de formas sem texto
+  porquê, experimente)` na `STRINGS`. Nas 15 línguas (as 12 novas em `locales/illusions.py` e `locales/illusion_page.py`);
+  textos longos encolhem as figuras no PDF, e em árabe o PDF, o Markdown e a página invertem o lado. As figuras (`illusion_figures.py`) são listas de formas sem texto
   (só A e B), escritas em SVG ou no canvas do ReportLab; `blink` anima só no SVG. Os pares de
   cor que têm de ser iguais (A/B do xadrez, alvos) são testados. `illusion_links.py` tem os
   títulos da Wikipédia por língua (gerado a partir dos langlinks). Os publicados regeneram-se com

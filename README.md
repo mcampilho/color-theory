@@ -4,7 +4,7 @@
 
 A colour theory guide, a ten-page vector poster and two build-your-own colour wheels,
 all generated with Python, plus an illustrated document on [colour illusions](#colour-illusions). The wheels can be printed and cut out, or turned on screen
-(desktop app or web page). Every program speaks 15 languages (the illusions document and page only English, Portuguese and Spanish for now): English, Portuguese (Portugal
+(desktop app or web page). Every program speaks 15 languages: English, Portuguese (Portugal
 and Brazil), Spanish, French, Italian, German, Dutch, Polish, Turkish, Russian, Arabic,
 Chinese, Japanese and Korean (see [Languages](#languages)).
 
@@ -369,6 +369,18 @@ It is a single file that also works offline.
 - English: [PDF](output/colour_illusions_en.pdf) · [Markdown](docs/illusions/colour_illusions_en.md)
 - Português: [PDF](output/colour_illusions_pt.pdf) · [Markdown](docs/illusions/colour_illusions_pt.md)
 - Español: [PDF](output/colour_illusions_es.pdf) · [Markdown](docs/illusions/colour_illusions_es.md)
+- Português (Brasil): [PDF](output/colour_illusions_pt-BR.pdf) · [Markdown](docs/illusions/colour_illusions_pt-BR.md)
+- Français: [PDF](output/colour_illusions_fr.pdf) · [Markdown](docs/illusions/colour_illusions_fr.md)
+- Italiano: [PDF](output/colour_illusions_it.pdf) · [Markdown](docs/illusions/colour_illusions_it.md)
+- Deutsch: [PDF](output/colour_illusions_de.pdf) · [Markdown](docs/illusions/colour_illusions_de.md)
+- Nederlands: [PDF](output/colour_illusions_nl.pdf) · [Markdown](docs/illusions/colour_illusions_nl.md)
+- Polski: [PDF](output/colour_illusions_pl.pdf) · [Markdown](docs/illusions/colour_illusions_pl.md)
+- Türkçe: [PDF](output/colour_illusions_tr.pdf) · [Markdown](docs/illusions/colour_illusions_tr.md)
+- Русский: [PDF](output/colour_illusions_ru.pdf) · [Markdown](docs/illusions/colour_illusions_ru.md)
+- العربية: [PDF](output/colour_illusions_ar.pdf) · [Markdown](docs/illusions/colour_illusions_ar.md)
+- 简体中文: [PDF](output/colour_illusions_zh.pdf) · [Markdown](docs/illusions/colour_illusions_zh.md)
+- 日本語: [PDF](output/colour_illusions_ja.pdf) · [Markdown](docs/illusions/colour_illusions_ja.md)
+- 한국어: [PDF](output/colour_illusions_ko.pdf) · [Markdown](docs/illusions/colour_illusions_ko.md)
 
 ```bash
 python3 -m colortheory.illusions              # -> colour_illusions_en.pdf, .md, illusion_images/

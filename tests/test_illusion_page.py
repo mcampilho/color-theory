@@ -22,7 +22,7 @@ def helped_keys():
         key for key, variants in illusion_page.figures() if any('class="t-' in svg for _, svg in variants)}
 
 
-@pytest.mark.parametrize("lang", ["en", "pt", "es"])
+@pytest.mark.parametrize("lang", illusions.LANGS)
 def test_interface_texts(lang):
     table = illusion_page.UI[lang]
     assert set(table) == set(illusion_page.UI["en"])

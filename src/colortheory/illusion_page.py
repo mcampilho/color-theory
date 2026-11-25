@@ -10,7 +10,8 @@ interface texts, the colour pairs and what each "help" does.
 import argparse
 import json
 
-from colortheory import illusions
+from colortheory import i18n, illusions
+from colortheory.locales.illusion_page import UI as _MORE
 
 # keys whose second figure is another version of the illusion (the others are the proof, which
 # the page shows through the help)
@@ -158,6 +159,8 @@ UI = {
     },
 }
 
+UI.update(_MORE)
+
 
 def figures():
     """(key, [(variant label, SVG with all layers)]) in the order of the document."""
@@ -184,6 +187,9 @@ def data():
         table = illusions.STRINGS[lang]
         out["languages"][lang] = {
             "ui": UI[lang],
+            "name": i18n.LANG_NAMES[lang],
+            "rtl": i18n.rtl(lang),
+            "font": i18n.css_family(lang),
             "title": table["title"],
             "subtitle": table["subtitle"],
             "headings": [table["see"], table["why"], table["try"]],
@@ -228,7 +234,7 @@ TEMPLATE = """<!doctype html>
   input[type="color"] { width: 62px; height: 34px; padding: 2px 4px; }
   input[type="range"] { width: 180px; height: 34px; border: 0; background: none; }
   [hidden] { display: none !important; }
-  #stage { margin-top: 10px; background: var(--card); border: 1px solid var(--line); }
+  #stage { direction: ltr; margin-top: 10px; background: var(--card); border: 1px solid var(--line); }
   #stage svg { display: block; width: 100%; height: auto; max-height: 72vh; }
   #stage .t-remove, #stage .t-aid, #stage .t-guide { transition: opacity .7s; }
   #stage .t-aid, #stage .t-guide { opacity: 0; }
@@ -401,6 +407,10 @@ function controls() {
 function show() {
   const L = DATA.languages[state.lang], ui = L.ui, item = current(), texts = L.texts[item.key];
   document.documentElement.lang = state.lang;
+  document.documentElement.dir = L.rtl ? "rtl" : "ltr";
+  document.body.style.fontFamily = L.font;
+  $("previous").textContent = L.rtl ? "\u25B6" : "\u25C0";
+  $("next").textContent = L.rtl ? "\u25C0" : "\u25B6";
   document.title = L.title + " – " + texts[0];
   $("title").textContent = L.title;
   $("subtitle").textContent = L.subtitle;
@@ -451,7 +461,7 @@ function show() {
 function go(index) {
   const n = DATA.illusions.length;
   Object.assign(state, { index: (index + n) % n, variant: 0, own: {}, hue: 0, aided: false });
-  history.replaceState(null, "", "#" + current().key);
+  history.replaceState(null, "", "#" + current().key);  // keeps ?lang=
   show();
 }
 
@@ -465,7 +475,11 @@ function choosePalette(id) {
   pickers();
 }
 
-$("lang").addEventListener("change", e => { state.lang = e.target.value; show(); });
+$("lang").addEventListener("change", e => {
+  state.lang = e.target.value;
+  history.replaceState(null, "", "?lang=" + state.lang + "#" + current().key);
+  show();
+});
 $("illusion").addEventListener("change", e => go(Number(e.target.value)));
 $("previous").addEventListener("click", () => go(state.index - 1));
 $("next").addEventListener("click", () => go(state.index + 1));
@@ -487,10 +501,10 @@ $("hue").addEventListener("input", e => { state.hue = Number(e.target.value); pa
 $("reset").addEventListener("click", () => { state.hue = 0; choosePalette("original"); });
 $("help").addEventListener("click", () => { state.aided = !state.aided; help(); });
 
-const NAMES = { en: "English", pt: "Português", es: "Español" };
-$("lang").append(...Object.keys(DATA.languages).map(code => option(code, NAMES[code] || code)));
-const preferred = (navigator.language || "en").slice(0, 2);
-state.lang = DATA.languages[preferred] ? preferred : "en";
+$("lang").append(...Object.keys(DATA.languages).map(code => option(code, DATA.languages[code].name)));
+// ?lang=xx in the address, else the browser's language (pt-BR before pt)
+const asked = new URLSearchParams(location.search).get("lang") || navigator.language || "en";
+state.lang = [asked, asked.slice(0, 2)].find(code => DATA.languages[code]) || "en";
 $("lang").value = state.lang;
 const wanted = DATA.illusions.findIndex(it => "#" + it.key === location.hash);
 state.index = Math.max(0, wanted);

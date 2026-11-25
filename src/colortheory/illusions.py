@@ -19,6 +19,7 @@ from colortheory import i18n
 from colortheory import illusion_figures as F
 from colortheory.i18n import BOLD, ITAL, REG
 from colortheory.illusion_links import LINKS
+from colortheory.locales.illusions import STRINGS as _MORE
 
 # (category, key, English Wikipedia article, figure, second figure that proves or extends it)
 ILLUSIONS = [
@@ -775,6 +776,7 @@ STRINGS = {
         },
     },
 }
+STRINGS.update(_MORE)
 LANGS = [code for code, _ in i18n.LANGS if code in STRINGS]
 
 
@@ -819,13 +821,24 @@ def _lines(c, text, x, y, width, font=REG, size=10.5, leading=14.5, colour=INK):
 def _footer(c, number):
     c.setFillColorRGB(*SOFT)
     c.setFont(REG, 8.5)
-    c.drawCentredString(PAGE_W / 2, 30, "%s %d" % (T("page"), number))
+    page = T("page")
+    c.drawCentredString(PAGE_W / 2, 30, page % number if "%d" in page else "%s %d" % (page, number))
+
+
+def _start(c, text, y, font, size, colour, indent=0):
+    """One line at the side where reading starts; returns its (left, right) edges."""
+    c.setFillColorRGB(*colour)
+    c.setFont(font, size)
+    width = stringWidth(i18n.visual(text), font, size)
+    if i18n.rtl():
+        c.drawRightString(LEFT + TEXT_W - indent, y, text)
+        return LEFT + TEXT_W - indent - width, LEFT + TEXT_W - indent
+    c.drawString(LEFT + indent, y, text)
+    return LEFT + indent, LEFT + indent + width
 
 
 def _cover(c):
-    c.setFillColorRGB(*INK)
-    c.setFont(BOLD, 34)
-    c.drawString(LEFT, PAGE_H - 110, T("title"))
+    _start(c, T("title"), PAGE_H - 110, BOLD, 34, INK)
     _lines(c, T("subtitle"), LEFT, PAGE_H - 138, TEXT_W, ITAL, 14, 18, SOFT)
     half = (TEXT_W - 16) / 2
     height = half * F.HEIGHT / F.WIDTH
@@ -840,23 +853,20 @@ def _cover(c):
 
 
 def _contents(c, first_page):
-    c.setFillColorRGB(*INK)
-    c.setFont(BOLD, 22)
-    c.drawString(LEFT, PAGE_H - 80, T("contents"))
+    _start(c, T("contents"), PAGE_H - 80, BOLD, 22, INK)
     texts = T("illusions")
     y, page = PAGE_H - 116, first_page
     for category in CATEGORIES:
-        c.setFillColorRGB(*ACCENT)
-        c.setFont(BOLD, 11.5)
-        c.drawString(LEFT, y, T("cat_" + category))
+        _start(c, T("cat_" + category), y, BOLD, 11.5, ACCENT)
         y -= 18
         for cat, key, *_ in ILLUSIONS:
             if cat != category:
                 continue
-            c.setFillColorRGB(*INK)
-            c.setFont(REG, 10.5)
-            c.drawString(LEFT + 14, y, texts[key][0])
-            c.drawRightString(LEFT + TEXT_W, y, str(page))
+            _start(c, texts[key][0], y, REG, 10.5, INK, indent=14)
+            if i18n.rtl():
+                c.drawString(LEFT, y, str(page))
+            else:
+                c.drawRightString(LEFT + TEXT_W, y, str(page))
             c.linkRect("", key, (LEFT, y - 3, LEFT + TEXT_W, y + 11), relative=0, thickness=0)
             y -= 15.5
             page += 1
@@ -865,24 +875,35 @@ def _contents(c, first_page):
     c.showPage()
 
 
+def _text_height(key, texts):
+    """Height of everything written below the figures."""
+    height = 14
+    for text in texts:
+        height += 14 + 14.5 * len(i18n.wrap(text, REG, 10.5, TEXT_W)) + 7
+    if key == "lilac":
+        height += 13 * len(i18n.wrap(T("animated"), ITAL, 9.5, TEXT_W)) + 7
+    return height
+
+
 def _illusion_page(c, entry, number):
     category, key, article, figure, second = entry
     name, see, why, try_ = T("illusions")[key]
     c.bookmarkPage(key)
     c.addOutlineEntry(name, key, level=0)
-    c.setFillColorRGB(*ACCENT)
-    c.setFont(BOLD, 9.5)
-    c.drawString(LEFT, PAGE_H - 52, T("cat_" + category).upper())
-    c.setFillColorRGB(*INK)
-    c.setFont(BOLD, 21)
-    c.drawString(LEFT, PAGE_H - 76, name)
+    heading = T("cat_" + category)
+    if i18n.current() == "tr":
+        heading = heading.replace("i", "İ")                         # Turkish dotted capital
+    _start(c, heading.upper(), PAGE_H - 52, BOLD, 9.5, ACCENT)
+    _start(c, name, PAGE_H - 76, BOLD, 21, INK)
+    figures = [fig for fig in (figure, second) if fig is not None]
     width = TEXT_W if second is None else 360
+    # long texts: smaller figures, so that the link stays above the page number
+    room = PAGE_H - 92 - 52 - _text_height(key, (see, why, try_)) - 12 * len(figures)
+    width = min(width, room / len(figures) * F.WIDTH / F.HEIGHT)
     height = width * F.HEIGHT / F.WIDTH
     x = (PAGE_W - width) / 2
     y = PAGE_H - 92
-    for fig in (figure, second):
-        if fig is None:
-            continue
+    for fig in figures:
         fig().draw(c, x, y, width)
         c.setStrokeColorRGB(0.82, 0.82, 0.84)
         c.setLineWidth(0.6)
@@ -890,17 +911,13 @@ def _illusion_page(c, entry, number):
         y -= height + 12
     y -= 14
     for label, text in (("see", see), ("why", why), ("try", try_)):
-        c.setFillColorRGB(*ACCENT)
-        c.setFont(BOLD, 10.5)
-        c.drawString(LEFT, y, T(label))
+        _start(c, T(label), y, BOLD, 10.5, ACCENT)
         y = _lines(c, text, LEFT, y - 14, TEXT_W) - 7
     if key == "lilac":
         y = _lines(c, T("animated"), LEFT, y, TEXT_W, ITAL, 9.5, 13, SOFT) - 7
     url, label = _link_label(article, i18n.current())
-    c.setFillColorRGB(*ACCENT)
-    c.setFont(REG, 10)
-    c.drawString(LEFT, y, label)
-    c.linkURL(url, (LEFT, y - 3, LEFT + stringWidth(label, REG, 10), y + 10), thickness=0)
+    left, right = _start(c, label, y, REG, 10, ACCENT)
+    c.linkURL(url, (left, y - 3, right, y + 10), thickness=0)
     _footer(c, number)
     c.showPage()
 
@@ -934,6 +951,8 @@ def markdown(images):
     texts = T("illusions")
     lines = ["# " + T("title"), "", "*%s*" % T("subtitle"), "", T("intro"), "", T("tips"), "",
              "> " + T("credits"), "", "## " + T("contents"), ""]
+    # Chinese and Japanese take their own full-width colon instead of a full stop
+    labelled = "**%s**：%s" if i18n.current() in ("zh", "ja") else "**%s.** %s"
     for category in CATEGORIES:
         lines.append("- **%s**" % T("cat_" + category))
         lines += ["  - [%s](#%s)" % (texts[key][0], key) for cat, key, *_ in ILLUSIONS if cat == category]
@@ -948,9 +967,11 @@ def markdown(images):
             if second is not None:
                 lines += ["", "![%s](%s/%s_2.svg)" % (name, images, key)]
             for label, text in (("see", see), ("why", why), ("try", try_)):
-                lines += ["", "**%s.** %s" % (T(label), text)]
+                lines += ["", labelled % (T(label), text)]
             url, label = _link_label(article, i18n.current())
             lines += ["", "[%s](%s)" % (label, url)]
+    if i18n.rtl():
+        lines = ['<div dir="rtl">', ""] + lines + ["", "</div>"]
     return "\n".join(lines) + "\n"
 
 
