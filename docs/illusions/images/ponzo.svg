@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+<path d="M0.00 0.00 L480.00 0.00 L480.00 320.00 L0.00 320.00 Z" fill="#ffffff"/>
+<path d="M216.00 40.00 L264.00 40.00" fill="none" stroke="#999999" stroke-width="1"/>
+<path d="M211.73 46.78 L268.27 46.78" fill="none" stroke="#999999" stroke-width="1.12559"/>
+<path d="M203.06 60.56 L276.94 60.56" fill="none" stroke="#999999" stroke-width="1.38073"/>
+<path d="M191.23 79.33 L288.77 79.33" fill="none" stroke="#999999" stroke-width="1.72839"/>
+<path d="M176.76 102.32 L303.24 102.32" fill="none" stroke="#999999" stroke-width="2.15416"/>
+<path d="M159.92 129.07 L320.08 129.07" fill="none" stroke="#999999" stroke-width="2.64938"/>
+<path d="M140.93 159.24 L339.07 159.24" fill="none" stroke="#999999" stroke-width="3.20807"/>
+<path d="M119.93 192.59 L360.07 192.59" fill="none" stroke="#999999" stroke-width="3.82571"/>
+<path d="M97.04 228.93 L382.96 228.93" fill="none" stroke="#999999" stroke-width="4.49876"/>
+<path d="M72.37 268.11 L407.63 268.11" fill="none" stroke="#999999" stroke-width="5.22433"/>
+<path d="M46.00 310.00 L434.00 310.00" fill="none" stroke="#999999" stroke-width="6"/>
+<path d="M226.00 10.00 L50.00 320.00" fill="none" stroke="#404040" stroke-width="6"/>
+<path d="M254.00 10.00 L430.00 320.00" fill="none" stroke="#404040" stroke-width="6"/>
+<path d="M180.00 83.00 L300.00 83.00 L300.00 97.00 L180.00 97.00 Z" fill="#f0b400"/>
+<path d="M180.00 233.00 L300.00 233.00 L300.00 247.00 L180.00 247.00 Z" fill="#f0b400"/>
+</svg>

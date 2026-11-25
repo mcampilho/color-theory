@@ -1,7 +1,7 @@
 [project]
 name = "color-theory"
 version = "1.0.0"
-description = "Colour theory poster, build-your-own colour wheels, tilings, patterns and wallpapers, in 15 languages"
+description = "Colour theory poster, build-your-own colour wheels, tilings, patterns, wallpapers and illusions"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
@@ -26,6 +26,8 @@ colortheory-document = "colortheory.document:main"
 colortheory-wheel = "colortheory.wheel:main"
 colortheory-tilings = "colortheory.tilings:main"
 colortheory-patterns = "colortheory.patterns:main"
+colortheory-illusions = "colortheory.illusions:main"
+colortheory-illusion-page = "colortheory.illusion_page:main"
 colortheory-wallpapers = "colortheory.wallpapers:main"
 
 [build-system]

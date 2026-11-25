@@ -3,8 +3,8 @@
 *Português: [README.pt.md](README.pt.md)*
 
 A colour theory guide, a ten-page vector poster and two build-your-own colour wheels,
-all generated with Python. The wheels can be printed and cut out, or turned on screen
-(desktop app or web page). Every program speaks 15 languages: English, Portuguese (Portugal
+all generated with Python, plus an illustrated document on [colour illusions](#colour-illusions). The wheels can be printed and cut out, or turned on screen
+(desktop app or web page). Every program speaks 15 languages (the illusions document and page only English, Portuguese and Spanish for now): English, Portuguese (Portugal
 and Brazil), Spanish, French, Italian, German, Dutch, Polish, Turkish, Russian, Arabic,
 Chinese, Japanese and Korean (see [Languages](#languages)).
 
@@ -350,6 +350,32 @@ colours. With `--show` nothing is written until you press "Save full size...": `
 the name and folder offered there. Files without a full path go to the folder the command
 runs in, and the program always prints the full path of what it wrote. Without `-o`, the file name tells the hue and the size, e.g.
 `blue_wave_orange_1980x1080.png`.
+
+## Colour illusions
+
+`illusions.py` makes an illustrated document about colour and contrast illusions, as a PDF
+(A4, 30 pages) and as Markdown: 28 entries in six groups (colour; brightness and contrast; size
+and length; bent and tilted lines; motion in still pictures; figure, ground and impossible
+objects), each with what you see, why it happens, something to try and a link to the Wikipedia
+article. All figures are drawn from scratch as vector shapes; in the Markdown version the lilac
+chaser is animated. It is available in English, Portuguese and Spanish for now.
+
+There is also an **interactive page**, [colour_illusions.html](docs/illusions/colour_illusions.html)
+([try it online](https://mcampilho.github.io/color-theory/docs/illusions/colour_illusions.html)): one illusion
+at a time, chosen from a list, in other colour pairs (red/green, blue/orange, violet/yellow
+... or your own) and with a help button that removes or adds lines to show what is really there.
+It is a single file that also works offline.
+
+- English: [PDF](output/colour_illusions_en.pdf) · [Markdown](docs/illusions/colour_illusions_en.md)
+- Português: [PDF](output/colour_illusions_pt.pdf) · [Markdown](docs/illusions/colour_illusions_pt.md)
+- Español: [PDF](output/colour_illusions_es.pdf) · [Markdown](docs/illusions/colour_illusions_es.md)
+
+```bash
+python3 -m colortheory.illusions              # -> colour_illusions_en.pdf, .md, illusion_images/
+python3 -m colortheory.illusions --lang pt
+python3 -m colortheory.illusion_page         # -> colour_illusions.html
+python3 -m colortheory.illusions -o doc.pdf --md doc.md --images figures
+```
 
 ## Languages
 

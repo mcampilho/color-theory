@@ -4,7 +4,7 @@
 
 Um guia de teoria da cor, um póster vetorial de dez páginas e duas rodas de cores para
 construir em casa, tudo gerado em Python. As rodas podem ser impressas e recortadas, ou
-rodadas no ecrã (aplicação de computador ou página web). Todos os programas falam 15 línguas:
+rodadas no ecrã (aplicação de computador ou página web). Todos os programas falam 15 línguas (o documento e a página das ilusões, por agora, só inglês, português e espanhol):
 inglês, português (de Portugal e do Brasil), espanhol, francês, italiano, alemão, neerlandês,
 polaco, turco, russo, árabe, chinês, japonês e coreano (ver [Línguas](#línguas)).
 
@@ -360,6 +360,33 @@ dá apenas o nome e a pasta propostos nesse diálogo. Os ficheiros sem caminho c
 na pasta onde o comando foi executado, e o programa escreve sempre o caminho completo do que
 gravou. Sem `-o`, o nome do ficheiro diz o matiz e o tamanho, por exemplo
 `onda_azul_orange_1980x1080.png`.
+
+## Ilusões de cor
+
+O `illusions.py` cria um documento ilustrado sobre ilusões de cor e de contraste, em PDF
+(A4, 30 páginas) e em Markdown: 28 entradas em seis grupos (cor; luminosidade e contraste;
+tamanho e comprimento; linhas curvadas e inclinadas; movimento em imagens paradas; figura,
+fundo e objetos impossíveis), cada uma com o que se vê, porque acontece, algo para
+experimentar e uma ligação ao artigo da Wikipédia. Todas as figuras são desenhadas de raiz em
+vetor; na versão Markdown o perseguidor lilás é animado. Para já existe em inglês, português e
+espanhol.
+
+Há também uma **página interativa**, [colour_illusions.html](docs/illusions/colour_illusions.html)
+([experimentar online](https://mcampilho.github.io/color-theory/docs/illusions/colour_illusions.html)): uma
+ilusão de cada vez, escolhida numa lista, com outros pares de cores (vermelho/verde, azul/laranja,
+violeta/amarelo... ou os seus) e um botão de ajuda que retira ou acrescenta linhas para mostrar
+o que lá está de facto. É um único ficheiro, que também funciona sem rede.
+
+- English: [PDF](output/colour_illusions_en.pdf) · [Markdown](docs/illusions/colour_illusions_en.md)
+- Português: [PDF](output/colour_illusions_pt.pdf) · [Markdown](docs/illusions/colour_illusions_pt.md)
+- Español: [PDF](output/colour_illusions_es.pdf) · [Markdown](docs/illusions/colour_illusions_es.md)
+
+```bash
+python3 -m colortheory.illusions              # -> colour_illusions_en.pdf, .md, illusion_images/
+python3 -m colortheory.illusions --lang pt
+python3 -m colortheory.illusion_page         # -> colour_illusions.html
+python3 -m colortheory.illusions -o doc.pdf --md doc.md --images figuras
+```
 
 ## Línguas
 

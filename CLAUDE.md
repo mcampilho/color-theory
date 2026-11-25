@@ -8,7 +8,7 @@ português europeu: mudar os dois em conjunto. As imagens dos READMEs estão em 
 PDFs atuais (`colour_theory_*.pdf`, `colour_wheels_*.pdf`) e `web/discs/` vão para o
 repositório, para se poderem usar sem Python. Contém:
 
-- `i18n.py` — línguas e fontes partilhadas. Todos os programas estão nas 15 línguas (en, pt,
+- `i18n.py` — línguas e fontes partilhadas. Todos os programas (menos os das ilusões) estão nas 15 línguas (en, pt,
   pt-BR, es, fr, it, de, nl, pl, tr, ru, ar, zh, ja, ko). Árabe (direita para a esquerda):
   `visual(text)` liga as letras (`arabic-reshaper`) e põe a linha na ordem de leitura
   (`python-bidi`). O `i18n` remenda `Canvas.drawString/drawCentredString/drawRightString` e
@@ -150,6 +150,18 @@ repositório, para se poderem usar sem Python. Contém:
     matizes pela diferença entre o `--hue` e o `dominant_hue`; `tint` põe um só matiz; `map`
     é um mapa de degradê da luminosidade pela paleta). `hue=None` mantém as cores; o tamanho
     `source` é o da imagem original (`size_of`).
+- `illusions.py` — documento sobre ilusões de cor e contraste, em PDF (A4) e Markdown: lista
+  `ILLUSIONS` (grupo, chave, artigo, figura, figura de prova), textos `(nome, o que se vê,
+  porquê, experimente)` na `STRINGS`. **Só en, pt e es** por agora (`LANGS`); as outras 12
+  línguas estão por fazer. As figuras (`illusion_figures.py`) são listas de formas sem texto
+  (só A e B), escritas em SVG ou no canvas do ReportLab; `blink` anima só no SVG. Os pares de
+  cor que têm de ser iguais (A/B do xadrez, alvos) são testados. `illusion_links.py` tem os
+  títulos da Wikipédia por língua (gerado a partir dos langlinks). Os publicados regeneram-se com
+  `--lang X -o output/colour_illusions_X.pdf --md docs/illusions/colour_illusions_X.md --images docs/illusions/images`.
+- `illusion_page.py` — página interativa autónoma (`docs/illusions/colour_illusions.html`, gerada com
+  `-o`): figuras e textos do documento, pares de cores, matiz e ajuda. As camadas `remove`/`aid`/`guide`
+  de `Figure.layer` dizem o que a ajuda esconde ou mostra (`aid` não sai no documento). Cada figura
+  com camadas precisa de um texto em `UI[língua]["aids"]`. Regenerar depois de mudar figuras ou textos.
 - `poster.py` — versão anterior, só a página 1, sem traduções (ReportLab).
 - PDFs gerados: `colour_theory_en.pdf`, `colour_theory_pt.pdf`, `colour_theory_es.pdf`
   (do `document.py`), `colour_wheels_en.pdf`, `colour_wheels_pt.pdf`,
@@ -160,10 +172,12 @@ repositório, para se poderem usar sem Python. Contém:
 
 ```bash
 pip install reportlab pillow
+python3 -m colortheory.illusion_page -o docs/illusions/colour_illusions.html
 python3 -m colortheory.document                      # -> colour_theory_en.pdf (10 páginas)
 python3 -m colortheory.document --lang pt            # -> colour_theory_pt.pdf
 python3 -m colortheory.document --lang es -o es.pdf
 python3 -m colortheory.document --pages 3 4          # só as páginas 3 e 4
+python3 -m colortheory.illusions [--lang pt]         # -> colour_illusions_<lang>.pdf e .md
 python3 -m colortheory.poster [saida.pdf]            # -> colour_theory.pdf
 python3 -m colortheory.wheel [--lang pt]                    # -> colour_wheels_<lang>.pdf (A4, 6 páginas)
 python3 -m colortheory.wheel --app [--lang pt]              # rodas numa janela (Tkinter)

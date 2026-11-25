@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+<path d="M0.00 0.00 L480.00 0.00 L480.00 320.00 L0.00 320.00 Z" fill="#000000"/>
+<path d="M0.00 19.00 L480.00 19.00 L480.00 29.00 L0.00 29.00 Z" fill="#808080"/>
+<path d="M0.00 64.00 L480.00 64.00 L480.00 74.00 L0.00 74.00 Z" fill="#808080"/>
+<path d="M0.00 109.00 L480.00 109.00 L480.00 119.00 L0.00 119.00 Z" fill="#808080"/>
+<path d="M0.00 154.00 L480.00 154.00 L480.00 164.00 L0.00 164.00 Z" fill="#808080"/>
+<path d="M0.00 199.00 L480.00 199.00 L480.00 209.00 L0.00 209.00 Z" fill="#808080"/>
+<path d="M0.00 244.00 L480.00 244.00 L480.00 254.00 L0.00 254.00 Z" fill="#808080"/>
+<path d="M0.00 289.00 L480.00 289.00 L480.00 299.00 L0.00 299.00 Z" fill="#808080"/>
+<path d="M15.00 0.00 L25.00 0.00 L25.00 320.00 L15.00 320.00 Z" fill="#808080"/>
+<path d="M64.00 0.00 L74.00 0.00 L74.00 320.00 L64.00 320.00 Z" fill="#808080"/>
+<path d="M113.00 0.00 L123.00 0.00 L123.00 320.00 L113.00 320.00 Z" fill="#808080"/>
+<path d="M162.00 0.00 L172.00 0.00 L172.00 320.00 L162.00 320.00 Z" fill="#808080"/>
+<path d="M211.00 0.00 L221.00 0.00 L221.00 320.00 L211.00 320.00 Z" fill="#808080"/>
+<path d="M260.00 0.00 L270.00 0.00 L270.00 320.00 L260.00 320.00 Z" fill="#808080"/>
+<path d="M309.00 0.00 L319.00 0.00 L319.00 320.00 L309.00 320.00 Z" fill="#808080"/>
+<path d="M358.00 0.00 L368.00 0.00 L368.00 320.00 L358.00 320.00 Z" fill="#808080"/>
+<path d="M407.00 0.00 L417.00 0.00 L417.00 320.00 L407.00 320.00 Z" fill="#808080"/>
+<path d="M456.00 0.00 L466.00 0.00 L466.00 320.00 L456.00 320.00 Z" fill="#808080"/>
+<circle cx="20.00" cy="24.00" r="7.50" fill="#ffffff"/>
+<circle cx="20.00" cy="69.00" r="7.50" fill="#ffffff"/>
+<circle cx="20.00" cy="114.00" r="7.50" fill="#ffffff"/>
+<circle cx="20.00" cy="159.00" r="7.50" fill="#ffffff"/>
+<circle cx="20.00" cy="204.00" r="7.50" fill="#ffffff"/>
+<circle cx="20.00" cy="249.00" r="7.50" fill="#ffffff"/>
+<circle cx="20.00" cy="294.00" r="7.50" fill="#ffffff"/>
+<circle cx="69.00" cy="24.00" r="7.50" fill="#ffffff"/>
+<circle cx="69.00" cy="69.00" r="7.50" fill="#ffffff"/>
+<circle cx="69.00" cy="114.00" r="7.50" fill="#ffffff"/>
+<circle cx="69.00" cy="159.00" r="7.50" fill="#ffffff"/>
+<circle cx="69.00" cy="204.00" r="7.50" fill="#ffffff"/>
+<circle cx="69.00" cy="249.00" r="7.50" fill="#ffffff"/>
+<circle cx="69.00" cy="294.00" r="7.50" fill="#ffffff"/>
+<circle cx="118.00" cy="24.00" r="7.50" fill="#ffffff"/>
+<circle cx="118.00" cy="69.00" r="7.50" fill="#ffffff"/>
+<circle cx="118.00" cy="114.00" r="7.50" fill="#ffffff"/>
+<circle cx="118.00" cy="159.00" r="7.50" fill="#ffffff"/>
+<circle cx="118.00" cy="204.00" r="7.50" fill="#ffffff"/>
+<circle cx="118.00" cy="249.00" r="7.50" fill="#ffffff"/>
+<circle cx="118.00" cy="294.00" r="7.50" fill="#ffffff"/>
+<circle cx="167.00" cy="24.00" r="7.50" fill="#ffffff"/>
+<circle cx="167.00" cy="69.00" r="7.50" fill="#ffffff"/>
+<circle cx="167.00" cy="114.00" r="7.50" fill="#ffffff"/>
+<circle cx="167.00" cy="159.00" r="7.50" fill="#ffffff"/>
+<circle cx="167.00" cy="204.00" r="7.50" fill="#ffffff"/>
+<circle cx="167.00" cy="249.00" r="7.50" fill="#ffffff"/>
+<circle cx="167.00" cy="294.00" r="7.50" fill="#ffffff"/>
+<circle cx="216.00" cy="24.00" r="7.50" fill="#ffffff"/>
+<circle cx="216.00" cy="69.00" r="7.50" fill="#ffffff"/>
+<circle cx="216.00" cy="114.00" r="7.50" fill="#ffffff"/>
+<circle cx="216.00" cy="159.00" r="7.50" fill="#ffffff"/>
+<circle cx="216.00" cy="204.00" r="7.50" fill="#ffffff"/>
+<circle cx="216.00" cy="249.00" r="7.50" fill="#ffffff"/>
+<circle cx="216.00" cy="294.00" r="7.50" fill="#ffffff"/>
+<circle cx="265.00" cy="24.00" r="7.50" fill="#ffffff"/>
+<circle cx="265.00" cy="69.00" r="7.50" fill="#ffffff"/>
+<circle cx="265.00" cy="114.00" r="7.50" fill="#ffffff"/>
+<circle cx="265.00" cy="159.00" r="7.50" fill="#ffffff"/>
+<circle cx="265.00" cy="204.00" r="7.50" fill="#ffffff"/>
+<circle cx="265.00" cy="249.00" r="7.50" fill="#ffffff"/>
+<circle cx="265.00" cy="294.00" r="7.50" fill="#ffffff"/>
+<circle cx="314.00" cy="24.00" r="7.50" fill="#ffffff"/>
+<circle cx="314.00" cy="69.00" r="7.50" fill="#ffffff"/>
+<circle cx="314.00" cy="114.00" r="7.50" fill="#ffffff"/>
+<circle cx="314.00" cy="159.00" r="7.50" fill="#ffffff"/>
+<circle cx="314.00" cy="204.00" r="7.50" fill="#ffffff"/>
+<circle cx="314.00" cy="249.00" r="7.50" fill="#ffffff"/>
+<circle cx="314.00" cy="294.00" r="7.50" fill="#ffffff"/>
+<circle cx="363.00" cy="24.00" r="7.50" fill="#ffffff"/>
+<circle cx="363.00" cy="69.00" r="7.50" fill="#ffffff"/>
+<circle cx="363.00" cy="114.00" r="7.50" fill="#ffffff"/>
+<circle cx="363.00" cy="159.00" r="7.50" fill="#ffffff"/>
+<circle cx="363.00" cy="204.00" r="7.50" fill="#ffffff"/>
+<circle cx="363.00" cy="249.00" r="7.50" fill="#ffffff"/>
+<circle cx="363.00" cy="294.00" r="7.50" fill="#ffffff"/>
+<circle cx="412.00" cy="24.00" r="7.50" fill="#ffffff"/>
+<circle cx="412.00" cy="69.00" r="7.50" fill="#ffffff"/>
+<circle cx="412.00" cy="114.00" r="7.50" fill="#ffffff"/>
+<circle cx="412.00" cy="159.00" r="7.50" fill="#ffffff"/>
+<circle cx="412.00" cy="204.00" r="7.50" fill="#ffffff"/>
+<circle cx="412.00" cy="249.00" r="7.50" fill="#ffffff"/>
+<circle cx="412.00" cy="294.00" r="7.50" fill="#ffffff"/>
+<circle cx="461.00" cy="24.00" r="7.50" fill="#ffffff"/>
+<circle cx="461.00" cy="69.00" r="7.50" fill="#ffffff"/>
+<circle cx="461.00" cy="114.00" r="7.50" fill="#ffffff"/>
+<circle cx="461.00" cy="159.00" r="7.50" fill="#ffffff"/>
+<circle cx="461.00" cy="204.00" r="7.50" fill="#ffffff"/>
+<circle cx="461.00" cy="249.00" r="7.50" fill="#ffffff"/>
+<circle cx="461.00" cy="294.00" r="7.50" fill="#ffffff"/>
+</svg>
