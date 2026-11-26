@@ -7,7 +7,7 @@ import pytest
 from colortheory import illusion_figures as F
 from colortheory import i18n, illusions
 from colortheory.illusion_links import LINKS
-from test_generate import pdf_pages, run
+from test_generate import need_font, pdf_pages, run
 
 KEYS = [entry[1] for entry in illusions.ILLUSIONS]
 
@@ -59,6 +59,7 @@ def test_compared_patches_share_one_colour():
 
 @pytest.mark.parametrize("lang", ["en", "pt", "es", "ru", "ar", "zh"])
 def test_document_is_written(tmp_path, lang):
+    need_font(lang)                                           # e.g. no CJK font on the Linux runners
     out, md = tmp_path / "doc.pdf", tmp_path / "doc.md"
     run("illusions", "--lang", lang, "-o", str(out))
     assert pdf_pages(out) == 2 + len(KEYS)
